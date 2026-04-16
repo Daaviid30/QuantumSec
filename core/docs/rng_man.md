@@ -1,0 +1,41 @@
+# QuantumSec: Random Number Generation (RNG) Architecture
+
+## 1. Context and Importance in Quantum Cryptography
+In quantum security protocols (like QKD - Quantum Key Distribution), the fundamental assumption of security relies on the absolute unpredictability of random choices. If an eavesdropper (Eve) can predict the random numbers Alice and Bob use to generate bases or bits, the entire cryptographic protocol collapses.
+
+Therefore, providing a robust, flexible, and mathematically sound random number generator architecture is the foundation of the `QuantumSec` project. 
+
+## 2. Architectural Decisions
+The `rng.py` module was designed around three main engineering principles:
+
+1. **Object-Oriented Abstraction (`BaseRNG`)**: We chose to use an Abstract Base Class (ABC) to define a strict blueprint. Any generator implemented in this project must expose a `.gen` property that yields a NumPy generator. This ensures the rest of the codebase interacts with a uniform interface regardless of how the randomness is achieved under the hood.
+2. **Dependency Injection**: None of the cryptographic functions (like `random_bit` or `random_basis`) instantiate their own RNG. Instead, the RNG object must be injected (passed as a parameter). This allows instant swapping between a deterministic testing environment and chaotic production environment without modifying the cryptographic functions themselves.
+3. **Reproducibility vs. Chaos**: We explicitly separated the concept of reproducible testing (`SeededRNG`) from unpredictable runs (`GlobalRNG`). This is crucial because standard cryptography needs entropy, but unit tests demand reproducibility.
+
+## 3. The Core RNG Models
+
+### `SeededRNG` (Testing and Debugging)
+- **Purpose**: Provides a deterministic stream of random numbers based on a `seed` integer.
+- **Why we need it**: When writing unit tests or debugging complex quantum algorithms, we need reproducibility. If an algorithm fails, we must be able to rerun it and get the exact same "random" sequence to isolate the bug.
+- **Underlying Engine**: Uses NumPy's `default_rng(seed)` (PCG-64).
+
+### `GlobalRNG` (Production and Live Simulation)
+- **Purpose**: Provides true unpredictability for production runs.
+- **Why we need it**: Real cryptography needs entropy. We want our numbers to be as chaotic as possible, pulling entropy from the operating system.
+- **Design Pattern**: Implemented as a **Singleton** using the `__new__` method. We decided on a Singleton because we want to guarantee that there is exactly one source of true randomness across the entire application, preventing accidental sequence duplication or state resets.
+
+### `QRNGSimulator` (Hardware Imperfection Modeling)
+- **Purpose**: Simulates the physical flaws of a real-world Quantum Random Number Generator (QRNG) hardware device.
+- **Why we need it**: A core part of researching quantum security is analyzing side-channel attacks and faulty hardware. Real-world physical sensors are rarely a mathematically perfect 50/50 probability split.
+- **Decisions Made**:
+  - We introduced `bias_prob` to represent detector imbalance (e.g., favoring a 1 over a 0).
+  - We introduced `correlation` using a Markov Chain approach to represent electronic memory or thermal noise, where consecutive mathematical measurements influence each other.
+
+## 4. Cryptographic Helper Functions
+Rather than letting developers interact with the raw `rng.gen` NumPy objects repeatedly, we built tightly-scoped domain wrappers:
+- `random_bit()`: Abstracts away NumPy syntax for picking 0 or 1.
+- `random_basis()`: Extends the logic of a simple bit, but mathematically frames it as a choice between the 'Rectilinear (Z)' basis and 'Diagonal (X)' basis, enforcing naming conventions in the protocol.
+- `random_unitary()`: This creates a random $NxN$ matrix to simulate system noise and Eve's eavesdropping operators. We decided to use SciPy's `unitary_group.rvs` combined with our injected generator because it natively distributes random unitary matrices along the mathematically fair "Haar measure".
+
+## Summary
+The `rng.py` architecture ensures that `QuantumSec` guarantees mathematically sound randomness, supports hardware-flaw simulation for thesis research scenarios, and maintains a highly decoupled codebase where RNG sources can be swapped seamlessly.
