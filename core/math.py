@@ -16,12 +16,18 @@ operations in the future.
 # ================== IMPORTATIONS ==================
 import numpy as np
 import scipy.linalg
+from functools import reduce
 # ================================================== 
 
+# Global Tolerance
+ATOL = 1e-8
 
-# ================== FUNCTIONS ===================
 
-def hermitian_conjugate(matrix: np.array) -> np.array:
+# ================================================== 
+# 1. BASIC MATRIX & VECTOR UTILITIES
+# ================================================== 
+
+def hermitian_conjugate(matrix: np.ndarray) -> np.ndarray:
     """
     Calculates the hermitian conjugate of a matrix or vector.
     
@@ -32,9 +38,9 @@ def hermitian_conjugate(matrix: np.array) -> np.array:
         The hermitian conjugate of the matrix.
     """
 
-    return np.conjugate(matrix.T)
+    return matrix.conj().T
 
-def euclidean_norm(vector: np.array) -> float:
+def euclidean_norm(vector: np.ndarray) -> float:
     """
     Calculates the euclidean norm of a vector.
     
@@ -45,9 +51,9 @@ def euclidean_norm(vector: np.array) -> float:
         The euclidean norm of the vector.
     """
 
-    return np.sqrt(hermitian_conjugate(vector) @ vector)[0,0]
+    return float(np.linalg.norm(vector))
 
-def matrix_trace(matrix: np.array) -> float:
+def matrix_trace(matrix: np.ndarray) -> float:
     """
     Calculates the trace of a matrix.
     
@@ -60,32 +66,10 @@ def matrix_trace(matrix: np.array) -> float:
 
     return np.trace(matrix)
 
-def purity(density_matrix: np.array) -> float:
-    """
-    Calculates the purity of a density matrix.
-    
-    Args:
-        density_matrix: The density matrix to calculate the purity of.
-    
-    Returns:
-        The purity of the density matrix.
-    """
 
-    return np.trace(density_matrix @ density_matrix)
-
-def tensor_product(matrix_a: np.array, matrix_b: np.array) -> np.array:
-    """
-    Calculates the tensor product of two matrices or vectors.
-    
-    Args:
-        matrix_a: The first matrix or vector.
-        matrix_b: The second matrix or vector.
-    
-    Returns:
-        The tensor product of the two matrices or vectors.
-    """
-
-    return np.kron(matrix_a, matrix_b)
+# ================================================== 
+# 2. QUANTUM STATES & PROJECTIONS
+# ================================================== 
 
 def dm_from_ket(psi: np.ndarray) -> np.ndarray:
     """
@@ -126,7 +110,54 @@ def dm_from_ensemble(states: list[np.ndarray], probs: list[float]) -> np.ndarray
         
     return rho
 
-def partial_trace(rho: np.ndarray, dims: list[int], subsystem: int) -> np.ndarray:
+def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
+    """
+    Calculates the inner product <phi|psi> between two pure states.
+    
+    Args:
+        phi: The bra state vector.
+        psi: The ket state vector.
+    
+    Returns:
+        The complex inner product.
+    """
+    phi_vec = np.asarray(phi).flatten()
+    psi_vec = np.asarray(psi).flatten()
+    return np.vdot(phi_vec, psi_vec)
+
+def purity(density_matrix: np.ndarray) -> float:
+    """
+    Calculates the purity of a density matrix.
+    
+    Args:
+        density_matrix: The density matrix to calculate the purity of.
+    
+    Returns:
+        The purity of the density matrix.
+    """
+
+    return np.real(matrix_trace(density_matrix @ density_matrix))
+
+
+# ================================================== 
+# 3. MULTI-QUBIT TRANSFORMATIONS
+# ================================================== 
+
+def tensor(*operators: np.ndarray) -> np.ndarray:
+    """
+    Calculates the tensor product of multiple matrices or vectors.
+    
+    Args:
+        *operators: A variable number of matrices or vectors.
+    
+    Returns:
+        The tensor product of all provided matrices or vectors.
+    """
+    if not operators:
+        raise ValueError("At least one operator must be provided.")
+    return reduce(np.kron, operators)
+
+def partial_trace(rho: np.ndarray, dims: list[int], subsystem: int) -> np.ndarray | float:
     """
     Calculates the partial trace of a multipartite density matrix.
     
@@ -155,12 +186,30 @@ def partial_trace(rho: np.ndarray, dims: list[int], subsystem: int) -> np.ndarra
     reduced_dims = dims[:subsystem] + dims[subsystem+1:]
     if not reduced_dims:
         # If all subsystems are traced out (e.g. subsystem=0 and len(dims)=1)
-        return float(np.real(reduced_rho))
+        return np.real(reduced_rho)
         
     new_dim = int(np.prod(reduced_dims))
     return reduced_rho.reshape((new_dim, new_dim))
 
-def is_hermitian(matrix: np.ndarray, atol: float = 1e-8) -> bool:
+def matrix_exp(matrix: np.ndarray) -> np.ndarray:
+    """
+    Calculates the matrix exponential e^M.
+    Useful for generating unitary operators from Hamiltonians U = e^{-iHt}.
+    
+    Args:
+        matrix: The matrix to exponentiate.
+        
+    Returns:
+        The exponentiated matrix.
+    """
+    return scipy.linalg.expm(matrix)
+
+
+# ================================================== 
+# 4. INTEGRITY AND VALIDATION
+# ================================================== 
+
+def is_hermitian(matrix: np.ndarray, atol: float = ATOL) -> bool:
     """
     Checks if a matrix is Hermitian (M = M^\dagger).
     
@@ -173,7 +222,7 @@ def is_hermitian(matrix: np.ndarray, atol: float = 1e-8) -> bool:
     """
     return np.allclose(matrix, hermitian_conjugate(matrix), atol=atol)
 
-def is_positive_semidefinite(matrix: np.ndarray, atol: float = 1e-8) -> bool:
+def is_positive_semidefinite(matrix: np.ndarray, atol: float = ATOL) -> bool:
     """
     Checks if a matrix is positive semi-definite (Hermitian and all eigenvalues >= 0).
     
@@ -190,7 +239,7 @@ def is_positive_semidefinite(matrix: np.ndarray, atol: float = 1e-8) -> bool:
     eigenvalues = np.linalg.eigvalsh(matrix)
     return bool(np.all(eigenvalues >= -atol))
 
-def is_unitary(matrix: np.ndarray, atol: float = 1e-8) -> bool:
+def is_unitary(matrix: np.ndarray, atol: float = ATOL) -> bool:
     """
     Checks if a matrix is unitary (U U^\dagger = I).
     
@@ -218,6 +267,34 @@ def spectral_decomp(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     return np.linalg.eigh(matrix)
 
+
+# ================================================== 
+# 5. CRYPTOGRAPHY METRICS (VULNERABILITIES)
+# ================================================== 
+
+def expectation_value(state: np.ndarray, operator: np.ndarray) -> float:
+    """
+    Calculates the expectation value of an operator given a state.
+    For pure states: <psi|O|psi>
+    For mixed states: Tr(rho * O)
+    
+    Args:
+        state: A pure state ket vector or a density matrix.
+        operator: The observable operator.
+    
+    Returns:
+        The expectation value (should be real for Hermitian operators).
+    """
+    state = np.asarray(state)
+    if state.ndim == 1 or state.shape[1] == 1:
+        # Pure state
+        phi = state.flatten()
+        val = np.vdot(phi, operator @ phi)
+    else:
+        # Mixed state
+        val = matrix_trace(state @ operator)
+    return np.real(val)
+
 def fidelity(rho: np.ndarray, sigma: np.ndarray) -> float:
     """
     Calculates the fidelity between two density matrices.
@@ -230,11 +307,16 @@ def fidelity(rho: np.ndarray, sigma: np.ndarray) -> float:
     Returns:
         The fidelity metric (0 to 1).
     """
+    # Optimization for pure states: if both are pure, fidelity is simply Tr(rho * sigma)
+    # which is computationally much faster than matrix square roots.
+    if abs(purity(rho) - 1.0) < ATOL and abs(purity(sigma) - 1.0) < ATOL:
+        return np.real(matrix_trace(rho @ sigma))
+
     sqrt_rho = scipy.linalg.sqrtm(rho)
     # The function might return complex outputs containing tiny imaginary parts
     f_matrix = scipy.linalg.sqrtm(sqrt_rho @ sigma @ sqrt_rho)
     f = matrix_trace(f_matrix)
-    return float(np.real(f))**2
+    return np.real(f)**2
 
 def trace_distance(rho: np.ndarray, sigma: np.ndarray) -> float:
     """
@@ -251,7 +333,7 @@ def trace_distance(rho: np.ndarray, sigma: np.ndarray) -> float:
     diff = rho - sigma
     # For Hermitian matrices, the trace norm is the sum of absolute values of eigenvalues.
     eigenvalues = np.linalg.eigvalsh(diff)
-    return float(0.5 * np.sum(np.abs(eigenvalues)))
+    return 0.5 * np.sum(np.abs(eigenvalues))
 
 def von_neumann_entropy(rho: np.ndarray) -> float:
     """
@@ -267,6 +349,6 @@ def von_neumann_entropy(rho: np.ndarray) -> float:
     entropy = 0.0
     for val in eigenvalues:
         # Ignore zero eigenvalues or small negative ones from numeric noise
-        if val > 1e-12:
+        if val > ATOL:
             entropy -= val * np.log2(val)
-    return float(np.real(entropy))
+    return np.real(entropy)
