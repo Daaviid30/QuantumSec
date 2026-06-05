@@ -9,11 +9,14 @@
 import numpy as np
 from scipy.stats import unitary_group
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Optional,Union
 
 
 class BaseRNG(ABC):
-    """Abstract base class ensuring all RNGs expose the same NumPy Generator interface."""
+    """
+    Abstract base class ensuring all RNGs expose the same NumPy Generator interface.
+    Any Random Number Generator must expose a gen property that returns a NumPy random generator object
+    """
     
     @property
     @abstractmethod
@@ -39,9 +42,13 @@ class GlobalRNG(BaseRNG):
     Singleton for production. Draws seed from OS entropy (/dev/urandom).
     Strictly for deployment runs where reproducibility is fundamentally unwanted.
     """
-    _instance = None
-    _gen = None
+    # We indicate that these variables are None sometimes, in order to prevent syntax errors, 
+    # as they will be initialized in the __new__ method.
+    _instance: GlobalRNG | None = None
+    _gen: np.random.Generator | None = None 
 
+    # Singleton pattern, ensures only one instance of GlobalRNG is created and used throughout the application
+    # This is useful for performance reasons and for ensuring that the same random number generator is used
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(GlobalRNG, cls).__new__(cls)
@@ -51,6 +58,8 @@ class GlobalRNG(BaseRNG):
 
     @property
     def gen(self) -> np.random.Generator:
+        # Confirmation that _gen is not None, this is for the type hints
+        assert self._gen is not None, "Generator was not initialized"
         return self._gen
 
 
@@ -93,6 +102,9 @@ class QRNGSimulator(BaseRNG):
             # This is a simplified model suitable for TFM simulation of readout noise
             p_stay = 0.5 + (self.correlation / 2)
             if bits[i-1] == 1:
+                # This is a mathematical formulation to compensate for the bias probability
+                # and the correlation in the same equation. It is not the most optimal 
+                # way to do it, but it is a valid one for simulation purposes.
                 p_one = p_stay if self.bias_prob >= 0.5 else p_stay * (self.bias_prob / 0.5)
             else:
                 p_one = (1 - p_stay) if self.bias_prob <= 0.5 else (1 - p_stay) * (self.bias_prob / 0.5)
@@ -108,11 +120,12 @@ class QRNGSimulator(BaseRNG):
 # ==========================================
 # Notice how every helper REQUIRES an rng instance to be passed in.
 
-def random_bit(rng: BaseRNG, size: Optional[int] = None) -> Union[int, np.ndarray]:
+# If size is None, numpy returns only one random number. 
+def random_bit(rng: BaseRNG, size: int | None = None) -> Union[int, np.ndarray]:
     """Generates a perfectly random classical bit (0 or 1)."""
     return rng.gen.integers(0, 2, size=size)
 
-def random_basis(rng: BaseRNG, size: Optional[int] = None) -> Union[int, np.ndarray]:
+def random_basis(rng: BaseRNG, size: int | None = None) -> Union[int, np.ndarray]:
     """
     Generates a random basis choice. 
     Convention: 0 represents Rectilinear (Z), 1 represents Diagonal (X).
