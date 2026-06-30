@@ -1,0 +1,53 @@
+[project]
+name = "quantumsec"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "matplotlib>=3.11.0",
+    "numpy>=2.5.0",
+    "qiskit>=2.4.2",
+    "rich>=15.0.0",
+    "sympy>=1.14.0",
+    "tqdm>=4.68.3",
+]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "ruff>=0.15.20",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [
+    "E",       # Estilo básico
+    "F",       # Errores tipo variables/imports sin usar
+    "I",       # Orden de imports
+    "UP",      # Modernizar sintaxis de Python
+    "B",       # Posibles bugs comunes
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"  # Podría ser strict
+include = ["src", "tests"]
+exclude = [
+    ".venv/",
+    "__pycache__/",
+    "*.pyc",
+    ".ipynb_checkpoints/",
+    ".env",
+    ".DS_Store",
+    ".vscode/", 
+    "**/node_modules"
+]
