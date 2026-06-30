@@ -9,13 +9,15 @@
 
 import numpy as np
 
+from quantum import linalg
+
 #=================== CONSTANTS ===================
 
 ATOL = 1e-10
 
 #=================== FUNCTIONS ===================
 
-def is_normalize(psi: np.ndarray, tol:float = ATOL) -> bool:
+def is_normalized_state(psi: np.ndarray, tol:float = ATOL) -> bool:
     """
     Return a boolean indicating whether a state is a normalize state or not.
 
@@ -34,14 +36,11 @@ def is_normalize(psi: np.ndarray, tol:float = ATOL) -> bool:
     ValueError: If the psi parameter is not a valid vector input.
     """
 
-    psi = np.asarray(psi).reshape(-1)
-
-    if psi.size == 0:
-        raise ValueError("[!] The input vector could not be an empty vector")
+    psi = linalg.as_ket(psi)
     
     modules_sum = np.sum(np.abs(psi) ** 2)
 
-    return np.isclose(modules_sum, 1, atol=tol)
+    return np.isclose(modules_sum, 1, atol=tol, rtol=0.0)
 
 def is_quantum_state(psi: np.ndarray) -> bool:
     """
@@ -61,12 +60,9 @@ def is_quantum_state(psi: np.ndarray) -> bool:
     ValueError: If the psi parameter is not a valid vector input
     """
 
-    psi = np.asarray(psi, dtype=complex).reshape(-1)
-
-    if psi.size == 0:
-        raise ValueError("[!] The input vector could not be an empty vector")
+    psi = linalg.as_ket(psi)
     
-    return is_normalize(psi)
+    return is_normalized_state(psi)
 
 def is_unitary(U: np.ndarray, tol:float = ATOL) -> bool:
     """
@@ -92,12 +88,12 @@ def is_unitary(U: np.ndarray, tol:float = ATOL) -> bool:
     if U.size == 0:
         raise ValueError("[!] The input matrix could not be empty")
     
-    if U.ndim < 2:
-        raise ValueError("[!] Vectors (dim 1) are not allowed on this function")
+    if U.ndim != 2:
+        raise ValueError("[!] U must be a two-dimensional matrix.")
     
     if U.shape[0] != U.shape[1]:
         return False
     
     operation = U.conj().T @ U
 
-    return np.allclose(operation, np.identity(U.shape[0]), atol=tol)
+    return np.allclose(operation, np.identity(U.shape[0]), atol=tol, rtol=0.0)

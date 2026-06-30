@@ -23,6 +23,11 @@ dev = [
 [tool.ruff]
 line-length = 110
 target-version = "py314"
+extend-exclude = [
+    "__pycache__",
+    ".pytest_cache",
+    ".venv",
+]
 
 [tool.ruff.lint]
 select = [
@@ -44,10 +49,13 @@ include = ["src", "tests"]
 exclude = [
     ".venv/",
     "__pycache__/",
+    "**/__pycache__/",
     "*.pyc",
     ".ipynb_checkpoints/",
     ".env",
     ".DS_Store",
     ".vscode/", 
-    "**/node_modules"
+    "**/node_modules", 
+    "**/.*", 
+    ".venv"
 ]

@@ -4,3 +4,14 @@
 # @ GITHUB: https://github.com/Daaviid30
 
 #=================================================
+
+#================= IMPORT MODULES ================
+
+import numpy as np
+
+#=================== CONSTANTS ===================
+
+KET0 = np.array([1, 0], dtype = complex)
+KET1 = np.array([0, 1], dtype = complex)
+PLUS = np.array([1, 1], dtype = complex) / np.sqrt(2)
+MINUS = np.array([1, -1], dtype = complex) / np.sqrt(2)
