@@ -6,16 +6,17 @@
 #=================================================
 
 #================= IMPORT MODULES =================
+from abc import ABC, abstractmethod
+
 import numpy as np
 from scipy.stats import unitary_group
-from abc import ABC, abstractmethod
-from typing import Optional,Union
 
 
 class BaseRNG(ABC):
     """
     Abstract base class ensuring all RNGs expose the same NumPy Generator interface.
-    Any Random Number Generator must expose a gen property that returns a NumPy random generator object
+    Any Random Number Generator must expose a gen property that returns
+    a NumPy random generator object
     """
     
     @property
@@ -51,7 +52,7 @@ class GlobalRNG(BaseRNG):
     # This is useful for performance reasons and for ensuring that the same random number generator is used
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(GlobalRNG, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             # Without a seed, default_rng pulls from OS entropy
             cls._instance._gen = np.random.default_rng() 
         return cls._instance
@@ -121,11 +122,11 @@ class QRNGSimulator(BaseRNG):
 # Notice how every helper REQUIRES an rng instance to be passed in.
 
 # If size is None, numpy returns only one random number. 
-def random_bit(rng: BaseRNG, size: int | None = None) -> Union[int, np.ndarray]:
+def random_bit(rng: BaseRNG, size: int | None = None) -> int | np.ndarray:
     """Generates a perfectly random classical bit (0 or 1)."""
     return rng.gen.integers(0, 2, size=size)
 
-def random_basis(rng: BaseRNG, size: int | None = None) -> Union[int, np.ndarray]:
+def random_basis(rng: BaseRNG, size: int | None = None) -> int | np.ndarray:
     """
     Generates a random basis choice. 
     Convention: 0 represents Rectilinear (Z), 1 represents Diagonal (X).
