@@ -40,7 +40,7 @@ def as_ket(psi: np.ndarray) -> np.ndarray:
     )
 
 def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
-    """Return the inner product <phi|psi> between 2 quantum states.
+    """Return the inner product <phi|psi> between 2 vectors.
 
     Parameters:
     -----------
@@ -63,8 +63,38 @@ def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
 
     if phi.size != psi.size:
         raise ValueError(
-            "[!] The quantum vectors have different sizes:" 
+            "[!] The vectors have different sizes:" 
             f"phi size -> {phi.size} and psi size -> {psi.size}.")
     
     return complex(np.vdot(phi, psi))
+
+def outer_product(phi: np.ndarray, psi: np.ndarray) -> np.ndarray:
+    """Return the outer product |phi><psi| between 2 vectors.
+
+    Parameters:
+    -----------
+    phi: First of the outer product vectors.
+    psi: Second of the outer product vectors, here the complex conjugate is applied.
+
+    Returns:
+    --------
+    product: A matrix that represents the result of the product
+
+    Raises:
+    -------
+    ValueError: 
+        If phi or psi are not valid as ket vectors.
+        If phi and psi do not have the same shape
+    """
+
+    phi = as_ket(phi)
+    psi = as_ket(psi)
+
+    if phi.size != psi.size:
+        raise ValueError(
+            "[!] The vectors have different sizes:" 
+            f"phi size -> {phi.size} and psi size -> {psi.size}.")
+    
+    return np.outer(phi, psi.conj())
+
 
