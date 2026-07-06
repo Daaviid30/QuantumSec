@@ -38,3 +38,33 @@ def as_ket(psi: np.ndarray) -> np.ndarray:
     raise ValueError(
         f"ket must have shape (n,) or (n, 1). Got shape {psi.shape}."
     )
+
+def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
+    """Return the inner product <phi|psi> between 2 quantum states.
+
+    Parameters:
+    -----------
+    phi: First of the inner product vectors, here the complex conjugate is applied.
+    psi: Second of the inner product vectors.
+
+    Returns:
+    --------
+    product: A complex escalar that represents the result of the product
+
+    Raises:
+    -------
+    ValueError: 
+        If phi or psi are not valid as ket vectors.
+        If phi and psi do not have the same shape
+    """
+
+    phi = as_ket(phi)
+    psi = as_ket(psi)
+
+    if phi.size != psi.size:
+        raise ValueError(
+            "[!] The quantum vectors have different sizes:" 
+            f"phi size -> {phi.size} and psi size -> {psi.size}.")
+    
+    return complex(np.vdot(phi, psi))
+
