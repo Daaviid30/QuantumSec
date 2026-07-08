@@ -9,6 +9,10 @@
 
 import numpy as np
 
+#=================== CONSTANTS ===================
+
+ATOL = 1e-10
+
 #=================== FUNCTIONS ===================
 
 def as_ket(psi: np.ndarray) -> np.ndarray:
@@ -97,4 +101,57 @@ def outer_product(phi: np.ndarray, psi: np.ndarray) -> np.ndarray:
     
     return np.outer(phi, psi.conj())
 
+def normalize(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
+    """Return the psi vector in a normalized way.
+
+    Parameters:
+    -----------
+    psi: Vector to be normalize.
+
+    Returns:
+    --------
+    psi_normalized: The normalized version of psi
+
+    Raises:
+    -------
+    ValueError: 
+        If psi is not a valid ket vector.
+        If the norm of the vector psi is 0.
+    """
+    
+    psi = as_ket(psi)
+
+    norm = np.linalg.norm(psi)
+
+    if np.isclose(norm, 0, atol=tol, rtol=0):
+        raise ValueError("[!] Psi norm can not be 0.")
+    
+    return psi / norm
+
+def probabilities_from_ket(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
+    """Returns a probability vector associated with a quantum state measured in
+    the computational basis.
+
+    Parameters:
+    -----------
+    psi: Vector from where the probabilities are calculated.
+
+    Returns:
+    --------
+    prob_vector: The probability vector of the psi quantum state
+
+    Raises:
+    -------
+    ValueError: 
+        If psi is not a valid quantum state.
+    """
+
+    psi = as_ket(psi)
+
+    norm_squared = float(np.vdot(psi, psi).real)
+
+    if not np.isclose(norm_squared, 1.0, atol=tol, rtol=0.0):
+        raise ValueError("[!] psi must be normalized.")
+
+    return np.abs(psi) ** 2
 
