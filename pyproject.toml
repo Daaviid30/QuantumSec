@@ -45,7 +45,7 @@ indent-style = "space"
 [tool.pyright]
 pythonVersion = "3.14"
 typeCheckingMode = "basic"  # Podría ser strict
-include = ["src", "tests"]
+include = ["core", "quantum", "qkd", "tests"]
 exclude = [
     ".venv/",
     "__pycache__/",
@@ -59,3 +59,6 @@ exclude = [
     "**/.*", 
     ".venv"
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
