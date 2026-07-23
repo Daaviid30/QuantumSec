@@ -63,7 +63,7 @@ def dm_from_ensemble(states: Sequence[np.ndarray], probs: np.ndarray) -> np.ndar
     """
     probs = linalg.as_ket(probs)
     v.validate_probability_state(probs)
-    probs = np.isreal(probs)
+    probs = np.real(probs)
 
     if len(states) != probs.size:
         raise ValueError("[!] Probability vector and state vector have different size.")

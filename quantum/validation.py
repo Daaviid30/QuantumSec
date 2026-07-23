@@ -22,7 +22,9 @@ def _error_probability_state(probs: np.ndarray, tol: float = ATOL) -> str | None
     probs = linalg.as_ket(probs)
 
     if not np.all(np.isreal(probs)):
-            return "[!] Some entries are not real."
+        return "[!] Some entries are not real."
+
+    probs = np.real(probs)
 
     if np.any(probs < -tol): # Equivalent to < 0.0
         return "[!] Vector entries must be non-negative"
@@ -128,7 +130,7 @@ def is_quantum_state(psi: np.ndarray, tol:float = ATOL) -> bool:
     ValueError: If the psi parameter is not a valid vector input
     """
 
-    return _error_normalized_state(psi) is None
+    return _error_normalized_state(psi, tol) is None
 
 def validate_quantum_state(psi: np.ndarray, tol:float = ATOL) -> None:
     """
@@ -141,7 +143,7 @@ def validate_quantum_state(psi: np.ndarray, tol:float = ATOL) -> None:
     ValueError: If the psi parameter is not a valid vector input
     """
 
-    error = _error_normalized_state(psi)
+    error = _error_normalized_state(psi, tol)
     if error is not None:
         raise ValueError(error)
 
@@ -159,7 +161,7 @@ def _error_unitary(U: np.ndarray, tol:float = ATOL) -> str | None:
         return "[!] U is not a square matrix."
 
     if not np.all(np.isfinite(U)):
-            raise ValueError("[!] Ket amplitudes must be finite.")
+        return "[!] Matrix entries must be finite."
     
     operation = U.conj().T @ U
 

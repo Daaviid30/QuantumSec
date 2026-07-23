@@ -9,7 +9,6 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-from scipy.stats import unitary_group
 
 
 class BaseRNG(ABC):
@@ -88,6 +87,12 @@ class QRNGSimulator(BaseRNG):
 
     def generate_raw_bits(self, size: int) -> np.ndarray:
         """Generates bits incorporating physical bias and classical readout correlation."""
+        if size < 0:
+            raise ValueError("[!] Size must be non-negative.")
+
+        if size == 0:
+            return np.array([], dtype=int)
+
         if self.correlation == 0.0:
             # Simple biased coin flip (Bernoulli trials)
             return self.gen.binomial(n=1, p=self.bias_prob, size=size)
@@ -141,6 +146,16 @@ def random_unitary(rng: BaseRNG, dimension: int) -> np.ndarray:
     :param rng: The BaseRNG instance.
     :param dimension: The dimension of the Hilbert space (e.g., 2 for a single qubit).
     """
-    # SciPy's unitary_group requires a NumPy RandomState or Generator seed.
-    # We pass the exact NumPy generator from our injected RNG.
-    return unitary_group.rvs(dim=dimension, random_state=rng.gen)
+    if dimension <= 0:
+        raise ValueError("[!] Dimension must be positive.")
+
+    # QR decomposition of a complex Ginibre matrix produces a Haar-distributed
+    # unitary after correcting the arbitrary phases on R's diagonal.
+    matrix = rng.gen.normal(size=(dimension, dimension)) + 1j * rng.gen.normal(
+        size=(dimension, dimension)
+    )
+    unitary, triangular = np.linalg.qr(matrix)
+    diagonal = np.diag(triangular)
+    phases = diagonal / np.abs(diagonal)
+
+    return unitary * phases.conj()
