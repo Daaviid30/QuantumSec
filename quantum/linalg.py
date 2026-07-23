@@ -29,6 +29,9 @@ def as_ket(psi: np.ndarray) -> np.ndarray:
     """
     psi = np.asarray(psi, dtype=complex)
 
+    if not np.all(np.isfinite(psi)):
+            raise ValueError("[!] Ket amplitudes must be finite.")
+
     if psi.ndim == 1:
         if psi.size == 0:
             raise ValueError("[!] ket must not be empty.")
