@@ -206,3 +206,73 @@ def validate_unitary(U: np.ndarray, tol:float = ATOL) -> None:
     error = _error_unitary(U, tol)
     if error is not None:
         raise ValueError(error)
+
+def _error_density_matrix(rho: np.ndarray, tol:float = ATOL) -> str | None:
+
+    rho = np.asarray(rho, dtype=complex)
+
+    if rho.size == 0:
+        return "[!] The input matrix could not be empty"
+    
+    if rho.ndim != 2:
+        return "[!] rho must be a two-dimensional matrix."
+    
+    if rho.shape[0] != rho.shape[1]:
+        return "[!] rho is not a square matrix."
+
+    if not np.all(np.isfinite(rho)):
+        return "[!] Matrix entries must be finite."
+    
+    hermitian = rho.conj().T
+
+    if not np.allclose(hermitian, rho, atol=tol, rtol=0.0):
+        return "[!] rho is not a hermitian matrix."
+
+    trace = np.trace(rho)
+
+    if not np.isclose(trace, 1, atol=tol, rtol=0.0):
+        return f"[!] rho trace must be 1. rho trace value is: {trace}"
+
+    eigenvalues = np.linalg.eigvalsh(rho)
+
+    if not np.all(eigenvalues >= -tol):
+        return "[!] The matrix is not positive semi-definite."
+
+    return None
+
+def is_density_matrix(rho: np.ndarray, tol:float = ATOL) -> bool:
+    """
+    Return a boolean indicating whether a matrix is a density matrix or not.
+
+    Parameters:
+    -----------
+    rho: matrix to be check.
+    tol: tolerance needed in funtions that may have not exact values.
+
+    Returns:
+    --------
+    True: If the matrix is a density matrix
+    False: If the matrix is not a density matrix
+
+    Raises:
+    -------
+    ValueError: If the rho parameter is not a valid matrix input
+    """
+
+    return _error_density_matrix(rho, tol) is None
+
+def validate_density_matrix(rho: np.ndarray, tol:float = ATOL) -> None:
+    """
+    Parameters:
+    -----------
+    rho: matrix to be check.
+    tol: tolerance needed in funtions that may have not exact values.
+
+    Raises:
+    -------
+    ValueError: If the rho parameter is not a valid matrix input
+    """
+
+    error = _error_density_matrix(rho, tol)
+    if error is not None:
+        raise ValueError(error)
