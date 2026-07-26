@@ -276,3 +276,73 @@ def validate_density_matrix(rho: np.ndarray, tol:float = ATOL) -> None:
     error = _error_density_matrix(rho, tol)
     if error is not None:
         raise ValueError(error)
+
+def _error_projector(projector: np.ndarray, tol: float = ATOL) -> str | None:
+    """
+    Return an error message if the input is not an orthogonal projector.
+    """
+
+    projector = np.asarray(projector, dtype=complex)
+
+    if projector.size == 0:
+        return "[!] The proyector must not be empty"
+
+    if projector.ndim != 2:
+        return f"[!] The projector should be a bi-dimensional matrix.\
+            Projector dimensions: {projector.ndim}"
+
+    if projector.shape[0] != projector.shape[1]:
+        return f"[!] The projector must be a square matrix\
+            Projector shape: {projector.shape}"
+
+    if not np.all(np.isfinite(projector)):
+        return "[!] The projector entries must be finite."
+
+    hermitian = projector.conj().T
+
+    if not np.allclose(hermitian, projector, atol=tol, rtol=0.0):
+        return "[!] The projector must be a hermitian matrix."
+
+    square = projector @ projector
+
+    if not np.allclose(square, projector, atol=tol, rtol=0.0):
+        return "[!] The projecctor must be idempotent."
+
+    return None
+
+def is_projector(projector: np.ndarray, tol:float = ATOL) -> bool:
+    """
+    Return a boolean indicating whether a matrix is a projector or not.
+
+    Parameters:
+    -----------
+    projector: matrix to be check.
+    tol: tolerance needed in funtions that may have not exact values.
+
+    Returns:
+    --------
+    True: If the matrix is a projector
+    False: If the matrix is not a projector
+
+    Raises:
+    -------
+    ValueError: If the projector parameter is not a valid matrix input
+    """
+
+    return _error_projector(projector, tol) is None
+
+def validate_projector(projector: np.ndarray, tol:float = ATOL) -> None:
+    """
+    Parameters:
+    -----------
+    projector: matrix to be check.
+    tol: tolerance needed in funtions that may have not exact values.
+
+    Raises:
+    -------
+    ValueError: If the projector parameter is not a valid matrix input
+    """
+
+    error = _error_projector(projector, tol)
+    if error is not None:
+        raise ValueError(error)
