@@ -12,10 +12,11 @@ import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
 from core import rng
+from core.constants import DEFAULT_ATOL
 
 # =================== CONSTANTS ===================
 
-ATOL = 1e-10
+ATOL = DEFAULT_ATOL
 
 # ===================== TESTS =====================
 

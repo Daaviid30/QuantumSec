@@ -1,181 +1,75 @@
-#================= QUANTUM SEC ===================
-
-# @ AUTHOR: David Martín Castro
-# @ GITHUB: https://github.com/Daaviid30
-
-#=================================================
-
-#================= IMPORT MODULES =================
+"""Linear-algebra helpers for finite-dimensional quantum systems."""
 
 import numpy as np
 
-#=================== CONSTANTS ===================
+from core.constants import DEFAULT_ATOL
+from quantum.types import ArrayLike, ComplexArray, RealArray
 
-ATOL = 1e-10
 
-#=================== FUNCTIONS ===================
+def as_ket(psi: ArrayLike) -> ComplexArray:
+    """Convert an array-like vector to a finite one-dimensional complex ket.
 
-def as_ket(psi: np.ndarray) -> np.ndarray:
-    """
-    Convert a vector into the canonical one-dimensional ket representation.
-
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Vector with shape (n,) or column-vector shape (n, 1).
-
-    Returns:
-    --------
-    np.ndarray
-        Non-empty complex vector with shape (n,).
-
-    Raises:
-    -------
-    ValueError
-        If psi is empty, non-finite, or does not have an accepted ket shape.
-    """
-    psi = np.asarray(psi, dtype=complex)
-
-    if not np.all(np.isfinite(psi)):
-            raise ValueError("[!] Ket amplitudes must be finite.")
-
-    if psi.ndim == 1:
-        if psi.size == 0:
-            raise ValueError("[!] ket must not be empty.")
-        return psi
-
-    if psi.ndim == 2 and psi.shape[1] == 1:
-        if psi.size == 0:
-            raise ValueError("[!] ket must not be empty.")
-        return psi[:, 0]
-
-    raise ValueError(
-        f"ket must have shape (n,) or (n, 1). Got shape {psi.shape}."
-    )
-
-def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
-    """
-    Calculate the complex inner product <phi|psi> between two kets.
-
-    Parameters:
-    -----------
-    phi: np.ndarray
-        Ket whose complex conjugate is applied.
-    psi: np.ndarray
-        Ket multiplied by the conjugate of phi.
-
-    Returns:
-    --------
-    complex
-        Scalar inner product of phi and psi.
-
-    Raises:
-    -------
-    ValueError
-        If either input is not a valid ket or their dimensions differ.
+    Accepted shapes are ``(n,)`` and the column-vector form ``(n, 1)``.
     """
 
-    phi = as_ket(phi)
-    psi = as_ket(psi)
+    ket = np.asarray(psi, dtype=np.complex128)
+    if not np.all(np.isfinite(ket)):
+        raise ValueError("Ket amplitudes must be finite.")
+    if ket.ndim == 1:
+        if ket.size == 0:
+            raise ValueError("A ket must not be empty.")
+        return ket
+    if ket.ndim == 2 and ket.shape[1] == 1:
+        if ket.size == 0:
+            raise ValueError("A ket must not be empty.")
+        return ket[:, 0]
+    raise ValueError(f"A ket must have shape (n,) or (n, 1). Got shape={ket.shape}.")
 
-    if phi.size != psi.size:
+
+def inner_product(phi: ArrayLike, psi: ArrayLike) -> complex:
+    """Return the complex inner product ``<phi|psi>`` between equal-size kets."""
+
+    clean_phi = as_ket(phi)
+    clean_psi = as_ket(psi)
+    if clean_phi.size != clean_psi.size:
         raise ValueError(
-            "[!] The vectors have different sizes:" 
-            f"phi size -> {phi.size} and psi size -> {psi.size}.")
-    
-    return complex(np.vdot(phi, psi))
+            "Inner-product kets must have the same dimension. "
+            f"Got phi.size={clean_phi.size} and psi.size={clean_psi.size}."
+        )
+    return complex(np.vdot(clean_phi, clean_psi))
 
-def outer_product(phi: np.ndarray, psi: np.ndarray) -> np.ndarray:
-    """
-    Calculate the outer product |phi><psi| between two kets.
 
-    Parameters:
-    -----------
-    phi: np.ndarray
-        Ket placed on the left side of the product.
-    psi: np.ndarray
-        Ket whose complex conjugate is placed on the right side.
+def outer_product(phi: ArrayLike, psi: ArrayLike) -> ComplexArray:
+    """Return the outer product ``|phi><psi|`` between equal-size kets."""
 
-    Returns:
-    --------
-    np.ndarray
-        Complex matrix representing |phi><psi|.
-
-    Raises:
-    -------
-    ValueError
-        If either input is not a valid ket or their dimensions differ.
-    """
-
-    phi = as_ket(phi)
-    psi = as_ket(psi)
-
-    if phi.size != psi.size:
+    clean_phi = as_ket(phi)
+    clean_psi = as_ket(psi)
+    if clean_phi.size != clean_psi.size:
         raise ValueError(
-            "[!] The vectors have different sizes:" 
-            f"phi size -> {phi.size} and psi size -> {psi.size}.")
-    
-    return np.outer(phi, psi.conj())
+            "Outer-product kets must have the same dimension. "
+            f"Got phi.size={clean_phi.size} and psi.size={clean_psi.size}."
+        )
+    return np.asarray(np.outer(clean_phi, clean_psi.conj()), dtype=np.complex128)
 
-def normalize(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
-    """
-    Normalize a ket to unit Euclidean norm.
 
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Ket to normalize.
-    tol: float
-        Absolute tolerance below which the norm is treated as zero.
+def normalize(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> ComplexArray:
+    """Return a ket normalized to unit Euclidean norm."""
 
-    Returns:
-    --------
-    np.ndarray
-        Canonical one-dimensional ket with unit norm.
+    ket = as_ket(psi)
+    norm = float(np.linalg.norm(ket))
+    if np.isclose(norm, 0.0, atol=tol, rtol=0.0):
+        raise ValueError(f"A ket cannot be normalized from zero norm. Got norm={norm}.")
+    return np.asarray(ket / norm, dtype=np.complex128)
 
-    Raises:
-    -------
-    ValueError
-        If psi is not a valid ket or its norm is zero within tolerance.
-    """
-    
-    psi = as_ket(psi)
 
-    norm = np.linalg.norm(psi)
+def probabilities_from_ket(
+    psi: ArrayLike,
+    tol: float = DEFAULT_ATOL,
+) -> RealArray:
+    """Return computational-basis probabilities for a normalized ket."""
 
-    if np.isclose(norm, 0, atol=tol, rtol=0):
-        raise ValueError("[!] Psi norm can not be 0.")
-    
-    return psi / norm
-
-def probabilities_from_ket(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
-    """
-    Calculate computational-basis probabilities for a normalized ket.
-
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Normalized quantum-state ket.
-    tol: float
-        Absolute tolerance used when checking normalization.
-
-    Returns:
-    --------
-    np.ndarray
-        Real vector containing the squared magnitude of each amplitude.
-
-    Raises:
-    -------
-    ValueError
-        If psi is not a valid ket or is not normalized within tolerance.
-    """
-
-    psi = as_ket(psi)
-
-    norm_squared = float(np.vdot(psi, psi).real)
-
+    ket = as_ket(psi)
+    norm_squared = float(np.vdot(ket, ket).real)
     if not np.isclose(norm_squared, 1.0, atol=tol, rtol=0.0):
-        raise ValueError("[!] psi must be normalized.")
-
-    return np.abs(psi) ** 2
-
+        raise ValueError(f"A probability ket must have unit norm. Got norm_squared={norm_squared}.")
+    return np.asarray(np.abs(ket) ** 2, dtype=np.float64)

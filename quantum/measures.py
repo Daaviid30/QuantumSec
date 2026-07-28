@@ -1,146 +1,215 @@
-#================= QUANTUM SEC ===================
+"""General projective-measurement domain objects and operations."""
 
-# @ AUTHOR: David Martín Castro
-# @ GITHUB: https://github.com/Daaviid30
-
-#=================================================
-
-#================= IMPORT MODULES =================
-
-from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
+from core.constants import DEFAULT_ATOL
 from core.rng import BaseRNG
 from quantum import validation as v
+from quantum.types import ArrayLike, ComplexArray, RealArray
 
-#=================== CONSTANTS ===================
 
-ATOL = 1e-10
-
-#=================== CLASSES ===================
-
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class MeasurementResult:
+    """A sampled logical outcome and its normalized post-measurement state."""
+
     outcome: int
     probability: float
-    post_state: np.ndarray
+    post_state: ComplexArray = field(repr=False)
 
-#=================== FUNCTIONS ===================
 
-def dm_purity(
-        rho: np.ndarray
-    ) -> float:
-    """
-    Calculate the purity Tr(rho²) of a quantum state.
+@dataclass(frozen=True, slots=True)
+class MeasurementSample:
+    """A sampled projector index and logical outcome, without state collapse."""
 
-    Parameters:
-    -----------
-    rho: np.ndarray
-        Density matrix representing the quantum state.
+    index: int
+    outcome: int
+    probability: float
 
-    Returns:
-    --------
-    float
-        Real purity value of rho.
 
-    Raises:
-    -------
-    ValueError
-        If rho is not a valid density matrix.
-    """
+@dataclass(frozen=True, slots=True, eq=False)
+class ProjectiveMeasurement:
+    """A complete projective measurement validated once at construction time."""
 
-    rho = np.asarray(rho, dtype = complex)
-    v.validate_density_matrix(rho)
+    projectors: tuple[ComplexArray, ...]
+    outcomes: tuple[int, ...]
 
-    purity = np.trace(rho @ rho)
+    def __post_init__(self) -> None:
+        if not self.projectors:
+            raise ValueError("A projective measurement requires at least one projector.")
 
-    return float(purity.real)
+        if len(self.projectors) != len(self.outcomes):
+            raise ValueError(
+                "Each projector must have one associated outcome. "
+                f"Got {len(self.projectors)} projectors and {len(self.outcomes)} outcomes."
+            )
 
-def measure_projective(
-        rho: np.ndarray, 
-        projectors: Sequence[np.ndarray], 
-        rng: BaseRNG, 
-        tol: float = ATOL
-    ) -> MeasurementResult:
-    """
-    Perform a projective measurement on a density matrix.
+        clean_projectors = tuple(
+            np.array(projector, dtype=np.complex128, copy=True) for projector in self.projectors
+        )
+        v.validate_projective_measurement(clean_projectors)
 
-    Parameters:
-    -----------
-    rho: np.ndarray
-        Density matrix representing the state before measurement.
-    projectors: Sequence[np.ndarray]
-        Projectors associated with the possible measurement outcomes.
-    rng: BaseRNG
-        Random source used to sample an outcome.
-    tol: float
-        Absolute tolerance used for probability checks.
+        for projector in clean_projectors:
+            projector.flags.writeable = False
 
-    Returns:
-    --------
-    MeasurementResult
-        Sampled outcome, its probability, and the normalized post-measurement state.
+        object.__setattr__(self, "projectors", clean_projectors)
+        object.__setattr__(self, "outcomes", tuple(int(outcome) for outcome in self.outcomes))
 
-    Raises:
-    -------
-    ValueError
-        If rho or a projector is invalid, dimensions differ, or probabilities are inconsistent.
-    """
+    @property
+    def dimension(self) -> int:
+        """Return the Hilbert-space dimension measured by the projectors."""
 
-    rho = np.asarray(rho, dtype=complex)
-    v.validate_density_matrix(rho)
+        return self.projectors[0].shape[0]
 
-    if len(projectors) == 0:
-        raise ValueError("[!] At least one projector is required.")
+    @property
+    def number_of_outcomes(self) -> int:
+        """Return the number of projector/outcome pairs."""
 
-    clean_projectors: list[np.ndarray] = []
-    probabilities = np.empty(len(projectors), dtype=float)
+        return len(self.projectors)
 
-    for index, projector in enumerate(projectors):
-        projector = np.asarray(projector, dtype = complex)
 
-        if projector.shape != rho.shape:
-            raise ValueError("[!] Projector and state dimensions must match. "
-                f"Got projector.shape={projector.shape} "
-                f"and rho.shape={rho.shape}.")
+def _born_probabilities(
+    rho: ComplexArray,
+    measurement: ProjectiveMeasurement,
+    tol: float,
+) -> RealArray:
+    """Calculate and validate the Born probability vector."""
 
-        v.validate_projector(projector)
+    complex_probabilities = np.array(
+        [np.trace(projector @ rho) for projector in measurement.projectors],
+        dtype=np.complex128,
+    )
 
-        probability = np.trace(projector @ rho)
+    imaginary_parts = np.abs(complex_probabilities.imag)
+    if np.any(imaginary_parts > tol):
+        raise ValueError(
+            f"Measurement probabilities must be real. Got imaginary parts {complex_probabilities.imag}."
+        )
 
-        if not np.isclose(probability.imag, 0.0, atol=tol, rtol=0.0):
-            raise ValueError("[!] The probability must not have an imaginary part.")
+    probabilities = np.asarray(complex_probabilities.real, dtype=np.float64)
 
-        probabilities[index] = probability.real
-        clean_projectors.append(projector)
+    if not np.all(np.isfinite(probabilities)):
+        raise ValueError(f"Measurement probabilities must be finite. Got {probabilities}.")
 
+    if np.any(probabilities < -tol):
+        raise ValueError(f"Measurement probabilities must be non-negative. Got {probabilities}.")
+
+    if np.any(probabilities > 1.0 + tol):
+        raise ValueError(f"Measurement probabilities cannot exceed one. Got {probabilities}.")
+
+    probabilities = np.clip(probabilities, 0.0, 1.0)
     total_probability = float(np.sum(probabilities))
 
     if not np.isclose(total_probability, 1.0, atol=tol, rtol=0.0):
-        raise ValueError(f"[!] The probability sum must be equal to 1. Got {total_probability}")
+        raise ValueError(
+            f"Measurement probabilities must sum to one. Got total={total_probability} from {probabilities}."
+        )
 
-    # Clean little variantions (ex: 1e-10)
-    probabilities = np.clip(probabilities, 0.0, 1.0)
-
-    # Erase minimal variations
     probabilities /= total_probability
+    return probabilities
 
-    outcome = int(rng.gen.choice(
-        len(projectors),
-        p=probabilities
-    ))
 
-    probability = float(probabilities[outcome])
-    projector = clean_projectors[outcome]
+def sample_projective_outcome(
+    rho: ArrayLike,
+    measurement: ProjectiveMeasurement,
+    rng: BaseRNG,
+    tol: float = DEFAULT_ATOL,
+    validate_state: bool = True,
+) -> MeasurementSample:
+    """Sample a projective outcome without constructing a collapsed state.
 
-    post_state = projector @ rho @ projector
-    post_state /= probability
+    Parameters
+    ----------
+    rho:
+        Density matrix representing the state before measurement.
+    measurement:
+        Prevalidated complete projective measurement.
+    rng:
+        Injected random source used to select an outcome.
+    tol:
+        Absolute tolerance for physical probability checks.
+    validate_state:
+        Whether to perform full density-matrix validation, including a spectral check.
 
-    return MeasurementResult(
-        outcome=outcome,
-        probability=probability,
-        post_state=post_state
+    Returns
+    -------
+    MeasurementSample
+        Selected projector index, logical outcome, and Born probability.
+
+    Raises
+    ------
+    ValueError
+        If the state is invalid or incompatible, or its probabilities are unphysical.
+    """
+
+    clean_rho = np.asarray(rho, dtype=np.complex128)
+    if validate_state:
+        v.validate_density_matrix(clean_rho, tol)
+
+    expected_shape = (measurement.dimension, measurement.dimension)
+    if clean_rho.shape != expected_shape:
+        raise ValueError(
+            "Measurement and state dimensions must match. "
+            f"Got measurement dimension={measurement.dimension} and rho.shape={clean_rho.shape}."
+        )
+
+    probabilities = _born_probabilities(clean_rho, measurement, tol)
+    index = int(rng.gen.choice(measurement.number_of_outcomes, p=probabilities))
+
+    return MeasurementSample(
+        index=index,
+        outcome=measurement.outcomes[index],
+        probability=float(probabilities[index]),
     )
 
+
+def measure_projective(
+    rho: ArrayLike,
+    measurement: ProjectiveMeasurement,
+    rng: BaseRNG,
+    tol: float = DEFAULT_ATOL,
+    validate_state: bool = True,
+) -> MeasurementResult:
+    """Sample a projective outcome and apply the Lueders state update.
+
+    Parameters
+    ----------
+    rho:
+        Density matrix representing the state before measurement.
+    measurement:
+        Prevalidated complete projective measurement.
+    rng:
+        Injected random source used to select an outcome.
+    tol:
+        Absolute tolerance for physical probability checks.
+    validate_state:
+        Whether to perform full density-matrix validation before sampling.
+
+    Returns
+    -------
+    MeasurementResult
+        Logical outcome, Born probability, and normalized post-measurement state.
+    """
+
+    clean_rho = np.asarray(rho, dtype=np.complex128)
+    sample = sample_projective_outcome(
+        clean_rho,
+        measurement,
+        rng,
+        tol=tol,
+        validate_state=validate_state,
+    )
+
+    if sample.probability <= tol:
+        raise RuntimeError("Sampled an outcome with numerically zero probability.")
+
+    projector = measurement.projectors[sample.index]
+    post_state = np.asarray(projector @ clean_rho @ projector, dtype=np.complex128)
+    post_state /= sample.probability
+
+    return MeasurementResult(
+        outcome=sample.outcome,
+        probability=sample.probability,
+        post_state=post_state,
+    )

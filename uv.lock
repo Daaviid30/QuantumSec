@@ -375,10 +375,14 @@ source = { virtual = "." }
 dependencies = [
     { name = "matplotlib" },
     { name = "numpy" },
-    { name = "qiskit" },
     { name = "rich" },
     { name = "sympy" },
     { name = "tqdm" },
+]
+
+[package.optional-dependencies]
+qiskit = [
+    { name = "qiskit" },
 ]
 
 [package.dev-dependencies]
@@ -392,11 +396,12 @@ dev = [
 requires-dist = [
     { name = "matplotlib", specifier = ">=3.11.0" },
     { name = "numpy", specifier = ">=2.5.0" },
-    { name = "qiskit", specifier = ">=2.4.2" },
+    { name = "qiskit", marker = "extra == 'qiskit'", specifier = ">=2.4.2" },
     { name = "rich", specifier = ">=15.0.0" },
     { name = "sympy", specifier = ">=1.14.0" },
     { name = "tqdm", specifier = ">=4.68.3" },
 ]
+provides-extras = ["qiskit"]
 
 [package.metadata.requires-dev]
 dev = [

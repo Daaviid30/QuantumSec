@@ -1,17 +1,19 @@
 [project]
 name = "quantumsec"
 version = "0.1.0"
-description = "Add your description here"
+description = "Research framework for reproducible QKD and post-quantum authentication simulations"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "matplotlib>=3.11.0",
     "numpy>=2.5.0",
-    "qiskit>=2.4.2",
     "rich>=15.0.0",
     "sympy>=1.14.0",
     "tqdm>=4.68.3",
 ]
+
+[project.optional-dependencies]
+qiskit = ["qiskit>=2.4.2"]
 
 [dependency-groups]
 dev = [
@@ -44,6 +46,8 @@ indent-style = "space"
 
 [tool.pyright]
 pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
 typeCheckingMode = "basic"  # Podría ser strict
 include = ["core", "quantum", "qkd", "tests"]
 exclude = [

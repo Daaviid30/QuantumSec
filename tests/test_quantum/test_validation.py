@@ -10,12 +10,13 @@
 import numpy as np
 import pytest
 
+from core.constants import DEFAULT_ATOL
 from qkd.primitives import operations, states
 from quantum import validation as v
 
 # =================== CONSTANTS ===================
 
-ATOL = 1e-10
+ATOL = DEFAULT_ATOL
 
 # ===================== TESTS =====================
 
@@ -184,3 +185,66 @@ def test_validate_unitary(unitary, expected_error):
             v.validate_unitary(unitary)
     else:
         assert v.validate_unitary(unitary) is None
+
+
+@pytest.mark.parametrize(
+    "projector",
+    [
+        np.diag([1.0, 0.0]),
+        np.diag([1.0, 1.0, 0.0]),
+    ],
+)
+def test_projector_validation_accepts_rank_one_and_higher_rank(projector):
+    assert v.is_projector(projector)
+    assert v.validate_projector(projector) is None
+
+
+@pytest.mark.parametrize(
+    "projector",
+    [
+        np.ones((2, 3)),
+        np.array([[1.0, 1.0], [0.0, 0.0]]),
+        np.identity(2) / 2.0,
+        np.array([]),
+        np.array([[1.0, 0.0], [0.0, np.nan]]),
+    ],
+)
+def test_projector_validation_rejects_malformed_or_non_projector_arrays(projector):
+    assert not v.is_projector(projector)
+    with pytest.raises(ValueError):
+        v.validate_projector(projector)
+
+
+def test_complete_projective_measurements_accept_z_and_x_bases():
+    p0 = np.diag([1.0, 0.0])
+    p1 = np.diag([0.0, 1.0])
+    p_plus = np.outer(states.PLUS, states.PLUS.conj())
+    p_minus = np.outer(states.MINUS, states.MINUS.conj())
+
+    assert v.is_projective_measurement((p0, p1))
+    assert v.is_projective_measurement((p_plus, p_minus))
+    assert v.validate_projective_measurement((p0, p1)) is None
+    assert v.validate_projective_measurement((p_plus, p_minus)) is None
+
+
+@pytest.mark.parametrize(
+    "projectors",
+    [
+        (np.diag([1.0, 0.0]), np.diag([1.0, 0.0])),
+        (np.diag([1.0, 0.0]),),
+        (np.diag([1.0, 0.0]), np.identity(3)),
+        (),
+    ],
+)
+def test_complete_projective_measurements_reject_invalid_sets(projectors):
+    assert not v.is_projective_measurement(projectors)
+    with pytest.raises(ValueError):
+        v.validate_projective_measurement(projectors)
+
+
+def test_projective_measurement_error_identifies_invalid_projector_index():
+    valid = np.diag([1.0, 0.0])
+    invalid = np.identity(2) / 2.0
+
+    with pytest.raises(ValueError, match="index 1"):
+        v.validate_projective_measurement((valid, invalid))

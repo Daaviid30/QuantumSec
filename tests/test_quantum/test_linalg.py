@@ -11,12 +11,13 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
+from core.constants import DEFAULT_ATOL
 from qkd.primitives import states
 from quantum import linalg
 
 # =================== CONSTANTS ===================
 
-ATOL = 1e-10
+ATOL = DEFAULT_ATOL
 
 # ===================== TESTS =====================
 

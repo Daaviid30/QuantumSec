@@ -1,650 +1,271 @@
-#================= QUANTUM SEC ===================
-
-# @ AUTHOR: David Martín Castro
-# @ GITHUB: https://github.com/Daaviid30
-
-#=================================================
-
-#================= IMPORT MODULES ================
+"""Validation helpers for quantum states, operators, and measurements."""
 
 from collections.abc import Sequence
 
 import numpy as np
 
+from core.constants import DEFAULT_ATOL
 from quantum import linalg
+from quantum.types import ArrayLike
 
-#=================== CONSTANTS ===================
 
-ATOL = 1e-10
+def _error_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
+    probabilities = linalg.as_ket(probs)
+    if not np.all(np.isreal(probabilities)):
+        return f"Probability entries must be real. Got {probabilities}."
 
-#=================== FUNCTIONS ===================
+    real_probabilities = np.real(probabilities)
+    if np.any(real_probabilities < -tol):
+        return f"Probability entries must be non-negative. Got {real_probabilities}."
 
-def _error_probability_state(probs: np.ndarray, tol: float = ATOL) -> str | None:
-    """
-    Inspect whether a vector defines a valid probability distribution.
-
-    Parameters:
-    -----------
-    probs: np.ndarray
-        Probability vector to inspect.
-    tol: float
-        Absolute tolerance for non-negativity and normalization checks.
-
-    Returns:
-    --------
-    str | None
-        Validation error message, or None when probs is valid.
-
-    Raises:
-    -------
-    ValueError
-        If probs is not a valid finite ket-shaped vector.
-    """
-
-    probs = linalg.as_ket(probs)
-
-    if not np.all(np.isreal(probs)):
-        return "[!] Some entries are not real."
-
-    probs = np.real(probs)
-
-    if np.any(probs < -tol): # Equivalent to < 0.0
-        return "[!] Vector entries must be non-negative"
-
-    if not np.isclose(np.sum(probs), 1, atol=tol, rtol=0):
-        return "[!] The sum of entries is not 1"
-
+    total = float(np.sum(real_probabilities))
+    if not np.isclose(total, 1.0, atol=tol, rtol=0.0):
+        return f"Probabilities must sum to one. Got total={total}."
     return None
 
-def is_probability_state(probs: np.ndarray, tol: float = ATOL) -> bool:
-    """
-    Check whether a vector defines a valid probability distribution.
 
-    Parameters:
-    -----------
-    probs: np.ndarray
-        Probability vector to check.
-    tol: float
-        Absolute tolerance for non-negativity and normalization checks.
+def is_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
+    """Return whether a well-formed vector is a probability distribution.
 
-    Returns:
-    --------
-    bool
-        True when probs is a valid probability vector; otherwise False.
-
-    Raises:
-    -------
+    Raises
+    ------
     ValueError
-        If probs is not a valid finite ket-shaped vector.
+        If ``probs`` is empty, non-finite, or not ket-shaped.
     """
 
     return _error_probability_state(probs, tol) is None
 
-def validate_probability_state(probs: np.ndarray, tol: float = ATOL) -> None:
-    """
-    Validate that a vector defines a probability distribution.
 
-    Parameters:
-    -----------
-    probs: np.ndarray
-        Probability vector to validate.
-    tol: float
-        Absolute tolerance for non-negativity and normalization checks.
-
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If probs is malformed, complex, negative, or does not sum to one.
-    """
+def validate_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> None:
+    """Validate a finite, real, non-negative probability distribution."""
 
     error = _error_probability_state(probs, tol)
     if error is not None:
         raise ValueError(error)
 
-def _error_normalized_state(psi: np.ndarray, tol:float = ATOL) -> str | None:
-    """
-    Inspect whether a ket is normalized to unit norm.
 
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Quantum-state ket to inspect.
-    tol: float
-        Absolute tolerance for the normalization check.
-
-    Returns:
-    --------
-    str | None
-        Validation error message, or None when psi is normalized.
-
-    Raises:
-    -------
-    ValueError
-        If psi is not a valid finite ket-shaped vector.
-    """
-
-    psi = linalg.as_ket(psi)
-    
-    modules_sum = np.sum(np.abs(psi) ** 2)
-
-    if not np.isclose(modules_sum, 1, atol=tol, rtol=0.0):
-        return "[!] The state is not normalized."
-
+def _error_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
+    state = linalg.as_ket(psi)
+    norm_squared = float(np.sum(np.abs(state) ** 2))
+    if not np.isclose(norm_squared, 1.0, atol=tol, rtol=0.0):
+        return f"A quantum-state ket must have unit norm. Got norm_squared={norm_squared}."
     return None
 
-def is_normalized_state(psi: np.ndarray, tol:float = ATOL) -> bool:
-    """
-    Check whether a quantum-state ket has unit norm.
 
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Quantum-state ket to check.
-    tol: float
-        Absolute tolerance for the normalization check.
+def is_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
+    """Return whether a well-formed ket has unit norm.
 
-    Returns:
-    --------
-    bool
-        True when psi is normalized; otherwise False.
-
-    Raises:
-    -------
+    Raises
+    ------
     ValueError
-        If psi is not a valid finite ket-shaped vector.
+        If ``psi`` is empty, non-finite, or not ket-shaped.
     """
 
     return _error_normalized_state(psi, tol) is None
 
-def validate_normalized_state(psi: np.ndarray, tol:float = ATOL) -> None:
-    """
-    Validate that a quantum-state ket has unit norm.
 
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Quantum-state ket to validate.
-    tol: float
-        Absolute tolerance for the normalization check.
-
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If psi is malformed, non-finite, or not normalized.
-    """
+def validate_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> None:
+    """Validate that a well-formed ket has unit norm."""
 
     error = _error_normalized_state(psi, tol)
     if error is not None:
         raise ValueError(error)
 
-def is_quantum_state(psi: np.ndarray, tol:float = ATOL) -> bool:
-    """
-    Check whether a ket represents a valid pure quantum state.
 
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Quantum-state ket to check.
-    tol: float
-        Absolute tolerance for the normalization check.
+def is_quantum_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
+    """Return whether a well-formed ket represents a normalized pure state.
 
-    Returns:
-    --------
-    bool
-        True when psi is a normalized ket; otherwise False.
-
-    Raises:
-    -------
+    Raises
+    ------
     ValueError
-        If psi is not a valid finite ket-shaped vector.
+        If ``psi`` is empty, non-finite, or not ket-shaped.
     """
 
     return _error_normalized_state(psi, tol) is None
 
-def validate_quantum_state(psi: np.ndarray, tol:float = ATOL) -> None:
-    """
-    Validate that a ket represents a pure quantum state.
 
-    Parameters:
-    -----------
-    psi: np.ndarray
-        Quantum-state ket to validate.
-    tol: float
-        Absolute tolerance for the normalization check.
-
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If psi is malformed, non-finite, or not normalized.
-    """
+def validate_quantum_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> None:
+    """Validate that a ket represents a normalized pure quantum state."""
 
     error = _error_normalized_state(psi, tol)
     if error is not None:
         raise ValueError(error)
 
-def _error_unitary(U: np.ndarray, tol:float = ATOL) -> str | None:
-    """
-    Inspect whether a matrix is square, finite, and unitary.
 
-    Parameters:
-    -----------
-    U: np.ndarray
-        Operator matrix to inspect.
-    tol: float
-        Absolute tolerance for the unitarity check.
+def _error_unitary(operator: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
+    matrix = np.asarray(operator, dtype=np.complex128)
+    if matrix.size == 0:
+        return "A unitary operator must not be empty."
+    if matrix.ndim != 2:
+        return f"A unitary operator must be two-dimensional. Got ndim={matrix.ndim}."
+    if matrix.shape[0] != matrix.shape[1]:
+        return f"A unitary operator must be square. Got shape={matrix.shape}."
+    if not np.all(np.isfinite(matrix)):
+        return "Unitary-operator entries must be finite."
 
-    Returns:
-    --------
-    str | None
-        Validation error message, or None when U is unitary.
-
-    Raises:
-    -------
-    ValueError
-        If U cannot be converted to a complex NumPy array.
-    """
-
-    U = np.asarray(U, dtype=complex)
-
-    if U.size == 0:
-        return "[!] The input matrix could not be empty"
-    
-    if U.ndim != 2:
-        return "[!] U must be a two-dimensional matrix."
-    
-    if U.shape[0] != U.shape[1]:
-        return "[!] U is not a square matrix."
-
-    if not np.all(np.isfinite(U)):
-        return "[!] Matrix entries must be finite."
-    
-    operation = U.conj().T @ U
-
-    if not np.allclose(operation, np.identity(U.shape[0]), atol=tol, rtol=0.0):
-        return "[!] U is not an unitary matrix, U†U is not equal to I."
-
+    product = matrix.conj().T @ matrix
+    identity = np.eye(matrix.shape[0], dtype=np.complex128)
+    if not np.allclose(product, identity, atol=tol, rtol=0.0):
+        deviation = float(np.max(np.abs(product - identity)))
+        return f"The operator is not unitary: U^dagger U differs from I by up to {deviation}."
     return None
 
-def is_unitary(U: np.ndarray, tol:float = ATOL) -> bool:
-    """
-    Check whether a matrix represents a unitary operator.
 
-    Parameters:
-    -----------
-    U: np.ndarray
-        Operator matrix to check.
-    tol: float
-        Absolute tolerance for the unitarity check.
+def is_unitary(operator: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
+    """Return whether an array is a finite square unitary operator.
 
-    Returns:
-    --------
-    bool
-        True when U is square, finite, and unitary; otherwise False.
-
-    Raises:
-    -------
-    ValueError
-        If U cannot be converted to a complex NumPy array.
+    Structurally malformed numerical arrays return ``False``. Conversion failures
+    from incompatible Python objects may raise ``TypeError`` or ``ValueError``.
     """
 
-    return _error_unitary(U, tol) is None
+    return _error_unitary(operator, tol) is None
 
-def validate_unitary(U: np.ndarray, tol:float = ATOL) -> None:
-    """
-    Validate that a matrix represents a unitary operator.
 
-    Parameters:
-    -----------
-    U: np.ndarray
-        Operator matrix to validate.
-    tol: float
-        Absolute tolerance for the unitarity check.
+def validate_unitary(operator: ArrayLike, tol: float = DEFAULT_ATOL) -> None:
+    """Validate that an array is a finite square unitary operator."""
 
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If U is malformed, non-finite, non-square, or not unitary.
-    """
-
-    error = _error_unitary(U, tol)
+    error = _error_unitary(operator, tol)
     if error is not None:
         raise ValueError(error)
 
-def _error_density_matrix(rho: np.ndarray, tol:float = ATOL) -> str | None:
-    """
-    Inspect whether a matrix satisfies the density-matrix conditions.
 
-    Parameters:
-    -----------
-    rho: np.ndarray
-        Candidate density matrix to inspect.
-    tol: float
-        Absolute tolerance for physical-validity checks.
+def _error_density_matrix(rho: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
+    matrix = np.asarray(rho, dtype=np.complex128)
+    if matrix.size == 0:
+        return "A density matrix must not be empty."
+    if matrix.ndim != 2:
+        return f"A density matrix must be two-dimensional. Got ndim={matrix.ndim}."
+    if matrix.shape[0] != matrix.shape[1]:
+        return f"A density matrix must be square. Got shape={matrix.shape}."
+    if not np.all(np.isfinite(matrix)):
+        return "Density-matrix entries must be finite."
+    if not np.allclose(matrix, matrix.conj().T, atol=tol, rtol=0.0):
+        deviation = float(np.max(np.abs(matrix - matrix.conj().T)))
+        return f"A density matrix must be Hermitian. Maximum deviation={deviation}."
 
-    Returns:
-    --------
-    str | None
-        Validation error message, or None when rho is a density matrix.
+    trace = complex(np.trace(matrix))
+    if not np.isclose(trace, 1.0, atol=tol, rtol=0.0):
+        return f"A density matrix must have unit trace. Got trace={trace}."
 
-    Raises:
-    -------
-    ValueError
-        If rho cannot be converted to a complex NumPy array.
-    """
-
-    rho = np.asarray(rho, dtype=complex)
-
-    if rho.size == 0:
-        return "[!] The input matrix could not be empty"
-    
-    if rho.ndim != 2:
-        return "[!] rho must be a two-dimensional matrix."
-    
-    if rho.shape[0] != rho.shape[1]:
-        return "[!] rho is not a square matrix."
-
-    if not np.all(np.isfinite(rho)):
-        return "[!] Matrix entries must be finite."
-    
-    hermitian = rho.conj().T
-
-    if not np.allclose(hermitian, rho, atol=tol, rtol=0.0):
-        return "[!] rho is not a hermitian matrix."
-
-    trace = np.trace(rho)
-
-    if not np.isclose(trace, 1, atol=tol, rtol=0.0):
-        return f"[!] rho trace must be 1. rho trace value is: {trace}"
-
-    eigenvalues = np.linalg.eigvalsh(rho)
-
-    if not np.all(eigenvalues >= -tol):
-        return "[!] The matrix is not positive semi-definite."
-
+    eigenvalues = np.linalg.eigvalsh(matrix)
+    minimum = float(np.min(eigenvalues))
+    if minimum < -tol:
+        return f"A density matrix must be positive semidefinite. Minimum eigenvalue={minimum}."
     return None
 
-def is_density_matrix(rho: np.ndarray, tol:float = ATOL) -> bool:
-    """
-    Check whether a matrix represents a physical quantum state.
 
-    Parameters:
-    -----------
-    rho: np.ndarray
-        Candidate density matrix to check.
-    tol: float
-        Absolute tolerance for physical-validity checks.
+def is_density_matrix(rho: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
+    """Return whether an array is a physical density matrix.
 
-    Returns:
-    --------
-    bool
-        True when rho is Hermitian, positive semidefinite, and has unit trace.
-
-    Raises:
-    -------
-    ValueError
-        If rho cannot be converted to a complex NumPy array.
+    Structurally malformed numerical arrays return ``False``. Conversion failures
+    from incompatible Python objects may raise ``TypeError`` or ``ValueError``.
     """
 
     return _error_density_matrix(rho, tol) is None
 
-def validate_density_matrix(rho: np.ndarray, tol:float = ATOL) -> None:
-    """
-    Validate that a matrix represents a physical quantum state.
 
-    Parameters:
-    -----------
-    rho: np.ndarray
-        Candidate density matrix to validate.
-    tol: float
-        Absolute tolerance for physical-validity checks.
-
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If rho is malformed, non-Hermitian, not positive semidefinite, or lacks unit trace.
-    """
+def validate_density_matrix(rho: ArrayLike, tol: float = DEFAULT_ATOL) -> None:
+    """Validate Hermiticity, unit trace, and positive semidefiniteness."""
 
     error = _error_density_matrix(rho, tol)
     if error is not None:
         raise ValueError(error)
 
-def _error_projector(projector: np.ndarray, tol: float = ATOL) -> str | None:
-    """
-    Inspect whether a matrix is an orthogonal projector.
 
-    Parameters:
-    -----------
-    projector: np.ndarray
-        Candidate projector matrix to inspect.
-    tol: float
-        Absolute tolerance for Hermiticity and idempotence checks.
+def _error_projector(projector: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
+    matrix = np.asarray(projector, dtype=np.complex128)
+    if matrix.size == 0:
+        return "A projector must not be empty."
+    if matrix.ndim != 2:
+        return f"A projector must be two-dimensional. Got ndim={matrix.ndim}."
+    if matrix.shape[0] != matrix.shape[1]:
+        return f"A projector must be square. Got shape={matrix.shape}."
+    if not np.all(np.isfinite(matrix)):
+        return "Projector entries must be finite."
+    if not np.allclose(matrix, matrix.conj().T, atol=tol, rtol=0.0):
+        deviation = float(np.max(np.abs(matrix - matrix.conj().T)))
+        return f"A projector must be Hermitian. Maximum deviation={deviation}."
 
-    Returns:
-    --------
-    str | None
-        Validation error message, or None when projector is valid.
-
-    Raises:
-    -------
-    ValueError
-        If projector cannot be converted to a complex NumPy array.
-    """
-
-    projector = np.asarray(projector, dtype=complex)
-
-    if projector.size == 0:
-        return "[!] The proyector must not be empty"
-
-    if projector.ndim != 2:
-        return f"[!] The projector should be a bi-dimensional matrix.\
-            Projector dimensions: {projector.ndim}"
-
-    if projector.shape[0] != projector.shape[1]:
-        return f"[!] The projector must be a square matrix\
-            Projector shape: {projector.shape}"
-
-    if not np.all(np.isfinite(projector)):
-        return "[!] The projector entries must be finite."
-
-    hermitian = projector.conj().T
-
-    if not np.allclose(hermitian, projector, atol=tol, rtol=0.0):
-        return "[!] The projector must be a hermitian matrix."
-
-    square = projector @ projector
-
-    if not np.allclose(square, projector, atol=tol, rtol=0.0):
-        return "[!] The projecctor must be idempotent."
-
+    square = matrix @ matrix
+    if not np.allclose(square, matrix, atol=tol, rtol=0.0):
+        deviation = float(np.max(np.abs(square - matrix)))
+        return f"A projector must be idempotent. Maximum deviation={deviation}."
     return None
 
-def is_projector(projector: np.ndarray, tol:float = ATOL) -> bool:
-    """
-    Check whether a matrix is an orthogonal projector.
 
-    Parameters:
-    -----------
-    projector: np.ndarray
-        Candidate projector matrix to check.
-    tol: float
-        Absolute tolerance for Hermiticity and idempotence checks.
+def is_projector(projector: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
+    """Return whether an array is a finite square orthogonal projector.
 
-    Returns:
-    --------
-    bool
-        True when projector is square, finite, Hermitian, and idempotent.
-
-    Raises:
-    -------
-    ValueError
-        If projector cannot be converted to a complex NumPy array.
+    Structurally malformed numerical arrays return ``False``. Conversion failures
+    from incompatible Python objects may raise ``TypeError`` or ``ValueError``.
     """
 
     return _error_projector(projector, tol) is None
 
-def validate_projector(projector: np.ndarray, tol:float = ATOL) -> None:
-    """
-    Validate that a matrix is an orthogonal projector.
 
-    Parameters:
-    -----------
-    projector: np.ndarray
-        Candidate projector matrix to validate.
-    tol: float
-        Absolute tolerance for Hermiticity and idempotence checks.
-
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If projector is malformed, non-finite, non-Hermitian, or not idempotent.
-    """
+def validate_projector(projector: ArrayLike, tol: float = DEFAULT_ATOL) -> None:
+    """Validate that an array is a finite Hermitian idempotent projector."""
 
     error = _error_projector(projector, tol)
     if error is not None:
         raise ValueError(error)
 
-def _error_projective_measurement(projectors: Sequence[np.ndarray], tol: float = ATOL) -> str | None:
-    """
-    Inspect whether a sequence forms a complete projective measurement.
 
-    Parameters:
-    -----------
-    projectors: Sequence[np.ndarray]
-        Candidate orthogonal projectors with a common dimension.
-    tol: float
-        Absolute tolerance for projector and completeness checks.
-
-    Returns:
-    --------
-    str | None
-        Validation error message, or None when the measurement is valid.
-
-    Raises:
-    -------
-    ValueError
-        If a projector cannot be converted to a complex NumPy array.
-    """
+def _error_projective_measurement(
+    projectors: Sequence[ArrayLike],
+    tol: float = DEFAULT_ATOL,
+) -> str | None:
     if len(projectors) == 0:
-        return "[!] A projective measurement requires at least one projector."
+        return "A projective measurement requires at least one projector."
 
     clean_projectors: list[np.ndarray] = []
     expected_shape: tuple[int, int] | None = None
 
     for index, projector in enumerate(projectors):
-        projector = np.asarray(
-            projector,
-            dtype=np.complex128,
-        )
-
-        try:
-            validate_projector(projector, tol)
-        except ValueError as exc:
-            return f"Invalid projector at index {index}: {exc}"
+        matrix = np.asarray(projector, dtype=np.complex128)
+        error = _error_projector(matrix, tol)
+        if error is not None:
+            return f"Invalid projector at index {index}: {error}"
 
         if expected_shape is None:
-            expected_shape = projector.shape
-        elif projector.shape != expected_shape:
+            expected_shape = matrix.shape
+        elif matrix.shape != expected_shape:
             return (
                 "All projectors must have the same shape. "
-                f"Expected {expected_shape}, got {projector.shape} "
-                f"at index {index}."
+                f"Expected {expected_shape}, got {matrix.shape} at index {index}."
             )
-
-        clean_projectors.append(projector)
+        clean_projectors.append(matrix)
 
     assert expected_shape is not None
-
-    projector_sum = np.zeros(
-        expected_shape,
-        dtype=np.complex128,
-    )
-
-    for projector in clean_projectors:
-        projector_sum += projector
-
-    identity = np.eye(
-        expected_shape[0],
-        dtype=np.complex128,
-    )
-
-    if not np.allclose(
-        projector_sum,
-        identity,
-        atol=tol,
-        rtol=0.0,
-    ):
-        return "[!] Projective measurement must satisfy sum(P_i) = I."
-
+    projector_sum = np.sum(clean_projectors, axis=0, dtype=np.complex128)
+    identity = np.eye(expected_shape[0], dtype=np.complex128)
+    if not np.allclose(projector_sum, identity, atol=tol, rtol=0.0):
+        deviation = float(np.max(np.abs(projector_sum - identity)))
+        return (
+            "A complete projective measurement must satisfy sum(P_i) = I. "
+            f"Dimension={expected_shape[0]}, maximum deviation={deviation}."
+        )
     return None
 
-def is_projective_measurement(projectors: Sequence[np.ndarray], tol: float = ATOL) -> bool:
-    """
-    Check whether a sequence forms a complete projective measurement.
 
-    Parameters:
-    -----------
-    projectors: Sequence[np.ndarray]
-        Candidate orthogonal projectors with a common dimension.
-    tol: float
-        Absolute tolerance for projector and completeness checks.
+def is_projective_measurement(
+    projectors: Sequence[ArrayLike],
+    tol: float = DEFAULT_ATOL,
+) -> bool:
+    """Return whether a sequence is a complete projective measurement.
 
-    Returns:
-    --------
-    bool
-        True when all projectors are valid and their sum is the identity.
-
-    Raises:
-    -------
-    ValueError
-        If a projector cannot be converted to a complex NumPy array.
+    Invalid numerical projectors return ``False``. Conversion failures from
+    incompatible Python objects may raise ``TypeError`` or ``ValueError``.
     """
 
     return _error_projective_measurement(projectors, tol) is None
 
-def validate_projective_measurement(projectors: Sequence[np.ndarray], tol: float = ATOL) -> None:
-    """
-    Validate that a sequence forms a complete projective measurement.
 
-    Parameters:
-    -----------
-    projectors: Sequence[np.ndarray]
-        Candidate orthogonal projectors with a common dimension.
-    tol: float
-        Absolute tolerance for projector and completeness checks.
-
-    Returns:
-    --------
-    None.
-
-    Raises:
-    -------
-    ValueError
-        If a projector is invalid, dimensions differ, or the projectors are incomplete.
-    """
+def validate_projective_measurement(
+    projectors: Sequence[ArrayLike],
+    tol: float = DEFAULT_ATOL,
+) -> None:
+    """Validate individual projectors, common dimension, and completeness."""
 
     error = _error_projective_measurement(projectors, tol)
     if error is not None:
