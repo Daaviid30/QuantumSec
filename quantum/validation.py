@@ -623,7 +623,7 @@ def is_projective_measurement(projectors: Sequence[np.ndarray], tol: float = ATO
         If a projector cannot be converted to a complex NumPy array.
     """
 
-    return _error_projective_measurement is None
+    return _error_projective_measurement(projectors, tol) is None
 
 def validate_projective_measurement(projectors: Sequence[np.ndarray], tol: float = ATOL) -> None:
     """
