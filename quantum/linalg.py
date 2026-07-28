@@ -16,16 +16,23 @@ ATOL = 1e-10
 #=================== FUNCTIONS ===================
 
 def as_ket(psi: np.ndarray) -> np.ndarray:
-    """Return psi as a canonical one-dimensional ket.
+    """
+    Convert a vector into the canonical one-dimensional ket representation.
 
-    Accepted shapes:
-    - (n,) one dimensional ket
-    - (n, 1) column vector
+    Parameters:
+    -----------
+    psi: np.ndarray
+        Vector with shape (n,) or column-vector shape (n, 1).
 
-    Rejected shapes:
-    - (1, n), explicit row vectors are not accepted as kets
-    - (n, m), because that may be an operator or density matrix
-    - higher-dimensional arrays
+    Returns:
+    --------
+    np.ndarray
+        Non-empty complex vector with shape (n,).
+
+    Raises:
+    -------
+    ValueError
+        If psi is empty, non-finite, or does not have an accepted ket shape.
     """
     psi = np.asarray(psi, dtype=complex)
 
@@ -47,22 +54,25 @@ def as_ket(psi: np.ndarray) -> np.ndarray:
     )
 
 def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
-    """Return the inner product <phi|psi> between 2 vectors.
+    """
+    Calculate the complex inner product <phi|psi> between two kets.
 
     Parameters:
     -----------
-    phi: First of the inner product vectors, here the complex conjugate is applied.
-    psi: Second of the inner product vectors.
+    phi: np.ndarray
+        Ket whose complex conjugate is applied.
+    psi: np.ndarray
+        Ket multiplied by the conjugate of phi.
 
     Returns:
     --------
-    product: A complex escalar that represents the result of the product
+    complex
+        Scalar inner product of phi and psi.
 
     Raises:
     -------
-    ValueError: 
-        If phi or psi are not valid as ket vectors.
-        If phi and psi do not have the same shape
+    ValueError
+        If either input is not a valid ket or their dimensions differ.
     """
 
     phi = as_ket(phi)
@@ -76,22 +86,25 @@ def inner_product(phi: np.ndarray, psi: np.ndarray) -> complex:
     return complex(np.vdot(phi, psi))
 
 def outer_product(phi: np.ndarray, psi: np.ndarray) -> np.ndarray:
-    """Return the outer product |phi><psi| between 2 vectors.
+    """
+    Calculate the outer product |phi><psi| between two kets.
 
     Parameters:
     -----------
-    phi: First of the outer product vectors.
-    psi: Second of the outer product vectors, here the complex conjugate is applied.
+    phi: np.ndarray
+        Ket placed on the left side of the product.
+    psi: np.ndarray
+        Ket whose complex conjugate is placed on the right side.
 
     Returns:
     --------
-    product: A matrix that represents the result of the product
+    np.ndarray
+        Complex matrix representing |phi><psi|.
 
     Raises:
     -------
-    ValueError: 
-        If phi or psi are not valid as ket vectors.
-        If phi and psi do not have the same shape
+    ValueError
+        If either input is not a valid ket or their dimensions differ.
     """
 
     phi = as_ket(phi)
@@ -105,21 +118,25 @@ def outer_product(phi: np.ndarray, psi: np.ndarray) -> np.ndarray:
     return np.outer(phi, psi.conj())
 
 def normalize(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
-    """Return the psi vector in a normalized way.
+    """
+    Normalize a ket to unit Euclidean norm.
 
     Parameters:
     -----------
-    psi: Vector to be normalize.
+    psi: np.ndarray
+        Ket to normalize.
+    tol: float
+        Absolute tolerance below which the norm is treated as zero.
 
     Returns:
     --------
-    psi_normalized: The normalized version of psi
+    np.ndarray
+        Canonical one-dimensional ket with unit norm.
 
     Raises:
     -------
-    ValueError: 
-        If psi is not a valid ket vector.
-        If the norm of the vector psi is 0.
+    ValueError
+        If psi is not a valid ket or its norm is zero within tolerance.
     """
     
     psi = as_ket(psi)
@@ -132,21 +149,25 @@ def normalize(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
     return psi / norm
 
 def probabilities_from_ket(psi: np.ndarray, tol: float = ATOL) -> np.ndarray:
-    """Returns a probability vector associated with a quantum state measured in
-    the computational basis.
+    """
+    Calculate computational-basis probabilities for a normalized ket.
 
     Parameters:
     -----------
-    psi: Vector from where the probabilities are calculated.
+    psi: np.ndarray
+        Normalized quantum-state ket.
+    tol: float
+        Absolute tolerance used when checking normalization.
 
     Returns:
     --------
-    prob_vector: The probability vector of the psi quantum state
+    np.ndarray
+        Real vector containing the squared magnitude of each amplitude.
 
     Raises:
     -------
-    ValueError: 
-        If psi is not a valid quantum state.
+    ValueError
+        If psi is not a valid ket or is not normalized within tolerance.
     """
 
     psi = as_ket(psi)

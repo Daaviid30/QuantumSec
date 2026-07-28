@@ -21,20 +21,23 @@ ATOL = 1e-10
 #=================== FUNCTIONS ===================
 
 def dm_from_ket(psi: np.ndarray) -> np.ndarray:
-    """Return the density matrix |psi><psi| associated with a pure state.
+    """
+    Construct the density matrix |psi><psi| of a pure quantum state.
 
     Parameters:
     -----------
-    psi: Vector that represents a quantum state.
+    psi: np.ndarray
+        Normalized ket representing a pure quantum state.
 
     Returns:
     --------
-    density_matrix: Matrix that represents quantum state psi.
+    np.ndarray
+        Complex density matrix associated with psi.
 
     Raises:
     -------
-    ValueError: 
-        If psi is not a valid quantum state.
+    ValueError
+        If psi is not a valid normalized quantum-state ket.
     """
 
     psi = linalg.as_ket(psi)
@@ -43,23 +46,25 @@ def dm_from_ket(psi: np.ndarray) -> np.ndarray:
     return linalg.outer_product(psi, psi)
 
 def dm_from_ensemble(states: Sequence[np.ndarray], probs: np.ndarray) -> np.ndarray:
-    """Return an ensemble of quantum states as a density matrix state.
+    """
+    Construct the density matrix of a probabilistic ensemble of pure states.
 
     Parameters:
     -----------
-    states: Quantum states array that represents an ensemble.
-    probs: Probabilities associated to quantum states.
+    states: Sequence[np.ndarray]
+        Normalized kets that form the ensemble.
+    probs: np.ndarray
+        Probability assigned to each ket in states.
 
     Returns:
     --------
-    density_matrix: Matrix that represents the ensemble of quantum states.
+    np.ndarray
+        Weighted sum of the pure-state density matrices.
 
     Raises:
     -------
-    ValueError: 
-        If psi is not a valid quantum state.
-        If len(states) is not equal to len(probs).
-        If probs is not a valid probability state vector.
+    ValueError
+        If probabilities are invalid, lengths differ, a ket is invalid, or state dimensions differ.
     """
     probs = linalg.as_ket(probs)
     v.validate_probability_state(probs)

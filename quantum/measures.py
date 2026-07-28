@@ -25,7 +25,7 @@ ATOL = 1e-10
 class MeasurementResult:
     outcome: int
     probability: float
-    poststate: np.ndarray
+    post_state: np.ndarray
 
 #=================== FUNCTIONS ===================
 
@@ -33,19 +33,21 @@ def dm_purity(
         rho: np.ndarray
     ) -> float:
     """
-    Returns the purity value of a density matrix.
+    Calculate the purity Tr(rho²) of a quantum state.
 
     Parameters:
     -----------
-    rho: Density matrix that represents a quantum state.
+    rho: np.ndarray
+        Density matrix representing the quantum state.
 
     Returns:
     --------
-    purity: The purity of the density matrix.
+    float
+        Real purity value of rho.
 
     Raises:
     -------
-    ValueError: 
+    ValueError
         If rho is not a valid density matrix.
     """
 
@@ -56,33 +58,35 @@ def dm_purity(
 
     return float(purity.real)
 
-def measure_state(
+def measure_projective(
         rho: np.ndarray, 
         projectors: Sequence[np.ndarray], 
         rng: BaseRNG, 
         tol: float = ATOL
     ) -> MeasurementResult:
     """
-    Returns the object related to a state measurements, including:
-    1- outcome: The result of the measurement
-    2- probabilities: The probability associated to the state measured.
-    3- poststate: The state that remains after a measurement.
+    Perform a projective measurement on a density matrix.
 
     Parameters:
     -----------
-    rho: Density matrix that represents a quantum state.
-    projectors: Projectors associated with the measurement.
-    rng: Random number generator from the rng.py script.
-    tol: Tolerance admitted.
+    rho: np.ndarray
+        Density matrix representing the state before measurement.
+    projectors: Sequence[np.ndarray]
+        Projectors associated with the possible measurement outcomes.
+    rng: BaseRNG
+        Random source used to sample an outcome.
+    tol: float
+        Absolute tolerance used for probability checks.
 
     Returns:
     --------
-    MeasurementResult: The information obteined after the measurement
+    MeasurementResult
+        Sampled outcome, its probability, and the normalized post-measurement state.
 
     Raises:
     -------
-    ValueError: 
-        If rho is not a valid density matrix.
+    ValueError
+        If rho or a projector is invalid, dimensions differ, or probabilities are inconsistent.
     """
 
     rho = np.asarray(rho, dtype=complex)
@@ -112,13 +116,13 @@ def measure_state(
         probabilities[index] = probability.real
         clean_projectors.append(projector)
 
-    # Clean little variantions (ex: 1e-10)
-    probabilities = np.clip(probabilities, 0.0, 1.0)
-
     total_probability = float(np.sum(probabilities))
 
     if not np.isclose(total_probability, 1.0, atol=tol, rtol=0.0):
         raise ValueError(f"[!] The probability sum must be equal to 1. Got {total_probability}")
+
+    # Clean little variantions (ex: 1e-10)
+    probabilities = np.clip(probabilities, 0.0, 1.0)
 
     # Erase minimal variations
     probabilities /= total_probability
@@ -137,6 +141,6 @@ def measure_state(
     return MeasurementResult(
         outcome=outcome,
         probability=probability,
-        poststate=post_state
+        post_state=post_state
     )
 

@@ -21,6 +21,22 @@ class BaseRNG(ABC):
     @property
     @abstractmethod
     def gen(self) -> np.random.Generator:
+        """
+        Provide the NumPy generator used by the random source.
+
+        Parameters:
+        -----------
+        None.
+
+        Returns:
+        --------
+        np.random.Generator
+            Generator that supplies random values.
+
+        Raises:
+        -------
+        None.
+        """
         pass
 
 # ==========================================
@@ -29,11 +45,44 @@ class BaseRNG(ABC):
 class SeededRNG(BaseRNG):
     """Deterministic PRNG for reproducible Monte Carlo simulations and unit tests."""
     def __init__(self, seed: int):
+        """
+        Initialize a reproducible random number generator.
+
+        Parameters:
+        -----------
+        seed: int
+            Non-negative seed used to initialize NumPy's generator.
+
+        Returns:
+        --------
+        None.
+
+        Raises:
+        -------
+        ValueError
+            If the seed is not valid for NumPy's generator.
+        """
         # PCG-64 is the default underlying bit generator in modern NumPy
         self._gen = np.random.default_rng(seed)
 
     @property
     def gen(self) -> np.random.Generator:
+        """
+        Return the seeded NumPy generator.
+
+        Parameters:
+        -----------
+        None.
+
+        Returns:
+        --------
+        np.random.Generator
+            Generator initialized with this instance's seed.
+
+        Raises:
+        -------
+        None.
+        """
         return self._gen
 
 
@@ -50,6 +99,22 @@ class GlobalRNG(BaseRNG):
     # Singleton pattern, ensures only one instance of GlobalRNG is created and used throughout the application
     # This is useful for performance reasons and for ensuring that the same random number generator is used
     def __new__(cls):
+        """
+        Create or return the process-wide random generator singleton.
+
+        Parameters:
+        -----------
+        None.
+
+        Returns:
+        --------
+        GlobalRNG
+            Shared global random number generator instance.
+
+        Raises:
+        -------
+        None.
+        """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             # Without a seed, default_rng pulls from OS entropy
@@ -58,6 +123,23 @@ class GlobalRNG(BaseRNG):
 
     @property
     def gen(self) -> np.random.Generator:
+        """
+        Return the singleton's entropy-seeded NumPy generator.
+
+        Parameters:
+        -----------
+        None.
+
+        Returns:
+        --------
+        np.random.Generator
+            Shared generator initialized from operating-system entropy.
+
+        Raises:
+        -------
+        AssertionError
+            If the singleton generator was not initialized correctly.
+        """
         # Confirmation that _gen is not None, this is for the type hints
         assert self._gen is not None, "Generator was not initialized"
         return self._gen
@@ -70,10 +152,24 @@ class QRNGSimulator(BaseRNG):
     """
     def __init__(self, base_rng: BaseRNG, bias_prob: float = 0.5, correlation: float = 0.0):
         """
-        :param base_rng: The underlying PRNG (Seeded or Global) driving the simulation.
-        :param bias_prob: Probability of generating a '1' (Ideal is 0.5). Models detector imbalance.
-        :param correlation: Markovian transition modifier. Models thermal/electronic memory.
-                            0.0 means independent bits. >0 means bits tend to repeat.
+        Initialize a quantum random number generator simulator.
+
+        Parameters:
+        -----------
+        base_rng: BaseRNG
+            Random source that drives the simulation.
+        bias_prob: float
+            Probability of producing one; 0.5 represents an unbiased source.
+        correlation: float
+            Markovian correlation modifier; positive values favor repeated bits.
+
+        Returns:
+        --------
+        None.
+
+        Raises:
+        -------
+        None.
         """
         self.base_rng = base_rng
         self.bias_prob = bias_prob
@@ -81,12 +177,45 @@ class QRNGSimulator(BaseRNG):
 
     @property
     def gen(self) -> np.random.Generator:
+        """
+        Return the NumPy generator supplied by the base random source.
+
+        Parameters:
+        -----------
+        None.
+
+        Returns:
+        --------
+        np.random.Generator
+            Generator used to simulate raw quantum measurements.
+
+        Raises:
+        -------
+        None.
+        """
         # We still expose the raw generator if absolutely necessary, 
         # but usage should go through specific QRNG methods.
         return self.base_rng.gen
 
     def generate_raw_bits(self, size: int) -> np.ndarray:
-        """Generates bits incorporating physical bias and classical readout correlation."""
+        """
+        Generate raw bits with the configured bias and temporal correlation.
+
+        Parameters:
+        -----------
+        size: int
+            Number of bits to generate.
+
+        Returns:
+        --------
+        np.ndarray
+            One-dimensional integer array containing zeros and ones.
+
+        Raises:
+        -------
+        ValueError
+            If size is negative or bias_prob is outside the interval [0, 1].
+        """
         if size < 0:
             raise ValueError("[!] Size must be non-negative.")
 
@@ -128,23 +257,71 @@ class QRNGSimulator(BaseRNG):
 
 # If size is None, numpy returns only one random number. 
 def random_bit(rng: BaseRNG, size: int | None = None) -> int | np.ndarray:
-    """Generates a perfectly random classical bit (0 or 1)."""
+    """
+    Generate one or more uniformly distributed classical bits.
+
+    Parameters:
+    -----------
+    rng: BaseRNG
+        Random source used to generate the bits.
+    size: int | None
+        Number of bits to return, or None for a scalar bit.
+
+    Returns:
+    --------
+    int | np.ndarray
+        Scalar bit or one-dimensional array containing zeros and ones.
+
+    Raises:
+    -------
+    ValueError
+        If size is negative.
+    """
     return rng.gen.integers(0, 2, size=size)
 
 def random_basis(rng: BaseRNG, size: int | None = None) -> int | np.ndarray:
     """
-    Generates a random basis choice. 
-    Convention: 0 represents Rectilinear (Z), 1 represents Diagonal (X).
+    Generate one or more random quantum-basis choices.
+
+    Parameters:
+    -----------
+    rng: BaseRNG
+        Random source used to choose the bases.
+    size: int | None
+        Number of choices to return, or None for a scalar choice.
+
+    Returns:
+    --------
+    int | np.ndarray
+        Basis choice where 0 denotes the Z basis and 1 denotes the X basis.
+
+    Raises:
+    -------
+    ValueError
+        If size is negative.
     """
     return rng.gen.integers(0, 2, size=size)
 
 def random_unitary(rng: BaseRNG, dimension: int) -> np.ndarray:
     """
-    Generates a random NxN unitary matrix distributed according to the Haar measure.
-    Crucial for simulating arbitrary quantum channels, noise, or Eve's attacks.
-    
-    :param rng: The BaseRNG instance.
-    :param dimension: The dimension of the Hilbert space (e.g., 2 for a single qubit).
+    Generate a Haar-distributed random unitary matrix.
+
+    Parameters:
+    -----------
+    rng: BaseRNG
+        Random source used to generate the underlying complex matrix.
+    dimension: int
+        Positive dimension of the square unitary matrix.
+
+    Returns:
+    --------
+    np.ndarray
+        Complex unitary matrix with shape (dimension, dimension).
+
+    Raises:
+    -------
+    ValueError
+        If dimension is not positive.
     """
     if dimension <= 0:
         raise ValueError("[!] Dimension must be positive.")
