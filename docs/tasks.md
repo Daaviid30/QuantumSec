@@ -1,6 +1,6 @@
 # QuantumSec — Development Task Roadmap
 
-> Scope: quantum primitives, projective measurements, quantum-information utilities, validation, tests, and performance.
+> Scope: quantum primitives, projective measurements, quantum-information utilities, quantum channels, validation, tests, and performance.
 
 ## Status legend
 
@@ -22,6 +22,23 @@
 - [x] Complete projective-measurement validation using individual validation plus `sum(P_i) = I`.
 - [x] General projective measurement using Born probabilities and Lüders state update.
 - [x] `is_projective_measurement()` fixed so the internal validation function is actually called.
+
+---
+
+## Completed milestone — Quantum channel foundation
+
+- [x] Register the physical package as lowercase `qkd/` in Git for Linux/WSL portability.
+- [x] Remove the provisional `BB84Alice` and `BB84Bob` classes without implementing BB84.
+- [x] Add the density-matrix `QuantumChannel` interface with optional full state validation.
+- [x] Add `IdentityChannel` with independent `np.complex128` outputs.
+- [x] Add reusable `KrausChannel` support with one-time CPTP completeness validation and immutable operators.
+- [x] Add the documented single-qubit depolarizing convention `E(rho) = (1-p)rho + pI/2`.
+- [x] Add general Pauli, bit-flip, phase-flip, and amplitude-damping channels.
+- [x] Add immutable sequential composition through `ChannelPipeline`; an empty pipeline is the identity.
+- [x] Add analytical tests for extrema, trace preservation, Hermiticity, positivity, and input immutability.
+- [x] Document amplitude damping as qubit relaxation, distinct from future optical photon-loss modeling.
+- [ ] Implement ideal BB84 over `IdentityChannel`.
+- [ ] Add optical transmission/loss and detector outcomes as a separate physical layer.
 
 ---
 

@@ -55,12 +55,19 @@ QuantumSec/
 |   |   |-- __init__.py
 |   |   |-- states.py
 |   |   |-- operations.py
-|   |   `-- measurement.py
+|   |   |-- bases.py
+|   |   `-- measurements.py
 |   |-- channel/
 |   |   |-- __init__.py
-|   |   |-- noise.py
-|   |   |-- loss.py
-|   |   `-- attacks.py
+|   |   |-- base.py
+|   |   |-- ideal.py
+|   |   |-- kraus.py
+|   |   |-- pipeline.py
+|   |   `-- noise/
+|   |       |-- __init__.py
+|   |       |-- depolarizing.py
+|   |       |-- pauli.py
+|   |       `-- amplitude_damping.py
 |   |-- protocols/
 |   |   |-- __init__.py
 |   |   |-- base.py
@@ -206,12 +213,14 @@ Examples:
 quantum.validation.is_quantum_state()     # yes
 quantum.validation.is_density_matrix()    # yes
 qkd.metrics.qber()                        # no, QKD-specific
-qkd.primitives.states.BASIS_Z             # no, QKD/convention-specific
+qkd.primitives.bases.Basis.Z              # no, QKD/convention-specific
 ```
 
 ### `qkd/`
 
-QKD simulation domain. This layer uses `quantum/` to implement concrete protocol behavior.
+QKD simulation domain. The physical package name is lowercase `qkd/` so imports
+have identical behavior on case-sensitive and case-insensitive filesystems. This
+layer uses `quantum/` to implement concrete protocol behavior.
 
 Suggested structure:
 
@@ -225,11 +234,13 @@ qkd/metrics/
 
 Responsibilities:
 
-- protocol states and bases: `KET0`, `KET1`, `PLUS`, `MINUS`, `BASIS_Z`, `BASIS_X`
+- protocol states and bases: `KET0`, `KET1`, `PLUS`, `MINUS`, `Basis.Z`, `Basis.X`
 - gates/operators used by QKD simulations: `X`, `Y`, `Z`, `H`, `CNOT`
 - measurements with injected RNG
-- channel models: depolarizing, bit flip, phase flip, amplitude damping, loss
-- attacks: intercept-resend, man-in-the-middle model for classical channel studies
+- deterministic CPTP channel models: identity, depolarizing, Pauli errors, and amplitude damping
+- sequential channel composition through `ChannelPipeline`
+- future optical transmission/loss models, kept separate from logical-qubit CPTP noise
+- future attacks such as intercept-resend and classical man-in-the-middle studies
 - protocols: BB84, B92, E91
 - postprocessing: sifting, reconciliation, privacy amplification
 - metrics: QBER, key generation rate, efficiency, security thresholds
@@ -241,6 +252,19 @@ quantum/validation.py can say whether a vector is a valid quantum state.
 qkd/primitives/states.py can say which valid states are used by BB84.
 qkd/protocols/bb84.py decides how Alice and Bob use those states.
 ```
+
+The channel boundary is intentionally split by physical meaning:
+
+```text
+qkd/channel/noise/    = deterministic CPTP transformations of density matrices
+optical loss          = future transmission model with vacuum/no-detection outcomes
+```
+
+`AmplitudeDampingChannel` models qubit relaxation from `|1>` to `|0>`. It is a
+useful CPTP noise model, but it is not a general synonym for photon loss in fiber:
+photonic loss normally leaves the logical qubit subspace as vacuum or a
+no-detection event. A future optical-loss layer will represent that distinction
+explicitly.
 
 ### `pqc/`
 
@@ -306,8 +330,14 @@ HybridVsPQCOnly
 | `trace_distance` | `quantum/measures.py` |
 | `KET0`, `KET1`, `PLUS`, `MINUS` | `qkd/primitives/states.py` |
 | `X`, `Y`, `Z`, `H` | `qkd/primitives/operations.py` |
-| `measure(state, basis, rng)` | `qkd/primitives/measurement.py` |
-| `DepolarizingChannel` | `qkd/channel/noise.py` |
+| standard Z/X/Y measurements | `qkd/primitives/measurements.py` |
+| `QuantumChannel` | `qkd/channel/base.py` |
+| `IdentityChannel` | `qkd/channel/ideal.py` |
+| `KrausChannel` | `qkd/channel/kraus.py` |
+| `DepolarizingChannel` | `qkd/channel/noise/depolarizing.py` |
+| Pauli, bit-flip, and phase-flip channels | `qkd/channel/noise/pauli.py` |
+| `AmplitudeDampingChannel` | `qkd/channel/noise/amplitude_damping.py` |
+| `ChannelPipeline` | `qkd/channel/pipeline.py` |
 | `BB84Protocol` | `qkd/protocols/bb84.py` |
 | `qber` | `qkd/metrics/qber.py` |
 | `DilithiumSignature` | `pqc/signatures/dilithium.py` |
@@ -317,24 +347,16 @@ HybridVsPQCOnly
 
 ## 6. Build Order
 
-Recommended implementation order:
+Current development order:
 
-1. `core/rng.py`
-2. `quantum/linalg.py`
-3. `quantum/validation.py`
-4. `quantum/states.py`
-5. `quantum/measures.py`
-6. `qkd/primitives/states.py`
-7. `qkd/primitives/operations.py`
-8. `qkd/primitives/measurement.py`
-9. `qkd/channel/noise.py`
-10. `qkd/protocols/base.py`
-11. `qkd/protocols/bb84.py`
-12. `qkd/postprocessing/sifting.py`
-13. `qkd/metrics/qber.py`
-14. `experiments/scenarios/bb84_noise_sweep.py`
-15. `pqc/signatures/` and `pqc/auth/`
-16. `experiments/scenarios/auth_overhead_comparison.py`
+1. Quantum and QKD primitives (complete)
+2. Quantum-channel foundation (complete)
+3. Ideal BB84 over `IdentityChannel`
+4. Sifting and QBER
+5. Noise experiments using the CPTP channel models
+6. Optical transmission and loss as a separate physical layer
+7. Advanced postprocessing
+8. PQC authentication and comparative experiments
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
 
@@ -356,7 +378,11 @@ tests/
 |-- test_qkd/
 |   |-- test_primitives.py
 |   |-- test_measurement.py
-|   |-- test_channel.py
+|   |-- test_channel/
+|   |   |-- test_ideal.py
+|   |   |-- test_kraus.py
+|   |   |-- test_noise.py
+|   |   `-- test_pipeline.py
 |   |-- test_bb84.py
 |   `-- test_metrics.py
 |-- test_pqc/
@@ -426,16 +452,7 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 
 ## 10. Current Immediate Goal
 
-The short-term goal is to stabilize the mathematical foundation and QKD primitives:
-
-- finish `quantum/linalg.py`
-- finish `quantum/validation.py`
-- implement `quantum/states.py`
-- implement `quantum/measures.py`
-- complete `qkd/primitives/states.py`
-- complete `qkd/primitives/operations.py`
-- add `qkd/primitives/measurement.py`
-- keep tests updated under `tests/test_quantum/` and `tests/test_qkd/`
-
-After that, BB84 can be implemented without needing to move core concepts around.
-
+The mathematical primitives and quantum-channel foundation are now in place.
+The next milestone is an ideal BB84 implementation over `IdentityChannel`,
+followed by sifting and QBER. Noise experiments should reuse `ChannelPipeline`;
+optical loss remains a later, physically separate model.
