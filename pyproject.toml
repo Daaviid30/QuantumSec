@@ -5,11 +5,13 @@ description = "Research framework for reproducible QKD and post-quantum authenti
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "fastapi>=0.116.0",
     "matplotlib>=3.11.0",
     "numpy>=2.5.0",
     "rich>=15.0.0",
     "sympy>=1.14.0",
     "tqdm>=4.68.3",
+    "uvicorn[standard]>=0.35.0",
 ]
 
 [project.optional-dependencies]
@@ -17,6 +19,7 @@ qiskit = ["qiskit>=2.4.2"]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pyright>=1.1.411",
     "pytest>=9.1.1",
     "ruff>=0.15.20",
@@ -49,7 +52,7 @@ pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "basic"  # Podría ser strict
-include = ["core", "quantum", "qkd", "tests"]
+include = ["core", "quantum", "qkd", "ui/backend", "tests"]
 exclude = [
     ".venv/",
     "__pycache__/",

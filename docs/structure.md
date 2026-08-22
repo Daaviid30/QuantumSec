@@ -117,7 +117,7 @@ Allowed dependency direction:
 
 ```text
 ui / notebooks
-    -> experiments
+    -> ui backend / experiments
         -> qkd, pqc
             -> quantum
                 -> core
@@ -128,6 +128,7 @@ More explicitly:
 
 ```text
 experiments -> qkd, pqc, quantum, core
+ui/backend -> qkd, quantum, core
 qkd         -> quantum, core
 pqc         -> core
 quantum     -> core, numpy/scipy
@@ -141,6 +142,9 @@ core    -> quantum, qkd, pqc, experiments
 quantum -> qkd, pqc, experiments
 qkd     -> pqc
 pqc     -> qkd
+core    -> ui
+quantum -> ui
+qkd     -> ui
 ```
 
 QKD and PQC integration belongs in `experiments/` or in an explicit authentication boundary, not through direct circular imports.
@@ -310,6 +314,24 @@ AuthOverheadComparison
 HybridVsPQCOnly
 ```
 
+### `ui/`
+
+The Web UI is an orchestration and visualization layer, split into:
+
+```text
+ui/backend/   = FastAPI routes, typed schemas, capabilities, and domain adapters
+ui/frontend/  = React, TypeScript, Vite, Tailwind CSS, Recharts, and Lucide
+```
+
+The backend maps validated HTTP requests to `BB84Protocol`, `SeededRNG`, and the public channel
+classes. It converts NumPy-backed domain results into JSON-safe DTOs. The frontend discovers real and
+planned functionality through `/api/capabilities`; planned features are always disabled and never
+produce fabricated data.
+
+The UI currently exposes BB84, seeded reproducibility, sequential channel composition, sifting, QBER,
+basis/outcome distributions, and a bounded raw-transmission inspector. It does not contain quantum
+simulation logic.
+
 ---
 
 ## 5. Where Specific Functions Should Live
@@ -351,12 +373,13 @@ Current development order:
 
 1. Quantum and QKD primitives (complete)
 2. Quantum-channel foundation (complete)
-3. Ideal BB84 over `IdentityChannel`
-4. Sifting and QBER
-5. Noise experiments using the CPTP channel models
-6. Optical transmission and loss as a separate physical layer
-7. Advanced postprocessing
-8. PQC authentication and comparative experiments
+3. Ideal and noisy BB84 over composable quantum channels (complete)
+4. Sifting and QBER (complete)
+5. Web UI V1 for interactive BB84 simulation (complete)
+6. Noise experiments using the CPTP channel models
+7. Optical transmission and loss as a separate physical layer
+8. Advanced postprocessing
+9. PQC authentication and comparative experiments
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
 
@@ -452,7 +475,7 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 
 ## 10. Current Immediate Goal
 
-The mathematical primitives and quantum-channel foundation are now in place.
-The next milestone is an ideal BB84 implementation over `IdentityChannel`,
-followed by sifting and QBER. Noise experiments should reuse `ChannelPipeline`;
-optical loss remains a later, physically separate model.
+The mathematical primitives, quantum-channel foundation, BB84, sifting, QBER, and Web UI V1 are in
+place. The next simulation milestone is structured noise experimentation over `ChannelPipeline`.
+Optical loss remains a later, physically separate model; advanced post-processing and PQC
+authentication must be added before the UI can expose final secret-key workflows.

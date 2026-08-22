@@ -1,6 +1,10 @@
-# QKD-PQC Simulation Framework
+# QuantumSec
 
-A modular simulation framework for analyzing the impact of post-quantum authentication mechanisms on Quantum Key Distribution (QKD) protocols.
+A modular, reproducible simulation platform for Quantum Key Distribution (QKD), quantum-channel
+research, and the future evaluation of post-quantum authentication mechanisms.
+
+The current release includes a functional BB84 engine and a dark-first web laboratory for composing
+logical-qubit channels, running seeded simulations, and inspecting genuine simulation output.
 
 ## 📌 Overview
 
@@ -28,15 +32,14 @@ While QKD provides information-theoretic security for key exchange, it relies on
 
 ## 🏗️ Architecture
 
-The framework is designed as a modular and extensible system:
-QuantumSec/
-├── qkd/ # QKD protocols (BB84, E91, B92)
-├── auth/ # Authentication schemes (classical, PQC, hybrid)
-├── math/ # Mathematical abstractions (bits, bases, measurements)
-├── network/ # (Future investigation) QKD network simulation
-├── experiments/ # Experimental scenarios and evaluations
-├── configs/ # Configuration files
-└── main.py # Entry point
+The implemented dependency direction is:
+
+```text
+ui/frontend -> ui/backend -> qkd -> quantum -> core
+```
+
+`core` and the simulation packages never depend on `ui`. The web backend is an adapter over the
+existing public APIs; it does not implement quantum behavior.
 
 
 ### Core Components
@@ -52,6 +55,53 @@ QuantumSec/
 
 - **Experiment Engine**  
   Enables reproducible evaluation and comparison across different configurations.
+
+## 🧪 Current simulation scope
+
+- BB84 preparation, transmission, projective measurement, sifting, and QBER
+- deterministic runs through the injected `SeededRNG`
+- composable Identity, Depolarizing, Pauli, Bit Flip, Phase Flip, and Amplitude Damping channels
+- per-position raw-result inspection and basis/outcome distributions in the Web UI
+
+Optical loss, parameter estimation, reconciliation, privacy amplification, final secret-key
+generation, PQC authentication, experiment sweeps, and QKDN functionality are not implemented yet.
+The UI marks those capabilities as unavailable.
+
+## 🖥️ Web UI V1
+
+Install the locked Python environment and frontend dependencies:
+
+```bash
+uv sync --dev
+cd ui/frontend
+npm install
+```
+
+Run the two development services in separate terminals from the repository root:
+
+```bash
+uv run uvicorn ui.backend.main:app --reload --port 8000
+```
+
+```bash
+cd ui/frontend
+npm run dev
+```
+
+Open `http://localhost:5173`. The Vite development server proxies `/api` to FastAPI on port `8000`.
+API documentation is available at `http://127.0.0.1:8000/docs`.
+
+See [`ui/README.md`](ui/README.md) for architecture, API contracts, tests, and extension points.
+
+## ✅ Tests
+
+```bash
+uv run pytest
+uv run ruff check .
+cd ui/frontend
+npm test
+npm run build
+```
 
 ---
 

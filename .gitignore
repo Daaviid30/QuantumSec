@@ -1,15 +1,34 @@
+# Python environments and caches
 venv/
 .venv/
+.uv-cache/
 
 __pycache__/
 **/__pycache__/
 *.py[cod]
 
 .pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-.serena
+# Frontend dependencies and build output
+node_modules/
+ui/frontend/node_modules/
+ui/frontend/dist/
+ui/frontend/coverage/
+*.tsbuildinfo
+npm-debug.log*
 
-.ruff_cache
+# Local configuration and editors
+.env
+.env.*
+!.env.example
+.serena/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 
-graphify-out
-
+# Generated project analysis
+graphify-out/
