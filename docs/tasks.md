@@ -25,7 +25,7 @@
 
 ---
 
-## Completed milestone — Quantum channel foundation
+## Completed milestone — Quantum channel foundation and BB84 core
 
 - [x] Register the physical package as lowercase `qkd/` in Git for Linux/WSL portability.
 - [x] Remove the provisional `BB84Alice` and `BB84Bob` classes without implementing BB84.
@@ -37,7 +37,10 @@
 - [x] Add immutable sequential composition through `ChannelPipeline`; an empty pipeline is the identity.
 - [x] Add analytical tests for extrema, trace preservation, Hermiticity, positivity, and input immutability.
 - [x] Document amplitude damping as qubit relaxation, distinct from future optical photon-loss modeling.
-- [ ] Implement ideal BB84 over `IdentityChannel`.
+- [x] Add deterministic basis sifting with retained-position metadata and protected key arrays.
+- [x] Add QBER over aligned, non-empty binary key material with explicit validation.
+- [x] Implement reproducible BB84 over an injected `QuantumChannel` and `BaseRNG`.
+- [x] Verify ideal BB84 over `IdentityChannel` and compatibility with an existing noisy channel.
 - [ ] Add optical transmission/loss and detector outcomes as a separate physical layer.
 
 ---
@@ -46,7 +49,7 @@
 
 ## 1. Improve `MeasurementResult`
 
-- [ ] Update the dataclass to avoid unsafe NumPy-array equality and large representations.
+- [x] Update the dataclass to avoid unsafe NumPy-array equality and large representations.
 
 ```python
 from dataclasses import dataclass, field
@@ -78,7 +81,7 @@ class MeasurementResult:
 
 ## 2. Add `MeasurementSample`
 
-- [ ] Create a lightweight result for sampling an outcome without constructing a collapsed state.
+- [x] Create a lightweight result for sampling an outcome without constructing a collapsed state.
 
 ```python
 from dataclasses import dataclass
@@ -102,7 +105,7 @@ class MeasurementSample:
 
 ## 3. Create `ProjectiveMeasurement`
 
-- [ ] Add an immutable class representing a complete projective measurement validated exactly once.
+- [x] Add an immutable class representing a complete projective measurement validated exactly once.
 
 Recommended location: `quantum/measures.py`.
 
@@ -179,7 +182,7 @@ construct once -> validate once -> reuse for every signal
 
 ## 4. Refactor `measure_projective()`
 
-- [ ] Make the function receive `ProjectiveMeasurement` instead of `Sequence[np.ndarray]`.
+- [x] Make the function receive `ProjectiveMeasurement` instead of `Sequence[np.ndarray]`.
 
 ```python
 def measure_projective(
@@ -235,7 +238,7 @@ if sample.probability <= tol:
 
 ## 5. Validate probabilities before `np.clip`
 
-- [ ] Replace unconditional clipping with validation followed by numerical cleanup.
+- [x] Replace unconditional clipping with validation followed by numerical cleanup.
 
 Correct order:
 
@@ -281,7 +284,7 @@ An invalid vector such as `[-0.1, 1.1]` sums to one. Direct clipping would hide 
 
 ## 6. Add `validate_state`
 
-- [ ] Add `validate_state: bool = True` to sampling and full-measurement functions.
+- [x] Add `validate_state: bool = True` to sampling and full-measurement functions.
 
 ```python
 if validate_state:
@@ -306,8 +309,8 @@ if validate_state:
 
 ## 7. Separate sampling and collapse
 
-- [ ] Implement `sample_projective_outcome()`.
-- [ ] Make `measure_projective()` call it and then calculate the post-state.
+- [x] Implement `sample_projective_outcome()`.
+- [x] Make `measure_projective()` call it and then calculate the post-state.
 
 ```python
 def sample_projective_outcome(
@@ -355,7 +358,7 @@ Use `measure_projective()` for intercept-resend, repeated measurements, demonstr
 
 ## 8. Create `Basis`
 
-- [ ] Create `qkd/primitives/bases.py`.
+- [x] Create `qkd/primitives/bases.py`.
 
 ```python
 from enum import Enum
@@ -383,7 +386,7 @@ class Basis(Enum):
 
 ## 9. Create standard measurements
 
-- [ ] Create `qkd/primitives/measurements.py`.
+- [x] Create `qkd/primitives/measurements.py`.
 
 Define reusable instances:
 
@@ -426,8 +429,8 @@ MEASUREMENTS_BY_BASIS = {
 
 ## 10. Create `quantum/information.py`
 
-- [ ] Move purity out of `quantum/measures.py`.
-- [ ] Add purity, trace distance, fidelity, and von Neumann entropy.
+- [x] Move purity out of `quantum/measures.py`.
+- [x] Add purity, trace distance, fidelity, and von Neumann entropy.
 
 ### Purity
 
@@ -498,77 +501,77 @@ Requirements:
 
 ## 11. Projector validation
 
-- [ ] Valid rank-one projectors are accepted.
-- [ ] Higher-rank orthogonal projectors are accepted.
-- [ ] Non-square arrays are rejected.
-- [ ] Non-Hermitian matrices are rejected.
-- [ ] Hermitian but non-idempotent matrices are rejected.
-- [ ] Empty and non-finite inputs are rejected.
+- [x] Valid rank-one projectors are accepted.
+- [x] Higher-rank orthogonal projectors are accepted.
+- [x] Non-square arrays are rejected.
+- [x] Non-Hermitian matrices are rejected.
+- [x] Hermitian but non-idempotent matrices are rejected.
+- [x] Empty and non-finite inputs are rejected.
 
 ## 12. Complete projective measurements
 
-- [ ] `(P0, P1)` is valid.
-- [ ] `(P_PLUS, P_MINUS)` is valid.
-- [ ] `(P0, P0)` is rejected.
-- [ ] `(P0,)` is rejected for a two-dimensional space.
-- [ ] Mixed dimensions are rejected.
-- [ ] Invalid projector errors identify the sequence index.
-- [ ] `is_projective_measurement()` returns the expected boolean.
+- [x] `(P0, P1)` is valid.
+- [x] `(P_PLUS, P_MINUS)` is valid.
+- [x] `(P0, P0)` is rejected.
+- [x] `(P0,)` is rejected for a two-dimensional space.
+- [x] Mixed dimensions are rejected.
+- [x] Invalid projector errors identify the sequence index.
+- [x] `is_projective_measurement()` returns the expected boolean.
 
 ## 13. `ProjectiveMeasurement`
 
-- [ ] Valid construction succeeds.
-- [ ] Mismatched projector and outcome counts fail.
-- [ ] Invalid sets fail during construction.
-- [ ] Input arrays are copied.
-- [ ] Stored arrays are read-only.
-- [ ] `dimension` is correct.
-- [ ] `number_of_outcomes` is correct.
+- [x] Valid construction succeeds.
+- [x] Mismatched projector and outcome counts fail.
+- [x] Invalid sets fail during construction.
+- [x] Input arrays are copied.
+- [x] Stored arrays are read-only.
+- [x] `dimension` is correct.
+- [x] `number_of_outcomes` is correct.
 
 ## 14. Sampling
 
-- [ ] `|0><0|` measured in Z always returns 0 with probability 1.
-- [ ] `|1><1|` measured in Z always returns 1 with probability 1.
-- [ ] `|+><+|` measured in X always returns the plus outcome.
-- [ ] The maximally mixed qubit has Z probabilities `[0.5, 0.5]`.
-- [ ] Equal seeds produce equal sampled sequences.
-- [ ] `validate_state=False` skips spectral validation but keeps probability checks.
-- [ ] Invalid probability ranges fail before clipping.
+- [x] `|0><0|` measured in Z always returns 0 with probability 1.
+- [x] `|1><1|` measured in Z always returns 1 with probability 1.
+- [x] `|+><+|` measured in X always returns the plus outcome.
+- [x] The maximally mixed qubit has Z probabilities `[0.5, 0.5]`.
+- [x] Equal seeds produce equal sampled sequences.
+- [x] `validate_state=False` skips spectral validation but keeps probability checks.
+- [x] Invalid probability ranges fail before clipping.
 
 ## 15. Collapse
 
-- [ ] Measuring `|+><+|` in Z collapses to `|0><0|` or `|1><1|`.
-- [ ] The post-state has trace one.
-- [ ] The post-state is Hermitian and positive semidefinite.
-- [ ] Repeating the same measurement returns the same outcome with probability one.
-- [ ] Sampling and full measurement select the same index with equal seeded RNG streams.
+- [x] Measuring `|+><+|` in Z collapses to `|0><0|` or `|1><1|`.
+- [x] The post-state has trace one.
+- [x] The post-state is Hermitian and positive semidefinite.
+- [x] Repeating the same measurement returns the same outcome with probability one.
+- [x] Sampling and full measurement select the same index with equal seeded RNG streams.
 
 ## 16. Quantum information
 
 ### Purity
 
-- [ ] Pure state: `1.0`.
-- [ ] Maximally mixed qubit: `0.5`.
-- [ ] Maximally mixed dimension four: `0.25`.
+- [x] Pure state: `1.0`.
+- [x] Maximally mixed qubit: `0.5`.
+- [x] Maximally mixed dimension four: `0.25`.
 
 ### Trace distance
 
-- [ ] Equal states: `0.0`.
-- [ ] Orthogonal pure states: `1.0`.
-- [ ] Symmetry.
+- [x] Equal states: `0.0`.
+- [x] Orthogonal pure states: `1.0`.
+- [x] Symmetry.
 
 ### Fidelity
 
-- [ ] Equal states: `1.0`.
-- [ ] Orthogonal pure states: `0.0`.
-- [ ] Symmetry within tolerance.
-- [ ] Pure-state analytical overlap case.
+- [x] Equal states: `1.0`.
+- [x] Orthogonal pure states: `0.0`.
+- [x] Symmetry within tolerance.
+- [x] Pure-state analytical overlap case.
 
 ### Von Neumann entropy
 
-- [ ] Pure state: `0.0` bits.
-- [ ] Maximally mixed qubit: `1.0` bit.
-- [ ] Maximally mixed dimension four: `2.0` bits.
+- [x] Pure state: `0.0` bits.
+- [x] Maximally mixed qubit: `1.0` bit.
+- [x] Maximally mixed dimension four: `2.0` bits.
 
 ---
 
@@ -576,9 +579,9 @@ Requirements:
 
 ## 17. Benchmark safe and fast paths
 
-- [ ] Compare `validate_state=True` and `False` for `10^3`, `10^4`, and `10^5` one-qubit signals.
-- [ ] Measure time spent in `validate_density_matrix()` and `eigvalsh`.
-- [ ] Use benchmark evidence before introducing vectorized or JIT implementations.
+- [x] Compare `validate_state=True` and `False` for `10^3`, `10^4`, and `10^5` one-qubit signals.
+- [x] Measure time spent in `validate_density_matrix()` and `eigvalsh`.
+- [x] Use benchmark evidence before introducing vectorized or JIT implementations.
 
 Optimization order:
 
@@ -589,7 +592,7 @@ Optimization order:
 
 ## 18. Add NumPy type aliases
 
-- [ ] Create `quantum/types.py` if useful.
+- [x] Create `quantum/types.py` if useful.
 
 ```python
 import numpy as np
@@ -604,7 +607,7 @@ Do not create wrapper classes for ket, density matrix, projector, or probability
 
 ## 19. Centralize tolerance
 
-- [ ] Move repeated `ATOL = 1e-10` declarations to `core/constants.py`.
+- [x] Move repeated `ATOL = 1e-10` declarations to `core/constants.py`.
 
 ```python
 DEFAULT_ATOL = 1e-10
@@ -618,53 +621,53 @@ The constants module must not import quantum or QKD modules.
 
 ## 20. Clean messages and spelling
 
-- [ ] Correct `proyector`, `bi-dimensional`, and `projecctor`.
-- [ ] Use `Hermitian` consistently.
-- [ ] Include useful dimensions, shapes, indices, and values in errors.
-- [ ] Ensure `is_*` docstrings match actual malformed-input behaviour.
+- [x] Correct `proyector`, `bi-dimensional`, and `projecctor`.
+- [x] Use `Hermitian` consistently.
+- [x] Include useful dimensions, shapes, indices, and values in errors.
+- [x] Ensure `is_*` docstrings match actual malformed-input behaviour.
 
 ## 21. Simplify excessive docstrings
 
-- [ ] Remove `Parameters: None` and `Raises: None` sections.
-- [ ] Keep scientific public APIs fully documented.
-- [ ] Keep trivial properties concise.
-- [ ] Use one NumPy-style format consistently.
+- [x] Remove `Parameters: None` and `Raises: None` sections.
+- [x] Keep scientific public APIs fully documented.
+- [x] Keep trivial properties concise.
+- [x] Use one NumPy-style format consistently.
 
 ## 22. Review dependencies
 
-- [ ] Replace the placeholder `pyproject.toml` description.
-- [ ] Review Qiskit as a mandatory dependency.
-- [ ] Move it to an optional group if used only for comparisons, notebooks, or external validation.
+- [x] Replace the placeholder `pyproject.toml` description.
+- [x] Review Qiskit as a mandatory dependency.
+- [x] Move it to an optional group if used only for comparisons, notebooks, or external validation.
 
 ## 23. Delay unnecessary wrappers
 
-- [ ] Do not create `QuantumState`, `Ket`, `DensityMatrix`, `Projector`, or `ProbabilityVector` wrapper classes yet.
+- [x] Do not create `QuantumState`, `Ket`, `DensityMatrix`, `Projector`, or `ProbabilityVector` wrapper classes yet.
 
 Revisit only if the project later requires multiple numerical backends, state metadata, strict serialization, cached decompositions, or backend-independent methods.
 
 ## 24. Preserve room for POVMs
 
-- [ ] Keep APIs explicitly named `ProjectiveMeasurement`, `sample_projective_outcome`, and `measure_projective`.
-- [ ] Do not create a generic hierarchy until B92 introduces a real second measurement model.
-- [ ] Design POVM effects and measurement operators separately; POVM effects are not necessarily idempotent or orthogonal.
+- [x] Keep APIs explicitly named `ProjectiveMeasurement`, `sample_projective_outcome`, and `measure_projective`.
+- [x] Do not create a generic hierarchy until B92 introduces a real second measurement model.
+- [x] Design POVM effects and measurement operators separately; POVM effects are not necessarily idempotent or orthogonal.
 
 ---
 
 # Recommended implementation order
 
-1. [ ] Update `MeasurementResult`.
-2. [ ] Add `MeasurementSample`.
-3. [ ] Implement `ProjectiveMeasurement` and tests.
-4. [ ] Create `Basis` in `qkd/primitives/bases.py`.
-5. [ ] Create standard Z/X/Y measurements.
-6. [ ] Fix probability validation before clipping.
-7. [ ] Implement `sample_projective_outcome()`.
-8. [ ] Refactor `measure_projective()` to reuse sampling.
-9. [ ] Add `validate_state` to both paths.
-10. [ ] Create `quantum/information.py` and move purity.
-11. [ ] Implement trace distance, fidelity, and von Neumann entropy.
-12. [ ] Complete measurement and information tests.
-13. [ ] Benchmark safe and fast paths.
+1. [x] Update `MeasurementResult`.
+2. [x] Add `MeasurementSample`.
+3. [x] Implement `ProjectiveMeasurement` and tests.
+4. [x] Create `Basis` in `qkd/primitives/bases.py`.
+5. [x] Create standard Z/X/Y measurements.
+6. [x] Fix probability validation before clipping.
+7. [x] Implement `sample_projective_outcome()`.
+8. [x] Refactor `measure_projective()` to reuse sampling.
+9. [x] Add `validate_state` to both paths.
+10. [x] Create `quantum/information.py` and move purity.
+11. [x] Implement trace distance, fidelity, and von Neumann entropy.
+12. [x] Complete measurement and information tests.
+13. [x] Benchmark safe and fast paths.
 
 ---
 
