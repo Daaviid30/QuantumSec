@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-08-22T15:07:14.980702+00:00",
+  "nodes": {
+    "docs_structure_tests_mirror_source_tree": {
+      "code_fingerprint": "42be2bdcc1041122a187fed7a7533e20883038e1de7d67c5a373173845bc3554",
+      "label": "Tests Mirror the Source Tree",
+      "last": "2026-08-22T11:45:47.314056+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T11:45:47.314056+00:00",
+          "outcome": "useful",
+          "q": "Haz ahora el onboarding completo de Serena para QuantumSec, escribe todas las memorias recomendadas y verifica sus referencias. Ya hice un update de graphify btw"
+        }
+      ],
+      "score": 0.99677276,
+      "source_file": "docs/structure.md",
+      "status": "tentative",
+      "uses": 1
+    },
+    "qkd_channel_ideal_identitychannel": {
+      "code_fingerprint": "94ab370f2f84e95f659eea2dfa073114503e40e542443aea24131dc7e407be93",
+      "label": "IdentityChannel",
+      "last": "2026-08-22T11:06:03.821822+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T11:06:03.821822+00:00",
+          "outcome": "useful",
+          "q": "Explícame cómo se utilizan las principales cosas y conceptos de BB84 y si Graphify, Serena y Context7 ayudaron"
+        }
+      ],
+      "score": 0.996137631,
+      "source_file": "qkd/channel/ideal.py",
+      "status": "tentative",
+      "uses": 1
+    },
+    "qkd_channel_pipeline_channelpipeline": {
+      "code_fingerprint": "bb4189e87c8234954e93294ac554f4155fd4a8b61deea4fe21bef9de399a27f3",
+      "label": "ChannelPipeline",
+      "last": "2026-08-22T12:31:37.942806+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T12:31:37.942806+00:00",
+          "outcome": "useful",
+          "q": "Te adjunto un prompt para seguir construyendo este proyecto esta vez vamos a ir creando la UI web, para ir ejecutando viendo resultados de forma guay, todo en el archivo adjunto. Btw creé una carpeta UI para que trabajes en ella para desplegar ahi si quieres. Actualiza el .gitignore como mejor sea :)"
+        }
+      ],
+      "score": 0.997506224,
+      "source_file": "qkd/channel/pipeline.py",
+      "status": "tentative",
+      "uses": 1
+    },
+    "qkd_protocols_bb84_bb84protocol": {
+      "code_fingerprint": "5beb76132017ca55e3bbe5fa4154343fdf3465002181ad0c07326f05deb2f70c",
+      "label": "BB84Protocol",
+      "last": "2026-08-22T12:31:37.942806+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T12:31:37.942806+00:00",
+          "outcome": "useful",
+          "q": "Te adjunto un prompt para seguir construyendo este proyecto esta vez vamos a ir creando la UI web, para ir ejecutando viendo resultados de forma guay, todo en el archivo adjunto. Btw creé una carpeta UI para que trabajes en ella para desplegar ahi si quieres. Actualiza el .gitignore como mejor sea :)"
+        },
+        {
+          "date": "2026-08-22T11:45:47.314056+00:00",
+          "outcome": "useful",
+          "q": "Haz ahora el onboarding completo de Serena para QuantumSec, escribe todas las memorias recomendadas y verifica sus referencias. Ya hice un update de graphify btw"
+        }
+      ],
+      "score": 1.994278984,
+      "source_file": "qkd/protocols/bb84.py",
+      "status": "preferred",
+      "uses": 2
+    },
+    "qkd_protocols_bb84_bb84result": {
+      "code_fingerprint": "5beb76132017ca55e3bbe5fa4154343fdf3465002181ad0c07326f05deb2f70c",
+      "label": "BB84Result",
+      "last": "2026-08-22T12:31:37.942806+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T12:31:37.942806+00:00",
+          "outcome": "useful",
+          "q": "Te adjunto un prompt para seguir construyendo este proyecto esta vez vamos a ir creando la UI web, para ir ejecutando viendo resultados de forma guay, todo en el archivo adjunto. Btw creé una carpeta UI para que trabajes en ella para desplegar ahi si quieres. Actualiza el .gitignore como mejor sea :)"
+        }
+      ],
+      "score": 0.997506224,
+      "source_file": "qkd/protocols/bb84.py",
+      "status": "tentative",
+      "uses": 1
+    },
+    "quantum_measures_sample_projective_outcome": {
+      "code_fingerprint": "01897be6cb12277025d98a2f258a7479ebb488019dea7b584acfb2d8f3d2ee9b",
+      "label": "sample_projective_outcome()",
+      "last": "2026-08-22T10:29:12.691508+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T10:29:12.691508+00:00",
+          "outcome": "useful",
+          "q": "How should the BB84 core integrate with QuantumSec architecture?"
+        }
+      ],
+      "score": 0.995548793,
+      "source_file": "quantum/measures.py",
+      "status": "tentative",
+      "uses": 1
+    }
+  },
+  "version": 1
+}

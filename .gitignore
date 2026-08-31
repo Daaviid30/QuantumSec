@@ -24,11 +24,7 @@ npm-debug.log*
 .env
 .env.*
 !.env.example
-.serena/
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# Generated project analysis
-graphify-out/
