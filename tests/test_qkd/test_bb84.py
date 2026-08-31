@@ -3,10 +3,16 @@ import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
 from core.rng import SeededRNG
-from qkd.channel import DepolarizingChannel, IdentityChannel, QuantumChannel
+from qkd.channel import BitFlipChannel, DepolarizingChannel, IdentityChannel, QuantumChannel
 from qkd.primitives import Basis
 from qkd.primitives.states import KET0, KET1, MINUS, PLUS
-from qkd.protocols import BB84Protocol, BB84Result, encode_bb84_state
+from qkd.protocols import (
+    BB84PostprocessingConfig,
+    BB84Protocol,
+    BB84Result,
+    BB84SessionStatus,
+    encode_bb84_state,
+)
 from quantum.states import dm_from_ket
 from quantum.types import ArrayLike, ComplexArray
 
@@ -142,3 +148,69 @@ def test_bb84_rejects_non_positive_or_non_integer_signal_counts(n_signals):
 
     with pytest.raises(ValueError, match="n_signals"):
         protocol.run(n_signals)
+
+
+def test_ideal_bb84_session_completes_full_postprocessing_pipeline():
+    session = BB84Protocol(IdentityChannel(), SeededRNG(2026)).run_session(512)
+
+    assert session.status is BB84SessionStatus.COMPLETED
+    assert session.estimated_qber == 0.0
+    assert session.diagnostic_full_sifted_qber == 0.0
+    assert session.verification is not None and session.verification.verified
+    assert session.alice_final_key is not None and session.bob_final_key is not None
+    assert_array_equal(session.alice_final_key, session.bob_final_key)
+    assert 0 < session.n_final < session.n_raw
+    assert session.n_raw >= session.n_sifted > session.n_candidate == session.n_reconciled
+    assert session.n_reconciled > session.n_final
+
+
+def test_complete_bb84_session_is_reproducible():
+    first = BB84Protocol(IdentityChannel(), SeededRNG(44)).run_session(384)
+    second = BB84Protocol(IdentityChannel(), SeededRNG(44)).run_session(384)
+
+    assert first.status is second.status
+    assert first.n_disclosed == second.n_disclosed
+    assert first.estimated_qber == second.estimated_qber
+    assert first.leak_ec == second.leak_ec
+    assert first.n_final == second.n_final
+    assert first.parameter_estimation is not None
+    assert second.parameter_estimation is not None
+    assert_array_equal(
+        first.parameter_estimation.disclosed_indices,
+        second.parameter_estimation.disclosed_indices,
+    )
+    assert_array_equal(first.alice_final_key, second.alice_final_key)
+
+
+def test_moderate_noise_runs_parameter_estimation_and_reconciliation_deterministically():
+    session = BB84Protocol(BitFlipChannel(0.04), SeededRNG(123)).run_session(512)
+    repeated = BB84Protocol(BitFlipChannel(0.04), SeededRNG(123)).run_session(512)
+
+    assert session.parameter_estimation is not None
+    assert session.reconciliation is not None
+    assert session.leak_ec > 0
+    assert session.status in {BB84SessionStatus.COMPLETED, BB84SessionStatus.ABORTED}
+    assert session.status is repeated.status
+    assert session.estimated_qber == repeated.estimated_qber
+    assert session.leak_ec == repeated.leak_ec
+    assert session.n_final == repeated.n_final
+
+
+def test_excessive_sampled_qber_aborts_before_reconciliation():
+    session = BB84Protocol(DepolarizingChannel(1.0), SeededRNG(7)).run_session(512)
+
+    assert session.status is BB84SessionStatus.ABORTED
+    assert session.estimated_qber is not None
+    assert session.estimated_qber > session.config.qber_abort_threshold
+    assert session.reconciliation is None
+    assert session.privacy_amplification is None
+
+
+def test_non_positive_security_length_aborts_without_final_key():
+    config = BB84PostprocessingConfig(security_margin_bits=10_000)
+    session = BB84Protocol(IdentityChannel(), SeededRNG(6)).run_session(256, config)
+
+    assert session.status is BB84SessionStatus.ABORTED
+    assert session.verification is not None and session.verification.verified
+    assert session.n_final == 0
+    assert session.alice_final_key is None

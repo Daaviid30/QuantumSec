@@ -33,7 +33,10 @@ def test_capabilities_expose_real_and_planned_features_distinctly():
         "pauli",
     }
     assert features["sifting"]["implemented"] is True
-    assert features["privacy_amplification"]["implemented"] is False
+    assert features["parameter_estimation"]["implemented"] is True
+    assert features["reconciliation"]["implemented"] is True
+    assert features["verification"]["implemented"] is True
+    assert features["privacy_amplification"]["implemented"] is True
 
 
 def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
@@ -51,14 +54,43 @@ def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
     first_body = first.json()
     second_body = second.json()
     assert first_body["metrics"] == second_body["metrics"]
+    assert first_body["postprocessing"] == second_body["postprocessing"]
     assert first_body["alice_basis_counts"] == second_body["alice_basis_counts"]
     assert first_body["bob_basis_counts"] == second_body["bob_basis_counts"]
     assert first_body["bob_outcome_counts"] == second_body["bob_outcome_counts"]
     assert first_body["transmissions"] == second_body["transmissions"]
     assert first_body["metrics"]["n_raw"] == 128
+    assert first_body["postprocessing"]["n_disclosed"] > 0
+    assert "n_final" in first_body["postprocessing"]
     assert first_body["channels"] == [
         {"type": "depolarizing", "name": "Depolarizing", "parameters": {"p": 0.12}}
     ]
+
+
+def test_completed_bb84_response_exposes_the_exact_final_simulator_key():
+    response = client.post(
+        "/api/simulations/bb84",
+        json={"protocol": "bb84", "n_signals": 256, "seed": 2026, "channels": []},
+    )
+
+    assert response.status_code == 200
+    postprocessing = response.json()["postprocessing"]
+    assert postprocessing["status"] == "completed"
+    assert len(postprocessing["final_key"]) == postprocessing["n_final"]
+    assert set(postprocessing["final_key"]) <= {"0", "1"}
+
+
+def test_aborted_bb84_response_exposes_reason_and_no_final_key():
+    response = client.post(
+        "/api/simulations/bb84",
+        json={"protocol": "bb84", "n_signals": 1, "seed": 3, "channels": []},
+    )
+
+    assert response.status_code == 200
+    postprocessing = response.json()["postprocessing"]
+    assert postprocessing["status"] == "aborted"
+    assert postprocessing["abort_reason"]
+    assert postprocessing["final_key"] is None
 
 
 def test_bb84_request_validation_rejects_invalid_signal_count():

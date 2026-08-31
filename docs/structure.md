@@ -328,9 +328,35 @@ classes. It converts NumPy-backed domain results into JSON-safe DTOs. The fronte
 planned functionality through `/api/capabilities`; planned features are always disabled and never
 produce fabricated data.
 
-The UI currently exposes BB84, seeded reproducibility, sequential channel composition, sifting, QBER,
-basis/outcome distributions, and a bounded raw-transmission inspector. It does not contain quantum
-simulation logic.
+The UI currently exposes complete BB84 sessions, seeded reproducibility, sequential channel
+composition, sifting, diagnostic full-key QBER, sampled parameter estimation, Cascade transcript
+leakage, verification status, privacy-amplification summaries, basis/outcome distributions, and a
+bounded raw-transmission inspector. It does not contain quantum or post-processing algorithms.
+Completed sessions may expose their final **simulated** key for educational inspection, while large
+public Toeplitz seeds remain internal to the backend.
+
+### BB84 classical post-processing
+
+The implemented QKD flow is:
+
+```text
+n_raw -> quantum transmission -> sifting -> n_sifted
+      -> disclose random sample and remove it -> n_candidate
+      -> Cascade reconciliation -> universal-hash confirmation
+      -> asymptotic length estimator -> FFT Toeplitz hashing -> L_final
+```
+
+`BB84Result.qber` compares the complete sifted arrays and is simulation-only diagnostic data.
+Security decisions use `ParameterEstimationResult.estimated_qber`, calculated from public sampled
+bits that are then removed from both candidate keys. Cascade reveals Alice block/subdivision
+parities and conservatively counts each disclosure in `leak_ec`. Confirmation reveals a short
+universal-hash tag and counts its length. The Toeplitz seeds used for confirmation and extraction
+are public randomness, not secret-key consumption.
+
+The security estimator uses the asymptotic symmetric BB84 phase-error assumption and subtracts the
+actual Cascade and verification leakage once. It is not a composable finite-key proof and makes no
+invented epsilon-security claim. All classical communication is assumed authenticated; PQC
+authentication belongs in a future upper-layer integration and is intentionally absent here.
 
 ---
 
@@ -378,7 +404,7 @@ Current development order:
 5. Web UI V1 for interactive BB84 simulation (complete)
 6. Noise experiments using the CPTP channel models
 7. Optical transmission and loss as a separate physical layer
-8. Advanced postprocessing
+8. Advanced postprocessing (parameter estimation, Cascade, confirmation, and Toeplitz extraction complete)
 9. PQC authentication and comparative experiments
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
@@ -475,7 +501,7 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 
 ## 10. Current Immediate Goal
 
-The mathematical primitives, quantum-channel foundation, BB84, sifting, QBER, and Web UI V1 are in
-place. The next simulation milestone is structured noise experimentation over `ChannelPipeline`.
-Optical loss remains a later, physically separate model; advanced post-processing and PQC
-authentication must be added before the UI can expose final secret-key workflows.
+The mathematical primitives, quantum-channel foundation, complete BB84 post-processing, and Web UI
+are in place. The next simulation milestone is structured noise experimentation over
+`ChannelPipeline`. Optical loss remains a later, physically separate model. PQC authentication must
+still be added before treating these simulated final-key workflows as authenticated QKD sessions.

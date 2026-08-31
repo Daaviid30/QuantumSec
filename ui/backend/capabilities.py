@@ -53,7 +53,10 @@ def get_capabilities() -> CapabilitiesResponse:
                 id="bb84",
                 name="BB84",
                 implemented=True,
-                description="Prepare-and-measure BB84 with basis sifting and QBER.",
+                description=(
+                    "Prepare-and-measure BB84 with sampled parameter estimation, Cascade, "
+                    "key confirmation, and Toeplitz privacy amplification."
+                ),
             ),
             ProtocolCapability(
                 id="b92",
@@ -108,9 +111,7 @@ def get_capabilities() -> CapabilitiesResponse:
                 name="Amplitude damping",
                 implemented=True,
                 description="Models qubit relaxation from |1> to |0>, not optical loss.",
-                parameters=[
-                    _probability("gamma", "Damping probability", "γ", 0.01, "Relaxation strength")
-                ],
+                parameters=[_probability("gamma", "Damping probability", "γ", 0.01, "Relaxation strength")],
             ),
             ChannelCapability(
                 id="pauli",
@@ -152,20 +153,26 @@ def get_capabilities() -> CapabilitiesResponse:
             FeatureCapability(
                 id="parameter_estimation",
                 name="Parameter estimation",
-                implemented=False,
-                description="Statistical disclosure and security thresholds are not implemented.",
+                implemented=True,
+                description="Seeded sampling estimates QBER and removes every disclosed position.",
             ),
             FeatureCapability(
                 id="reconciliation",
                 name="Error reconciliation",
-                implemented=False,
-                description="No reconciliation algorithm is available yet.",
+                implemented=True,
+                description="Multi-pass Cascade corrects errors and records public parity leakage.",
+            ),
+            FeatureCapability(
+                id="verification",
+                name="Key confirmation",
+                implemented=True,
+                description="Universal-hash tags confirm reconciliation and record tag leakage.",
             ),
             FeatureCapability(
                 id="privacy_amplification",
                 name="Privacy amplification",
-                implemented=False,
-                description="No final secret-key derivation is available yet.",
+                implemented=True,
+                description="FFT Toeplitz hashing extracts the asymptotically estimated key length.",
             ),
             FeatureCapability(
                 id="pqc_authentication",

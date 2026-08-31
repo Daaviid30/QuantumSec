@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from enum import StrEnum
 
 import numpy as np
 import numpy.typing as npt
@@ -9,7 +10,15 @@ import numpy.typing as npt
 from core.rng import BaseRNG, random_basis, random_bit
 from qkd.channel.base import QuantumChannel
 from qkd.metrics.qber import qber as calculate_qber
+from qkd.metrics.security import asymptotic_bb84_secret_length
+from qkd.postprocessing.parameter_estimation import (
+    ParameterEstimationResult,
+    estimate_qber_from_sample,
+)
+from qkd.postprocessing.privacy_amplification import PrivacyAmplificationResult, amplify_privacy
+from qkd.postprocessing.reconciliation import CascadeConfig, ReconciliationResult, reconcile_cascade
 from qkd.postprocessing.sifting import SiftingResult, sift_keys
+from qkd.postprocessing.verification import VerificationResult, verify_reconciled_keys
 from qkd.primitives.bases import Basis, bases_from_bits
 from qkd.primitives.measurements import MEASUREMENTS_BY_BASIS
 from qkd.primitives.states import KET0, KET1, MINUS, PLUS
@@ -178,7 +187,11 @@ class BB84Result:
 
     @property
     def qber(self) -> float:
-        """Return QBER over the complete sifted key.
+        """Return simulator-diagnostic QBER over the complete sifted key.
+
+        This value is retained for backwards compatibility and inspection. A
+        secure session never uses it for a protocol decision: ``run_session``
+        estimates QBER from disclosed random positions and removes them.
 
         Raises
         ------
@@ -187,6 +200,146 @@ class BB84Result:
         """
 
         return calculate_qber(self.alice_sifted_key, self.bob_sifted_key)
+
+
+class BB84SessionStatus(StrEnum):
+    """Terminal state of a complete BB84 session."""
+
+    COMPLETED = "completed"
+    ABORTED = "aborted"
+
+
+@dataclass(frozen=True, slots=True)
+class BB84PostprocessingConfig:
+    """Configuration for BB84's authenticated classical post-processing.
+
+    The default 11% abort boundary is the familiar ideal/asymptotic BB84
+    threshold under this simulator's assumptions, not a universal practical
+    finite-key threshold.
+    """
+
+    sample_fraction: float = 0.2
+    qber_abort_threshold: float = 0.11
+    cascade: CascadeConfig = field(default_factory=CascadeConfig)
+    verification_tag_length: int = 16
+    security_margin_bits: int = 0
+
+    def __post_init__(self) -> None:
+        for name in ("sample_fraction", "qber_abort_threshold"):
+            value = getattr(self, name)
+            if isinstance(value, (bool, np.bool_)) or not isinstance(
+                value, (float, int, np.floating, np.integer)
+            ):
+                raise ValueError(f"{name} must be a finite probability. Got {value!r}.")
+            clean = float(value)
+            valid = 0.0 < clean < 1.0 if name == "sample_fraction" else 0.0 <= clean <= 1.0
+            if not np.isfinite(clean) or not valid:
+                interval = "strictly between 0 and 1" if name == "sample_fraction" else "in [0, 1]"
+                raise ValueError(f"{name} must lie {interval}. Got {clean}.")
+            object.__setattr__(self, name, clean)
+        if not isinstance(self.cascade, CascadeConfig):
+            raise TypeError(f"cascade must be a CascadeConfig. Got {type(self.cascade).__name__}.")
+        for name in ("verification_tag_length", "security_margin_bits"):
+            value = getattr(self, name)
+            if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
+                raise ValueError(f"{name} must be an integer. Got {value!r}.")
+            clean = int(value)
+            if name == "verification_tag_length" and clean <= 0:
+                raise ValueError("verification_tag_length must be positive.")
+            if name == "security_margin_bits" and clean < 0:
+                raise ValueError("security_margin_bits must be non-negative.")
+            object.__setattr__(self, name, clean)
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class BB84SessionResult:
+    """Stage-by-stage immutable result of a complete BB84 session."""
+
+    raw: BB84Result = field(repr=False)
+    config: BB84PostprocessingConfig
+    status: BB84SessionStatus
+    abort_reason: str | None = None
+    parameter_estimation: ParameterEstimationResult | None = field(default=None, repr=False)
+    reconciliation: ReconciliationResult | None = field(default=None, repr=False)
+    verification: VerificationResult | None = field(default=None, repr=False)
+    privacy_amplification: PrivacyAmplificationResult | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.raw, BB84Result):
+            raise TypeError(f"raw must be a BB84Result. Got {type(self.raw).__name__}.")
+        if not isinstance(self.config, BB84PostprocessingConfig):
+            raise TypeError(f"config must be a BB84PostprocessingConfig. Got {type(self.config).__name__}.")
+        if not isinstance(self.status, BB84SessionStatus):
+            raise TypeError(f"status must be a BB84SessionStatus. Got {type(self.status).__name__}.")
+        if self.status is BB84SessionStatus.COMPLETED:
+            if self.abort_reason is not None or self.privacy_amplification is None:
+                raise ValueError("A completed session requires privacy amplification and no abort reason.")
+        elif not self.abort_reason:
+            raise ValueError("An aborted session requires a non-empty abort reason.")
+
+    @property
+    def n_raw(self) -> int:
+        return self.raw.n_raw
+
+    @property
+    def n_sifted(self) -> int:
+        return self.raw.n_sifted
+
+    @property
+    def diagnostic_full_sifted_qber(self) -> float | None:
+        """Return full-key QBER as simulator-only information."""
+
+        return self.raw.qber if self.raw.n_sifted > 0 else None
+
+    @property
+    def n_disclosed(self) -> int:
+        return self.parameter_estimation.sample_size if self.parameter_estimation is not None else 0
+
+    @property
+    def estimated_qber(self) -> float | None:
+        return self.parameter_estimation.estimated_qber if self.parameter_estimation is not None else None
+
+    @property
+    def n_candidate(self) -> int:
+        return self.parameter_estimation.n_candidate if self.parameter_estimation is not None else 0
+
+    @property
+    def leak_ec(self) -> int:
+        return self.reconciliation.leak_ec if self.reconciliation is not None else 0
+
+    @property
+    def verification_leakage(self) -> int:
+        return self.verification.leakage if self.verification is not None else 0
+
+    @property
+    def total_public_leakage(self) -> int:
+        """Return disclosed sample, reconciliation parities, and confirmation tag bits.
+
+        Sampled bits are removed before extraction, so the secret-length formula
+        subtracts only reconciliation and verification leakage from ``n_candidate``.
+        """
+
+        return self.n_disclosed + self.leak_ec + self.verification_leakage
+
+    @property
+    def n_reconciled(self) -> int:
+        return self.reconciliation.input_length if self.reconciliation is not None else 0
+
+    @property
+    def n_final(self) -> int:
+        return self.privacy_amplification.output_length if self.privacy_amplification is not None else 0
+
+    @property
+    def final_secret_fraction(self) -> float:
+        return self.n_final / self.n_raw
+
+    @property
+    def alice_final_key(self) -> npt.NDArray[np.uint8] | None:
+        return self.privacy_amplification.alice_final_key if self.privacy_amplification is not None else None
+
+    @property
+    def bob_final_key(self) -> npt.NDArray[np.uint8] | None:
+        return self.privacy_amplification.bob_final_key if self.privacy_amplification is not None else None
 
 
 @dataclass(frozen=True, slots=True, eq=False)
@@ -252,4 +405,119 @@ class BB84Protocol:
             bob_bases=bob_bases,
             bob_measured_bits=bob_measured_bits,
             sifting=sifting,
+        )
+
+    def run_session(
+        self,
+        n_signals: int,
+        config: BB84PostprocessingConfig | None = None,
+    ) -> BB84SessionResult:
+        """Run BB84 through estimation, Cascade, confirmation, and extraction.
+
+        Legitimate security aborts are represented in the returned session.
+        Invalid inputs and invalid configurations still raise validation errors.
+        The classical transcript is assumed to be authenticated.
+        """
+
+        clean_config = BB84PostprocessingConfig() if config is None else config
+        if not isinstance(clean_config, BB84PostprocessingConfig):
+            raise TypeError(f"config must be a BB84PostprocessingConfig. Got {type(clean_config).__name__}.")
+        raw = self.run(n_signals)
+        if raw.n_sifted < 2:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason="Insufficient sifted material for parameter estimation.",
+            )
+        planned_sample_size = int(np.ceil(raw.n_sifted * clean_config.sample_fraction))
+        if planned_sample_size >= raw.n_sifted:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason="Parameter-estimation disclosure would leave no candidate material.",
+            )
+
+        estimation = estimate_qber_from_sample(
+            raw.alice_sifted_key,
+            raw.bob_sifted_key,
+            self.rng,
+            sample_fraction=clean_config.sample_fraction,
+        )
+        if estimation.estimated_qber > clean_config.qber_abort_threshold:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason=(
+                    f"Estimated QBER {estimation.estimated_qber:.6f} exceeds the configured "
+                    f"threshold {clean_config.qber_abort_threshold:.6f}."
+                ),
+                parameter_estimation=estimation,
+            )
+        if estimation.n_candidate < clean_config.verification_tag_length:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason="Insufficient candidate material for the configured verification tag.",
+                parameter_estimation=estimation,
+            )
+
+        reconciliation = reconcile_cascade(
+            estimation.alice_candidate_key,
+            estimation.bob_candidate_key,
+            estimation.estimated_qber,
+            self.rng,
+            config=clean_config.cascade,
+        )
+        verification = verify_reconciled_keys(
+            reconciliation.alice_key,
+            reconciliation.bob_corrected_key,
+            self.rng,
+            tag_length=clean_config.verification_tag_length,
+        )
+        if not verification.verified:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason="Universal-hash key confirmation failed after reconciliation.",
+                parameter_estimation=estimation,
+                reconciliation=reconciliation,
+                verification=verification,
+            )
+
+        target_length = asymptotic_bb84_secret_length(
+            estimation.n_candidate,
+            estimation.estimated_qber,
+            reconciliation.leak_ec,
+            verification.leakage,
+            security_margin_bits=clean_config.security_margin_bits,
+        )
+        if target_length <= 0:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason="The asymptotic security estimator produced no extractable secret bits.",
+                parameter_estimation=estimation,
+                reconciliation=reconciliation,
+                verification=verification,
+            )
+        amplification = amplify_privacy(
+            reconciliation.alice_key,
+            reconciliation.bob_corrected_key,
+            target_length,
+            self.rng,
+        )
+        return BB84SessionResult(
+            raw=raw,
+            config=clean_config,
+            status=BB84SessionStatus.COMPLETED,
+            parameter_estimation=estimation,
+            reconciliation=reconciliation,
+            verification=verification,
+            privacy_amplification=amplification,
         )

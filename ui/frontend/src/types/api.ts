@@ -85,6 +85,23 @@ export interface SimulationMetrics {
   qber: number | null
 }
 
+export interface PostprocessingSummary {
+  status: 'completed' | 'aborted'
+  abort_reason: string | null
+  n_disclosed: number
+  estimated_qber: number | null
+  n_candidate: number
+  leak_ec: number
+  corrected_errors: number
+  verification_passed: boolean | null
+  verification_leakage: number
+  n_reconciled: number
+  n_final: number
+  compression_ratio: number | null
+  final_secret_fraction: number
+  final_key: string | null
+}
+
 export interface BasisCounts {
   Z: number
   X: number
@@ -109,6 +126,7 @@ export interface BB84SimulationResponse {
   metadata: SimulationMetadata
   channels: ChannelSummary[]
   metrics: SimulationMetrics
+  postprocessing: PostprocessingSummary
   alice_basis_counts: BasisCounts
   bob_basis_counts: BasisCounts
   bob_outcome_counts: OutcomeCounts

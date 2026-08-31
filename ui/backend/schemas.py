@@ -135,6 +135,25 @@ class SimulationMetrics(StrictModel):
     qber: float | None
 
 
+class PostprocessingSummary(StrictModel):
+    """Browser-facing post-processing result for the educational simulator."""
+
+    status: Literal["completed", "aborted"]
+    abort_reason: str | None
+    n_disclosed: int
+    estimated_qber: float | None
+    n_candidate: int
+    leak_ec: int
+    corrected_errors: int
+    verification_passed: bool | None
+    verification_leakage: int
+    n_reconciled: int
+    n_final: int
+    compression_ratio: float | None
+    final_secret_fraction: float
+    final_key: str | None
+
+
 class BasisCounts(StrictModel):
     Z: int
     X: int
@@ -159,6 +178,7 @@ class BB84SimulationResponse(StrictModel):
     metadata: SimulationMetadata
     channels: list[ChannelSummary]
     metrics: SimulationMetrics
+    postprocessing: PostprocessingSummary
     alice_basis_counts: BasisCounts
     bob_basis_counts: BasisCounts
     bob_outcome_counts: OutcomeCounts

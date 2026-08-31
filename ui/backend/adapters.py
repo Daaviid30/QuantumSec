@@ -5,6 +5,9 @@ from time import perf_counter
 from typing import Literal
 from uuid import uuid4
 
+import numpy as np
+import numpy.typing as npt
+
 from core.rng import SeededRNG
 from qkd.channel import (
     AmplitudeDampingChannel,
@@ -32,6 +35,7 @@ from ui.backend.schemas import (
     OutcomeCounts,
     PauliChannelConfiguration,
     PhaseFlipChannelConfiguration,
+    PostprocessingSummary,
     SimulationMetadata,
     SimulationMetrics,
     TransmissionRecord,
@@ -82,6 +86,14 @@ def _channel_summary(configuration: ChannelConfiguration) -> ChannelSummary:
     return ChannelSummary(type=channel_type, name=names[channel_type], parameters=data)
 
 
+def _final_key_string(session_key: npt.NDArray[np.uint8] | None) -> str | None:
+    """Serialize a completed simulator key as a binary string for inspection."""
+
+    if session_key is None:
+        return None
+    return "".join(str(int(bit)) for bit in session_key)
+
+
 def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     """Execute BB84 with the engine's seeded RNG and adapt its immutable result."""
 
@@ -90,7 +102,8 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     rng = SeededRNG(request.seed)
 
     started = perf_counter()
-    result = BB84Protocol(channel=pipeline, rng=rng).run(request.n_signals)
+    session = BB84Protocol(channel=pipeline, rng=rng).run_session(request.n_signals)
+    result = session.raw
     duration_ms = (perf_counter() - started) * 1000.0
 
     alice_basis_counts = Counter(basis.value for basis in result.alice_bases)
@@ -134,6 +147,28 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
             n_sifted=result.n_sifted,
             sifting_efficiency=result.sifting_efficiency,
             qber=qber,
+        ),
+        postprocessing=PostprocessingSummary(
+            status=session.status.value,
+            abort_reason=session.abort_reason,
+            n_disclosed=session.n_disclosed,
+            estimated_qber=session.estimated_qber,
+            n_candidate=session.n_candidate,
+            leak_ec=session.leak_ec,
+            corrected_errors=(
+                session.reconciliation.corrected_errors if session.reconciliation is not None else 0
+            ),
+            verification_passed=(session.verification.verified if session.verification is not None else None),
+            verification_leakage=session.verification_leakage,
+            n_reconciled=session.n_reconciled,
+            n_final=session.n_final,
+            compression_ratio=(
+                session.privacy_amplification.compression_ratio
+                if session.privacy_amplification is not None
+                else None
+            ),
+            final_secret_fraction=session.final_secret_fraction,
+            final_key=_final_key_string(session.alice_final_key),
         ),
         alice_basis_counts=BasisCounts(Z=alice_basis_counts["Z"], X=alice_basis_counts["X"]),
         bob_basis_counts=BasisCounts(Z=bob_basis_counts["Z"], X=bob_basis_counts["X"]),

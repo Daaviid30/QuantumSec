@@ -33,6 +33,13 @@ export function ResultsCharts({ result }: ResultsChartsProps) {
     { outcome: '|0⟩', count: result.bob_outcome_counts.zero },
     { outcome: '|1⟩', count: result.bob_outcome_counts.one },
   ]
+  const keyPipelineData = [
+    { stage: 'Raw', bits: result.metrics.n_raw },
+    { stage: 'Sifted', bits: result.metrics.n_sifted },
+    { stage: 'Candidate', bits: result.postprocessing.n_candidate },
+    { stage: 'Reconciled', bits: result.postprocessing.n_reconciled },
+    { stage: 'Final', bits: result.postprocessing.n_final },
+  ]
 
   return (
     <Panel className="p-5 lg:p-6">
@@ -44,6 +51,20 @@ export function ResultsCharts({ result }: ResultsChartsProps) {
       />
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
+        <div className="chart-frame xl:col-span-2">
+          <div className="chart-label">Secret-material shrinkage</div>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={keyPipelineData} margin={{ top: 12, right: 4, left: -24, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="rgba(148, 163, 184, 0.07)" />
+                <XAxis dataKey="stage" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(103, 232, 249, 0.025)' }} />
+                <Bar dataKey="bits" fill="#39d9f2" radius={[4, 4, 0, 0]} maxBarSize={52} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
         <div className="chart-frame">
           <div className="chart-label">Basis selections</div>
           <div className="h-52">
