@@ -8,6 +8,7 @@ import numpy as np
 import numpy.typing as npt
 
 from core.rng import BaseRNG, random_basis, random_bit
+from qkd._validation import copy_binary_vector
 from qkd.channel.base import QuantumChannel
 from qkd.metrics.qber import qber as calculate_qber
 from qkd.metrics.security import asymptotic_bb84_secret_length
@@ -70,20 +71,6 @@ def encode_bb84_state(bit: int | np.integer, basis: Basis) -> ComplexArray:
     return np.array(_BB84_DENSITY_MATRICES[(clean_basis, clean_bit)], copy=True)
 
 
-def _copy_binary_vector(values: npt.ArrayLike, *, name: str) -> npt.NDArray[np.uint8]:
-    vector = np.asarray(values)
-    if vector.ndim != 1:
-        raise ValueError(f"{name} must be one-dimensional. Got shape={vector.shape}.")
-    if vector.size > 0 and not np.issubdtype(vector.dtype, np.integer):
-        raise ValueError(f"{name} must contain integer bits. Got dtype={vector.dtype}.")
-    if np.any((vector != 0) & (vector != 1)):
-        raise ValueError(f"{name} must contain only 0 and 1. Got {vector}.")
-
-    result = np.array(vector, dtype=np.uint8, copy=True)
-    result.flags.writeable = False
-    return result
-
-
 def _copy_bb84_bases(values: Sequence[Basis], *, name: str) -> tuple[Basis, ...]:
     bases = tuple(values)
     for index, basis in enumerate(bases):
@@ -105,8 +92,8 @@ class BB84Result:
     sifting: SiftingResult = field(repr=False)
 
     def __post_init__(self) -> None:
-        alice_bits = _copy_binary_vector(self.alice_raw_bits, name="alice_raw_bits")
-        bob_bits = _copy_binary_vector(self.bob_measured_bits, name="bob_measured_bits")
+        alice_bits = copy_binary_vector(self.alice_raw_bits, name="alice_raw_bits")
+        bob_bits = copy_binary_vector(self.bob_measured_bits, name="bob_measured_bits")
         alice_bases = _copy_bb84_bases(self.alice_bases, name="alice_bases")
         bob_bases = _copy_bb84_bases(self.bob_bases, name="bob_bases")
 

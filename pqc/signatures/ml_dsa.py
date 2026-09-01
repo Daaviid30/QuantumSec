@@ -6,15 +6,19 @@ from typing import Final, Self
 from pqc.backends.oqs_backend import OQSSignatureBackend
 from pqc.signatures.base import SignatureMetadata, SignatureProvider
 
+_ML_DSA_65_PUBLIC_KEY_LENGTH: Final = 1952
+_ML_DSA_65_SECRET_KEY_LENGTH: Final = 4032
+_ML_DSA_65_SIGNATURE_LENGTH: Final = 3309
 ML_DSA_65_METADATA: Final = SignatureMetadata(
     name="ML-DSA-65",
     algorithm_type="digital signature",
     family="module-lattice based",
     nist_security_category=3,
     standardization="NIST FIPS 204",
+    public_key_length=_ML_DSA_65_PUBLIC_KEY_LENGTH,
+    secret_key_length=_ML_DSA_65_SECRET_KEY_LENGTH,
+    signature_length=_ML_DSA_65_SIGNATURE_LENGTH,
 )
-_ML_DSA_65_PUBLIC_KEY_LENGTH: Final = 1952
-_ML_DSA_65_SECRET_KEY_LENGTH: Final = 4032
 
 
 def _require_bytes(value: object, *, name: str) -> bytes:
@@ -76,7 +80,8 @@ class MLDSA65(SignatureProvider):
         clean_message = _require_bytes(message, name="message")
         return self._backend.sign(self.metadata.name, clean_message, self._secret_key)
 
-    def verify(self, message: bytes, signature: bytes, public_key: bytes) -> bool:
+    @staticmethod
+    def verify(message: bytes, signature: bytes, public_key: bytes) -> bool:
         """Return whether a signature is valid for a message and public key."""
 
         clean_message = _require_bytes(message, name="message")
@@ -87,7 +92,12 @@ class MLDSA65(SignatureProvider):
                 f"ML-DSA-65 public_key must contain {_ML_DSA_65_PUBLIC_KEY_LENGTH} bytes. "
                 f"Got {len(clean_public_key)}."
             )
-        return self._backend.verify(self.metadata.name, clean_message, clean_signature, clean_public_key)
+        return OQSSignatureBackend().verify(
+            ML_DSA_65_METADATA.name,
+            clean_message,
+            clean_signature,
+            clean_public_key,
+        )
 
     def __repr__(self) -> str:
         return f"MLDSA65(algorithm={self.metadata.name!r}, public_key_length={len(self._public_key)})"

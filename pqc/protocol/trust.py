@@ -2,9 +2,8 @@
 
 from collections.abc import Iterator
 
-from pqc.errors import UnknownTrustedPeerError, UnsupportedAlgorithmError
+from pqc.errors import TrustedIdentityConflictError, UnknownTrustedPeerError
 from pqc.protocol.identity import PublicIdentity, _validated_identity_name
-from pqc.signatures import ML_DSA_65_METADATA
 
 
 class TrustedIdentityStore:
@@ -15,14 +14,16 @@ class TrustedIdentityStore:
     def __init__(self) -> None:
         self._identities: dict[str, PublicIdentity] = {}
 
-    def trust(self, identity: PublicIdentity) -> None:
-        """Explicitly provision or replace a peer's trusted public identity."""
+    def trust(self, identity: PublicIdentity, *, overwrite: bool = False) -> None:
+        """Explicitly provision a peer, rejecting silent key replacement."""
 
         if not isinstance(identity, PublicIdentity):
             raise TypeError(f"identity must be a PublicIdentity. Got {type(identity).__name__}.")
-        if identity.algorithm != ML_DSA_65_METADATA.name:
-            raise UnsupportedAlgorithmError(
-                f"Trusted identity {identity.owner!r} uses unsupported algorithm {identity.algorithm!r}."
+        if not isinstance(overwrite, bool):
+            raise TypeError(f"overwrite must be a bool. Got {type(overwrite).__name__}.")
+        if identity.owner in self._identities and not overwrite:
+            raise TrustedIdentityConflictError(
+                f"Identity for {identity.owner!r} is already trusted; pass overwrite=True to replace it."
             )
         self._identities[identity.owner] = identity
 

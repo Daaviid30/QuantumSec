@@ -5,9 +5,10 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
+from core.constants import DEFAULT_ATOL
 from core.rng import BaseRNG
+from qkd._validation import copy_binary_vector, copy_indices, validate_aligned_keys
 from qkd.metrics.qber import qber
-from qkd.postprocessing._validation import copy_binary_vector, copy_indices, validate_aligned_keys
 
 
 @dataclass(frozen=True, slots=True, eq=False)
@@ -51,7 +52,12 @@ class ParameterEstimationResult:
         estimated_qber = float(self.estimated_qber)
         if not np.isfinite(estimated_qber) or not 0.0 <= estimated_qber <= 1.0:
             raise ValueError(f"estimated_qber must lie in [0, 1]. Got {estimated_qber}.")
-        if estimated_qber != qber(alice_disclosed, bob_disclosed):
+        if not np.isclose(
+            estimated_qber,
+            qber(alice_disclosed, bob_disclosed),
+            atol=DEFAULT_ATOL,
+            rtol=0.0,
+        ):
             raise ValueError("estimated_qber must equal the QBER of the disclosed sample.")
 
         object.__setattr__(self, "n_sifted", n_sifted)

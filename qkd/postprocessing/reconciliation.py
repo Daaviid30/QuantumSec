@@ -7,7 +7,7 @@ import numpy as np
 import numpy.typing as npt
 
 from core.rng import BaseRNG
-from qkd.postprocessing._validation import copy_indices, validate_aligned_keys
+from qkd._validation import copy_indices, validate_aligned_keys
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,6 +21,7 @@ class CascadeConfig:
     passes: int = 4
     initial_block_factor: float = 0.73
     maximum_initial_block_size: int | None = None
+    maximum_lookback_steps: int | None = None
 
     def __post_init__(self) -> None:
         if isinstance(self.passes, (bool, np.bool_)) or not isinstance(self.passes, (int, np.integer)):
@@ -41,6 +42,15 @@ class CascadeConfig:
             if int(maximum) <= 0:
                 raise ValueError("maximum_initial_block_size must be positive when provided.")
             object.__setattr__(self, "maximum_initial_block_size", int(maximum))
+        lookback_maximum = self.maximum_lookback_steps
+        if lookback_maximum is not None:
+            if isinstance(lookback_maximum, (bool, np.bool_)) or not isinstance(
+                lookback_maximum, (int, np.integer)
+            ):
+                raise ValueError("maximum_lookback_steps must be a positive integer or None.")
+            if int(lookback_maximum) <= 0:
+                raise ValueError("maximum_lookback_steps must be positive when provided.")
+            object.__setattr__(self, "maximum_lookback_steps", int(lookback_maximum))
         object.__setattr__(self, "passes", int(self.passes))
         object.__setattr__(self, "initial_block_factor", factor)
 
@@ -208,7 +218,16 @@ def reconcile_cascade(
                 pending.append(item)
                 queued.add(item)
 
+        lookback_steps = 0
+        derived_lookback_limit = len(blocks) + n_bits * pass_index
+        lookback_limit = clean_config.maximum_lookback_steps or derived_lookback_limit
         while pending:
+            lookback_steps += 1
+            if lookback_steps > lookback_limit:
+                raise RuntimeError(
+                    "Cascade look-back exceeded its maximum step limit. "
+                    f"Got limit={lookback_limit} in pass={pass_index}."
+                )
             source_pass, block_index = pending.popleft()
             queued.discard((source_pass, block_index))
             indices = layouts[source_pass].blocks[block_index]

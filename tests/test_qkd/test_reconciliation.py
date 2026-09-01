@@ -59,6 +59,50 @@ def test_cascade_permutations_and_leakage_are_reproducible():
         assert_array_equal(first_pass.permutation, second_pass.permutation)
 
 
+@pytest.mark.parametrize(("length", "error_positions"), [(7, [6]), (11, [1, 9]), (13, [0, 5, 12])])
+def test_cascade_handles_odd_prime_key_lengths(length, error_positions):
+    alice = np.zeros(length, dtype=np.uint8)
+    bob = alice.copy()
+    bob[error_positions] = 1
+
+    result = reconcile_cascade(alice, bob, len(error_positions) / length, SeededRNG(23))
+
+    assert_array_equal(result.bob_corrected_key, alice)
+    assert result.residual_mismatch_count == 0
+
+
+def test_cascade_forces_multilevel_lookback_across_three_passes():
+    alice = np.zeros(61, dtype=np.uint8)
+    bob = alice.copy()
+    bob[[32, 39, 48, 50]] = 1
+
+    result = reconcile_cascade(alice, bob, 0.05, SeededRNG(71))
+
+    assert_array_equal(result.bob_corrected_key, alice)
+    assert [item.corrected_errors for item in result.pass_statistics] == [1, 1, 2, 0]
+    assert result.residual_mismatch_count == 0
+
+
+def test_cascade_config_rejects_invalid_lookback_guard():
+    with pytest.raises(ValueError, match="maximum_lookback_steps"):
+        CascadeConfig(maximum_lookback_steps=0)
+
+
+def test_cascade_explicit_lookback_guard_fails_descriptively():
+    alice = np.zeros(64, dtype=np.uint8)
+    bob = alice.copy()
+    bob[[3, 11, 29, 44]] = 1
+
+    with pytest.raises(RuntimeError, match="maximum step limit"):
+        reconcile_cascade(
+            alice,
+            bob,
+            4 / 64,
+            SeededRNG(7),
+            config=CascadeConfig(maximum_lookback_steps=1),
+        )
+
+
 @pytest.mark.parametrize(
     ("alice", "bob", "qber"),
     [([0], [0, 1], 0.1), ([0, 2], [0, 1], 0.1), ([0, 1], [0, 1], -0.1)],

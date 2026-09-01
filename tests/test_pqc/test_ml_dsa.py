@@ -2,8 +2,9 @@
 
 import pytest
 
+from pqc.backends import oqs_backend
 from pqc.backends.oqs_backend import OQSSignatureBackend
-from pqc.errors import UnsupportedAlgorithmError
+from pqc.errors import BackendUnavailableError, UnsupportedAlgorithmError
 from pqc.signatures import ML_DSA_65_METADATA, MLDSA65
 
 
@@ -31,6 +32,16 @@ def test_ml_dsa_65_metadata_is_precise(signer: MLDSA65) -> None:
     assert signer.metadata.family == "module-lattice based"
     assert signer.metadata.nist_security_category == 3
     assert signer.metadata.standardization == "NIST FIPS 204"
+    assert signer.metadata.public_key_length == 1952
+    assert signer.metadata.secret_key_length == 4032
+    assert signer.metadata.signature_length == 3309
+
+
+def test_empty_message_can_be_signed_and_verified(signer: MLDSA65) -> None:
+    signature = signer.sign(b"")
+
+    assert 0 < len(signature) <= signer.metadata.signature_length
+    assert signer.verify(b"", signature, signer.public_key)
 
 
 def test_modified_message_and_signature_are_invalid(signer: MLDSA65) -> None:
@@ -65,3 +76,37 @@ def test_private_key_is_not_exposed_by_normal_representation(signer: MLDSA65) ->
 def test_unsupported_backend_algorithm_has_domain_error() -> None:
     with pytest.raises(UnsupportedAlgorithmError, match="not enabled"):
         OQSSignatureBackend().generate_keypair("NOT-A-SIGNATURE-ALGORITHM")
+
+
+def test_backend_load_failure_has_domain_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fail_import(_module_name: str) -> None:
+        raise ImportError("simulated missing backend")
+
+    oqs_backend._load_oqs.cache_clear()
+    oqs_backend._ensure_signature_algorithm_enabled.cache_clear()
+    monkeypatch.setattr(oqs_backend, "import_module", fail_import)
+    try:
+        with pytest.raises(BackendUnavailableError, match="could not be loaded"):
+            OQSSignatureBackend().generate_keypair("ML-DSA-65")
+    finally:
+        oqs_backend._load_oqs.cache_clear()
+        oqs_backend._ensure_signature_algorithm_enabled.cache_clear()
+
+
+def test_enabled_algorithm_check_is_cached(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeOQSModule:
+        checks = 0
+
+        def is_sig_enabled(self, _algorithm: str) -> int:
+            self.checks += 1
+            return 1
+
+    fake_module = FakeOQSModule()
+    oqs_backend._ensure_signature_algorithm_enabled.cache_clear()
+    monkeypatch.setattr(oqs_backend, "_load_oqs", lambda: fake_module)
+    try:
+        oqs_backend._ensure_signature_algorithm_enabled("CACHE-TEST")
+        oqs_backend._ensure_signature_algorithm_enabled("CACHE-TEST")
+        assert fake_module.checks == 1
+    finally:
+        oqs_backend._ensure_signature_algorithm_enabled.cache_clear()

@@ -3,13 +3,41 @@ import pytest
 from numpy.testing import assert_allclose
 
 from core.constants import DEFAULT_ATOL
-from qkd.primitives import Basis, bases_from_bits, basis_from_bit
+from qkd.primitives import Basis, bases_from_bits, basis_from_bit, operations, states
 from qkd.primitives.measurements import (
     MEASUREMENT_X,
     MEASUREMENT_Y,
     MEASUREMENT_Z,
     MEASUREMENTS_BY_BASIS,
 )
+
+
+def test_named_qkd_states_and_operators_are_immutable():
+    constants = (
+        states.KET0,
+        states.KET1,
+        states.PLUS,
+        states.MINUS,
+        states.PLUS_I,
+        states.MINUS_I,
+        states.PHI_PLUS,
+        states.PHI_MINUS,
+        states.PSI_PLUS,
+        states.PSI_MINUS,
+        operations.X,
+        operations.Y,
+        operations.Z,
+        operations.H,
+    )
+
+    assert all(not constant.flags.writeable for constant in constants)
+    with pytest.raises(ValueError):
+        states.KET0[0] = 0
+
+
+def test_standard_measurement_registry_is_structurally_immutable():
+    with pytest.raises(TypeError):
+        MEASUREMENTS_BY_BASIS[Basis.Z] = MEASUREMENT_X  # pyright: ignore[reportIndexIssue]
 
 
 @pytest.mark.parametrize(

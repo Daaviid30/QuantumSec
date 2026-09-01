@@ -14,6 +14,9 @@ class SignatureMetadata:
     family: str
     nist_security_category: int
     standardization: str
+    public_key_length: int
+    secret_key_length: int
+    signature_length: int
 
     def __post_init__(self) -> None:
         for field_name in ("name", "algorithm_type", "family", "standardization"):
@@ -25,6 +28,10 @@ class SignatureMetadata:
         category = self.nist_security_category
         if isinstance(category, bool) or not isinstance(category, int) or category <= 0:
             raise ValueError("nist_security_category must be a positive integer.")
+        for field_name in ("public_key_length", "secret_key_length", "signature_length"):
+            value = getattr(self, field_name)
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(f"{field_name} must be a positive integer.")
 
 
 class SignatureProvider(ABC):
@@ -57,8 +64,9 @@ class SignatureProvider(ABC):
 
         raise NotImplementedError
 
+    @staticmethod
     @abstractmethod
-    def verify(self, message: bytes, signature: bytes, public_key: bytes) -> bool:
+    def verify(message: bytes, signature: bytes, public_key: bytes) -> bool:
         """Verify a signature against an explicitly supplied public key."""
 
         raise NotImplementedError

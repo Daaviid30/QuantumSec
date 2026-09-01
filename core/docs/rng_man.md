@@ -8,7 +8,7 @@ Therefore, providing a robust, flexible, and mathematically sound random number 
 ## 2. Architectural Decisions
 The `rng.py` module was designed around three main engineering principles:
 
-1. **Object-Oriented Abstraction (`BaseRNG`)**: We chose to use an Abstract Base Class (ABC) to define a strict blueprint. Any generator implemented in this project must expose a `.gen` property that yields a NumPy generator. This ensures the rest of the codebase interacts with a uniform interface regardless of how the randomness is achieved under the hood.
+1. **Object-Oriented Abstraction (`BaseRNG`)**: We chose to use an Abstract Base Class (ABC) to define a strict blueprint. Any generator implemented in this project exposes a `.gen` property for general NumPy sampling and a `random_bits()` method for binary choices. Specialized sources can therefore model imperfect binary output without changing non-binary sampling semantics.
 2. **Dependency Injection**: None of the cryptographic functions (like `random_bit` or `random_basis`) instantiate their own RNG. Instead, the RNG object must be injected (passed as a parameter). This allows instant swapping between a deterministic testing environment and chaotic production environment without modifying the cryptographic functions themselves.
 3. **Reproducibility vs. Chaos**: We explicitly separated the concept of reproducible testing (`SeededRNG`) from unpredictable runs (`GlobalRNG`). This is crucial because standard cryptography needs entropy, but unit tests demand reproducibility.
 
@@ -30,6 +30,9 @@ The `rng.py` module was designed around three main engineering principles:
 - **Decisions Made**:
   - We introduced `bias_prob` to represent detector imbalance (e.g., favoring a 1 over a 0).
   - We introduced `correlation` using a Markov Chain approach to represent electronic memory or thermal noise, where consecutive mathematical measurements influence each other.
+  - `random_bit()` and `random_basis()` dispatch through `random_bits()`, so injecting a
+    `QRNGSimulator` into BB84 now preserves its configured bias and correlation. Direct `.gen`
+    operations remain delegated to the underlying NumPy generator for general sampling.
 
 ## 4. Cryptographic Helper Functions
 Rather than letting developers interact with the raw `rng.gen` NumPy objects repeatedly, we built tightly-scoped domain wrappers:

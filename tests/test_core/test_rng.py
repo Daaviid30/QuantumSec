@@ -79,6 +79,20 @@ def test_qrng_bias_boundaries_are_deterministic(bias_prob, expected):
     assert_array_equal(simulator.generate_raw_bits(32), np.full(32, expected))
 
 
+@pytest.mark.parametrize("helper", [rng.random_bit, rng.random_basis])
+@pytest.mark.parametrize(("bias_prob", "expected"), [(0.0, 0), (1.0, 1)])
+def test_qrng_bias_is_honored_through_binary_helper_interface(helper, bias_prob, expected):
+    simulator = rng.QRNGSimulator(rng.SeededRNG(7), bias_prob=bias_prob, correlation=0.5)
+
+    assert_array_equal(helper(simulator, size=32), np.full(32, expected))
+
+
+def test_qrng_scalar_binary_helper_honors_configured_bias():
+    simulator = rng.QRNGSimulator(rng.SeededRNG(7), bias_prob=1.0)
+
+    assert rng.random_bit(simulator) == 1
+
+
 def test_qrng_same_seed_reproduces_correlated_sequence():
     first = rng.QRNGSimulator(rng.SeededRNG(99), bias_prob=0.6, correlation=0.4)
     second = rng.QRNGSimulator(rng.SeededRNG(99), bias_prob=0.6, correlation=0.4)
@@ -110,6 +124,12 @@ def test_qrng_rejects_negative_size(correlation):
 
     with pytest.raises(ValueError):
         simulator.generate_raw_bits(-1)
+
+
+@pytest.mark.parametrize("size", [1.5, True])
+def test_qrng_rejects_non_integer_size(size):
+    with pytest.raises(ValueError, match="integer"):
+        rng.QRNGSimulator(rng.SeededRNG(7)).generate_raw_bits(size)
 
 
 @pytest.mark.parametrize("bias_prob", [-0.01, 1.01])

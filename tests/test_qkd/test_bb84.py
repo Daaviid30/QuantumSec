@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
-from core.rng import SeededRNG
+from core.rng import QRNGSimulator, SeededRNG
 from qkd.channel import BitFlipChannel, DepolarizingChannel, IdentityChannel, QuantumChannel
 from qkd.primitives import Basis
 from qkd.primitives.states import KET0, KET1, MINUS, PLUS
@@ -108,6 +108,17 @@ def test_different_seeds_can_produce_different_bb84_runs():
         and first.alice_bases == second.alice_bases
         and first.bob_bases == second.bob_bases
     )
+
+
+def test_bb84_honors_qrng_bias_for_raw_bits_and_basis_choices():
+    qrng = QRNGSimulator(SeededRNG(18), bias_prob=1.0, correlation=0.4)
+    result = BB84Protocol(IdentityChannel(), qrng).run(32)
+
+    assert_array_equal(result.alice_raw_bits, np.ones(32, dtype=np.uint8))
+    assert result.alice_bases == (Basis.X,) * 32
+    assert result.bob_bases == (Basis.X,) * 32
+    assert result.n_sifted == 32
+    assert result.qber == 0.0
 
 
 def test_bb84_result_protects_all_stored_key_arrays():

@@ -1,10 +1,13 @@
 """Private and public identities for PQC authentication."""
 
+import base64
+import binascii
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Self
 
-from pqc.errors import UnsupportedAlgorithmError
 from pqc.signatures import ML_DSA_65_METADATA, MLDSA65, SignatureMetadata
+from pqc.signatures.registry import _metadata_for_algorithm, verify_signature
 
 
 def _validated_identity_name(value: object) -> str:
@@ -35,9 +38,49 @@ class PublicIdentity:
             raise TypeError(f"public_key must be bytes. Got {type(self.public_key).__name__}.")
         if not self.public_key:
             raise ValueError("public_key must not be empty.")
+        metadata = _metadata_for_algorithm(algorithm)
+        if metadata is not None and len(self.public_key) != metadata.public_key_length:
+            raise ValueError(
+                f"{algorithm} public_key must contain {metadata.public_key_length} bytes. "
+                f"Got {len(self.public_key)}."
+            )
         object.__setattr__(self, "owner", owner)
         object.__setattr__(self, "algorithm", algorithm)
         object.__setattr__(self, "public_key", bytes(self.public_key))
+
+    def verify(self, message: bytes, signature: bytes) -> bool:
+        """Verify a signature using only this public identity."""
+
+        return verify_signature(self.algorithm, message, signature, self.public_key)
+
+    def to_dict(self) -> dict[str, str]:
+        """Serialize this non-secret identity to a JSON-compatible mapping."""
+
+        return {
+            "owner": self.owner,
+            "algorithm": self.algorithm,
+            "public_key": base64.b64encode(self.public_key).decode("ascii"),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> Self:
+        """Restore a public identity from its JSON-compatible mapping."""
+
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
+        missing = {"owner", "algorithm", "public_key"}.difference(payload)
+        if missing:
+            raise ValueError(f"Public identity payload is missing fields: {', '.join(sorted(missing))}.")
+        owner = payload["owner"]
+        algorithm = payload["algorithm"]
+        encoded_key = payload["public_key"]
+        if not isinstance(owner, str) or not isinstance(algorithm, str) or not isinstance(encoded_key, str):
+            raise TypeError("Public identity fields owner, algorithm, and public_key must be strings.")
+        try:
+            public_key = base64.b64decode(encoded_key, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise ValueError("Public identity public_key must be valid Base64.") from exc
+        return cls(owner=owner, algorithm=algorithm, public_key=public_key)
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -85,11 +128,7 @@ class MLDSAIdentity:
 
         if not isinstance(identity, PublicIdentity):
             raise TypeError(f"identity must be a PublicIdentity. Got {type(identity).__name__}.")
-        if identity.algorithm != self.metadata.name:
-            raise UnsupportedAlgorithmError(
-                f"Trusted identity {identity.owner!r} uses unsupported algorithm {identity.algorithm!r}."
-            )
-        return self._signer.verify(message, signature, identity.public_key)
+        return identity.verify(message, signature)
 
     def __repr__(self) -> str:
         return f"MLDSAIdentity(owner={self.owner!r}, algorithm={self.metadata.name!r})"

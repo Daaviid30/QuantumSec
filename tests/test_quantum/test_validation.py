@@ -31,9 +31,11 @@ ATOL = DEFAULT_ATOL
         (np.array([0.25, 0.5]), None, False),
         (np.array([-2 * ATOL, 1 + 2 * ATOL]), None, False),
         (np.array([0.5 + 0.1j, 0.5 - 0.1j]), None, False),
-        (np.array([]), ValueError, None),
-        (np.array([[0.5, 0.5]]), ValueError, None),
-        (np.array([np.nan, 0.0]), ValueError, None),
+        (np.array([]), None, False),
+        (np.array([[0.5, 0.5]]), None, False),
+        (np.array([np.nan, 0.0]), None, False),
+        (np.array([0.5 + ATOL / 2 * 1j, 0.5 - ATOL / 2 * 1j]), None, True),
+        (np.array([0.5 + 2 * ATOL * 1j, 0.5 - 2 * ATOL * 1j]), None, False),
     ],
 )
 def test_is_probability_state(probs, expected_error, expected):
@@ -72,10 +74,10 @@ def test_validate_probability_state(probs, expected_error):
         (np.array([np.sqrt(1 + ATOL / 2), 0]), None, True),
         (np.array([1, 1]), None, False),
         (np.array([np.sqrt(1 + 2 * ATOL), 0]), None, False),
-        (np.array([]), ValueError, None),
-        (np.array([[1, 0]]), ValueError, None),
-        (np.array([[1, 1], [1, 2]], dtype=complex), ValueError, None),
-        (np.array([np.inf, 0]), ValueError, None),
+        (np.array([]), None, False),
+        (np.array([[1, 0]]), None, False),
+        (np.array([[1, 1], [1, 2]], dtype=complex), None, False),
+        (np.array([np.inf, 0]), None, False),
     ],
 )
 def test_is_normalized_state(psi, expected_error, expected):
@@ -113,8 +115,8 @@ def test_validate_normalized_state(psi, expected_error):
         (np.array([1, 1]), ATOL, None, False),
         (np.array([np.sqrt(1 + 5e-8), 0]), 1e-7, None, True),
         (np.array([np.sqrt(1 + 5e-8), 0]), 1e-9, None, False),
-        (np.array([]), ATOL, ValueError, None),
-        (np.array([[1, 0]]), ATOL, ValueError, None),
+        (np.array([]), ATOL, None, False),
+        (np.array([[1, 0]]), ATOL, None, False),
     ],
 )
 def test_is_quantum_state(psi, tol, expected_error, expected):

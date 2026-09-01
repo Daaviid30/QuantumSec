@@ -10,8 +10,11 @@ from quantum.types import ArrayLike
 
 
 def _error_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
-    probabilities = linalg.as_ket(probs)
-    if not np.all(np.isreal(probabilities)):
+    try:
+        probabilities = linalg.as_ket(probs)
+    except (TypeError, ValueError) as error:
+        return str(error)
+    if np.any(np.abs(np.imag(probabilities)) > tol):
         return f"Probability entries must be real. Got {probabilities}."
 
     real_probabilities = np.real(probabilities)
@@ -25,13 +28,7 @@ def _error_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> str
 
 
 def is_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
-    """Return whether a well-formed vector is a probability distribution.
-
-    Raises
-    ------
-    ValueError
-        If ``probs`` is empty, non-finite, or not ket-shaped.
-    """
+    """Return whether an input is a finite probability distribution."""
 
     return _error_probability_state(probs, tol) is None
 
@@ -45,7 +42,10 @@ def validate_probability_state(probs: ArrayLike, tol: float = DEFAULT_ATOL) -> N
 
 
 def _error_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> str | None:
-    state = linalg.as_ket(psi)
+    try:
+        state = linalg.as_ket(psi)
+    except (TypeError, ValueError) as error:
+        return str(error)
     norm_squared = float(np.sum(np.abs(state) ** 2))
     if not np.isclose(norm_squared, 1.0, atol=tol, rtol=0.0):
         return f"A quantum-state ket must have unit norm. Got norm_squared={norm_squared}."
@@ -53,13 +53,7 @@ def _error_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> str | 
 
 
 def is_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
-    """Return whether a well-formed ket has unit norm.
-
-    Raises
-    ------
-    ValueError
-        If ``psi`` is empty, non-finite, or not ket-shaped.
-    """
+    """Return whether an input is a finite ket with unit norm."""
 
     return _error_normalized_state(psi, tol) is None
 
@@ -73,13 +67,7 @@ def validate_normalized_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> None
 
 
 def is_quantum_state(psi: ArrayLike, tol: float = DEFAULT_ATOL) -> bool:
-    """Return whether a well-formed ket represents a normalized pure state.
-
-    Raises
-    ------
-    ValueError
-        If ``psi`` is empty, non-finite, or not ket-shaped.
-    """
+    """Return whether an input represents a normalized pure state."""
 
     return _error_normalized_state(psi, tol) is None
 

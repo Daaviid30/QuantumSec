@@ -1,4 +1,4 @@
-"""Internal validation helpers shared by QKD post-processing stages."""
+"""Internal validation helpers shared across the QKD domain."""
 
 import numpy as np
 import numpy.typing as npt
@@ -60,7 +60,7 @@ def validate_aligned_keys(
 
 
 def validate_non_negative_int(value: object, *, name: str) -> int:
-    """Validate an integer while rejecting booleans."""
+    """Validate a non-negative integer while rejecting booleans."""
 
     if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
         raise ValueError(f"{name} must be a non-negative integer. Got {value!r}.")

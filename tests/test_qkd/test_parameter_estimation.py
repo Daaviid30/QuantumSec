@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from core.rng import SeededRNG
-from qkd.postprocessing import estimate_qber_from_sample
+from qkd.postprocessing import ParameterEstimationResult, estimate_qber_from_sample
 
 
 def test_parameter_estimation_is_reproducible_and_removes_disclosures():
@@ -53,3 +53,17 @@ def test_parameter_estimation_rejects_too_little_sifted_material():
 def test_parameter_estimation_rejects_sample_that_consumes_key():
     with pytest.raises(ValueError, match="leave at least one"):
         estimate_qber_from_sample([0, 1], [0, 1], SeededRNG(1), sample_size=2)
+
+
+def test_parameter_estimation_accepts_round_trip_qber_with_tiny_float_error():
+    result = ParameterEstimationResult(
+        n_sifted=4,
+        disclosed_indices=np.array([0, 2]),
+        alice_disclosed_bits=np.array([0, 1]),
+        bob_disclosed_bits=np.array([1, 1]),
+        estimated_qber=0.5 + 1e-12,
+        alice_candidate_key=np.array([0, 1]),
+        bob_candidate_key=np.array([0, 1]),
+    )
+
+    assert result.estimated_qber == pytest.approx(0.5)

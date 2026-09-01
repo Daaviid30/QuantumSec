@@ -6,41 +6,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
+from qkd._validation import copy_binary_vector, copy_indices
 from qkd.primitives.bases import Basis
-
-
-def _copy_binary_vector(values: npt.ArrayLike, *, name: str) -> npt.NDArray[np.uint8]:
-    """Validate and defensively copy a one-dimensional binary vector."""
-
-    try:
-        vector = np.asarray(values)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{name} must be one-dimensional binary integer data.") from error
-
-    if vector.ndim != 1:
-        raise ValueError(f"{name} must be one-dimensional. Got shape={vector.shape}.")
-    if vector.size > 0 and not np.issubdtype(vector.dtype, np.integer):
-        raise ValueError(f"{name} must contain integer bits. Got dtype={vector.dtype}.")
-    if np.any((vector != 0) & (vector != 1)):
-        raise ValueError(f"{name} must contain only 0 and 1. Got {vector}.")
-
-    result = np.array(vector, dtype=np.uint8, copy=True)
-    result.flags.writeable = False
-    return result
-
-
-def _copy_indices(values: npt.ArrayLike) -> npt.NDArray[np.intp]:
-    """Validate and defensively copy a one-dimensional index vector."""
-
-    indices = np.asarray(values)
-    if indices.ndim != 1:
-        raise ValueError(f"matching_indices must be one-dimensional. Got shape={indices.shape}.")
-    if indices.size > 0 and not np.issubdtype(indices.dtype, np.integer):
-        raise ValueError(f"matching_indices must contain integers. Got dtype={indices.dtype}.")
-
-    result = np.array(indices, dtype=np.intp, copy=True)
-    result.flags.writeable = False
-    return result
 
 
 def _basis_vector(values: Sequence[Basis] | np.ndarray, *, name: str) -> tuple[Basis, ...]:
@@ -73,9 +40,9 @@ class SiftingResult:
         if n_raw < 0:
             raise ValueError(f"n_raw must be non-negative. Got {n_raw}.")
 
-        indices = _copy_indices(self.matching_indices)
-        alice_key = _copy_binary_vector(self.alice_sifted_key, name="alice_sifted_key")
-        bob_key = _copy_binary_vector(self.bob_sifted_key, name="bob_sifted_key")
+        indices = copy_indices(self.matching_indices, name="matching_indices")
+        alice_key = copy_binary_vector(self.alice_sifted_key, name="alice_sifted_key")
+        bob_key = copy_binary_vector(self.bob_sifted_key, name="bob_sifted_key")
 
         if indices.size != alice_key.size or alice_key.size != bob_key.size:
             raise ValueError(
@@ -117,8 +84,8 @@ def sift_keys(
 
     clean_alice_bases = _basis_vector(alice_bases, name="alice_bases")
     clean_bob_bases = _basis_vector(bob_bases, name="bob_bases")
-    clean_alice_bits = _copy_binary_vector(alice_raw_bits, name="alice_raw_bits")
-    clean_bob_bits = _copy_binary_vector(bob_measured_bits, name="bob_measured_bits")
+    clean_alice_bits = copy_binary_vector(alice_raw_bits, name="alice_raw_bits")
+    clean_bob_bits = copy_binary_vector(bob_measured_bits, name="bob_measured_bits")
 
     lengths = (
         len(clean_alice_bases),

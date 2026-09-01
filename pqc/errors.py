@@ -19,3 +19,7 @@ class UnsupportedAlgorithmError(PQCError):
 
 class UnknownTrustedPeerError(PQCError):
     """Raised when a peer is absent from the pre-provisioned trust store."""
+
+
+class TrustedIdentityConflictError(PQCError):
+    """Raised when trust provisioning would silently replace an identity."""

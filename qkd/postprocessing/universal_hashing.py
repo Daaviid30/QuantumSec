@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 
 from core.rng import BaseRNG
-from qkd.postprocessing._validation import copy_binary_vector, validate_non_negative_int
+from qkd._validation import copy_binary_vector, validate_non_negative_int
 
 
 def toeplitz_seed_length(input_length: int, output_length: int) -> int:

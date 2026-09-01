@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as npt
 
 from core.rng import BaseRNG
-from qkd.postprocessing._validation import copy_binary_vector, validate_aligned_keys
+from qkd._validation import copy_binary_vector, validate_aligned_keys
 from qkd.postprocessing.universal_hashing import generate_toeplitz_seed, toeplitz_hash
 
 

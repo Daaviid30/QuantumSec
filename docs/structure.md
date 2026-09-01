@@ -208,7 +208,8 @@ Responsibilities:
 - state construction: `dm_from_ket`, `dm_from_ensemble`
 - validation: `is_normalized_state`, `is_unitary`, `is_hermitian`, `is_density_matrix`, `is_quantum_state`
 - quantum measures: `fidelity`, `trace_distance`, `von_neumann_entropy`, `purity`
-- physics errors: `QuantumStateError`, `QuantumOperatorError`
+- validation errors currently use standard `ValueError`; `quantum/errors.py` is reserved for a
+  future domain-exception hierarchy if concrete callers require one
 
 Rule of thumb:
 

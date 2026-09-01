@@ -1,6 +1,7 @@
 """Adapter isolating the liboqs-python signature API."""
 
 from dataclasses import dataclass, field
+from functools import cache, lru_cache
 from importlib import import_module
 from types import ModuleType, TracebackType
 from typing import Protocol, Self, cast
@@ -47,6 +48,7 @@ class OQSKeyPair:
     secret_key: bytes = field(repr=False)
 
 
+@lru_cache(maxsize=1)
 def _load_oqs() -> _OQSModule:
     try:
         module: ModuleType = import_module("oqs")
@@ -55,7 +57,8 @@ def _load_oqs() -> _OQSModule:
     return cast(_OQSModule, module)
 
 
-def _new_signature(algorithm: str, *, secret_key: bytes | None = None) -> _OQSSignature:
+@cache
+def _ensure_signature_algorithm_enabled(algorithm: str) -> None:
     module = _load_oqs()
     try:
         algorithm_enabled = bool(module.is_sig_enabled(algorithm))
@@ -63,6 +66,11 @@ def _new_signature(algorithm: str, *, secret_key: bytes | None = None) -> _OQSSi
         raise BackendUnavailableError("The liboqs backend could not query enabled algorithms.") from exc
     if not algorithm_enabled:
         raise UnsupportedAlgorithmError(f"Signature algorithm {algorithm!r} is not enabled by liboqs.")
+
+
+def _new_signature(algorithm: str, *, secret_key: bytes | None = None) -> _OQSSignature:
+    module = _load_oqs()
+    _ensure_signature_algorithm_enabled(algorithm)
     try:
         return module.Signature(algorithm, secret_key=secret_key)
     except (module.MechanismNotEnabledError, module.MechanismNotSupportedError) as exc:
