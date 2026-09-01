@@ -30,10 +30,10 @@
     "semantic_hash": "448d66ed341592ab8b2f51eeec39fd06"
   },
   "pyproject.toml": {
-    "mtime": 1788278449.229322,
-    "seen": 1788282823.9932787,
-    "ast_hash": "a8171a09132a893fed9060a4ef5faabd",
-    "semantic_hash": "a8171a09132a893fed9060a4ef5faabd"
+    "mtime": 1788284538.5532508,
+    "seen": 1788284660.1480262,
+    "ast_hash": "c622f9292b0a1cfb1d2c0b554f28a335",
+    "semantic_hash": ""
   },
   "qkd/__init__.py": {
     "mtime": 1788191176.758441,
@@ -264,10 +264,10 @@
     "semantic_hash": "71dfe8b68c045452a02d006183f9fdf9"
   },
   "README.md": {
-    "mtime": 1788193682.6139507,
-    "seen": 1788282823.9933965,
-    "ast_hash": "76254484cf204c36860502683da2bbf5",
-    "semantic_hash": "76254484cf204c36860502683da2bbf5"
+    "mtime": 1788284540.3152337,
+    "seen": 1788284660.1481795,
+    "ast_hash": "5d592115b23e2f73f0d24cf083427632",
+    "semantic_hash": ""
   },
   "core/docs/rng_man.md": {
     "mtime": 1788191176.698403,
@@ -282,10 +282,10 @@
     "semantic_hash": "0c566f8b084dbacf2100a8866eccd6f2"
   },
   "docs/structure.md": {
-    "mtime": 1788194436.9689739,
-    "seen": 1788282823.9933987,
-    "ast_hash": "170b9b9804776bc69c35ba37092fddf2",
-    "semantic_hash": "170b9b9804776bc69c35ba37092fddf2"
+    "mtime": 1788284539.470291,
+    "seen": 1788284660.148183,
+    "ast_hash": "70be8851c8c87cbf2c1e193523225d19",
+    "semantic_hash": ""
   },
   "docs/tasks.md": {
     "mtime": 1788191176.698403,
@@ -785,12 +785,6 @@
     "ast_hash": "04f214625941ea4aab93fc238dc6d75b",
     "semantic_hash": "04f214625941ea4aab93fc238dc6d75b"
   },
-  ".codex/hooks.json": {
-    "mtime": 1788282349.6491556,
-    "seen": 1788282823.9932656,
-    "ast_hash": "da81092b9f132903281aebf96b7c8b0b",
-    "semantic_hash": "da81092b9f132903281aebf96b7c8b0b"
-  },
   "qkd/metrics/security.py": {
     "mtime": 1788193704.8829744,
     "seen": 1788282823.9932928,
@@ -888,9 +882,9 @@
     "semantic_hash": "a0f30ecb0b9af038b3dbbd8767b74fed"
   },
   ".serena/memories/core.md": {
-    "mtime": 1788283613.426903,
-    "seen": 1788283656.57355,
-    "ast_hash": "ce5803a2017cf2f37488701072206816",
+    "mtime": 1788284755.845689,
+    "seen": 1788284798.5143733,
+    "ast_hash": "9bedcbe4039616956c4558e805101618",
     "semantic_hash": ""
   },
   ".serena/memories/infrastructure/core.md": {
@@ -957,6 +951,90 @@
     "mtime": 1788283616.450704,
     "seen": 1788283656.5735607,
     "ast_hash": "0d4f0d550dd43fbc2b44eb2c41a93e3d",
+    "semantic_hash": ""
+  },
+  "pqc/__init__.py": {
+    "mtime": 1788284458.939964,
+    "seen": 1788284660.1480126,
+    "ast_hash": "7051f1374067f57776dc6b32517482b7",
+    "semantic_hash": ""
+  },
+  "pqc/backends/__init__.py": {
+    "mtime": 1788284450.2175157,
+    "seen": 1788284660.1480145,
+    "ast_hash": "cfcd6cbedd9ebde0408a95bec75c64ad",
+    "semantic_hash": ""
+  },
+  "pqc/backends/oqs_backend.py": {
+    "mtime": 1788284751.643065,
+    "seen": 1788284798.5142262,
+    "ast_hash": "6b3e12b76bb0bc99c8d00e3f5cc02368",
+    "semantic_hash": ""
+  },
+  "pqc/errors.py": {
+    "mtime": 1788284448.8302863,
+    "seen": 1788284660.1480172,
+    "ast_hash": "1c0b574a2cbfaaf606fe0abfca365863",
+    "semantic_hash": ""
+  },
+  "pqc/protocol/__init__.py": {
+    "mtime": 1788284458.1181276,
+    "seen": 1788284660.148018,
+    "ast_hash": "cdd4a92403635fa2a389f3bd6ac63409",
+    "semantic_hash": ""
+  },
+  "pqc/protocol/identity.py": {
+    "mtime": 1788284455.6203854,
+    "seen": 1788284660.1480193,
+    "ast_hash": "238c0909879a0ca0b3cb97f2162cd1f0",
+    "semantic_hash": ""
+  },
+  "pqc/protocol/party.py": {
+    "mtime": 1788284537.7203698,
+    "seen": 1788284660.1480203,
+    "ast_hash": "7f786bc39c2a7e594349383a893b56ad",
+    "semantic_hash": ""
+  },
+  "pqc/protocol/trust.py": {
+    "mtime": 1788284753.312702,
+    "seen": 1788284798.5142334,
+    "ast_hash": "651e6022e6a5553d74e4df0406c15657",
+    "semantic_hash": ""
+  },
+  "pqc/signatures/__init__.py": {
+    "mtime": 1788284454.1839993,
+    "seen": 1788284660.1480222,
+    "ast_hash": "f4487770046a8f8cee06674f7afbf2ed",
+    "semantic_hash": ""
+  },
+  "pqc/signatures/base.py": {
+    "mtime": 1788284452.4772842,
+    "seen": 1788284660.1480234,
+    "ast_hash": "bd1727eff012f6c94a4541a12b0fe5a7",
+    "semantic_hash": ""
+  },
+  "pqc/signatures/ml_dsa.py": {
+    "mtime": 1788284752.4833863,
+    "seen": 1788284798.514237,
+    "ast_hash": "48c152ed46cb4ddce54a5405897f1569",
+    "semantic_hash": ""
+  },
+  "tests/test_pqc/test_identity.py": {
+    "mtime": 1788284542.549275,
+    "seen": 1788284660.1480749,
+    "ast_hash": "13233ce13accc3984cc1a28ba62bbf6b",
+    "semantic_hash": ""
+  },
+  "tests/test_pqc/test_ml_dsa.py": {
+    "mtime": 1788284754.1891775,
+    "seen": 1788284798.5142882,
+    "ast_hash": "6b5fc6c1edacc570383cedb3eaaeb5ba",
+    "semantic_hash": ""
+  },
+  "tests/test_pqc/test_party.py": {
+    "mtime": 1788284755.0187109,
+    "seen": 1788284798.5142894,
+    "ast_hash": "c6636a30c9755b34f50d925f0cfeb964",
     "semantic_hash": ""
   }
 }

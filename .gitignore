@@ -39,3 +39,6 @@ graphify-out/.graphify_root
 graphify-out/*.sig
 graphify-out/[0-9][0-9][0-9][0-9]-*/
 .codex/
+
+# extra files generated
+review_prompt.md

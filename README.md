@@ -1,10 +1,11 @@
 # QuantumSec
 
 A modular, reproducible simulation platform for Quantum Key Distribution (QKD), quantum-channel
-research, and the future evaluation of post-quantum authentication mechanisms.
+research, and post-quantum authentication mechanisms.
 
 The current release includes a functional BB84 engine and a dark-first web laboratory for composing
-logical-qubit channels, running seeded simulations, and inspecting genuine simulation output.
+logical-qubit channels, running seeded simulations, and inspecting genuine simulation output. It
+also includes a standalone ML-DSA-65 identity and pre-provisioned trust foundation backed by liboqs.
 
 ## 📌 Overview
 
@@ -41,6 +42,9 @@ ui/frontend -> ui/backend -> qkd -> quantum -> core
 `core` and the simulation packages never depend on `ui`. The web backend is an adapter over the
 existing public APIs; it does not implement quantum behavior.
 
+`qkd` and `pqc` are sibling domains and never import each other. Their future composition belongs in
+an upper orchestration layer.
+
 
 ### Core Components
 
@@ -48,7 +52,7 @@ existing public APIs; it does not implement quantum behavior.
   Logical implementation of QKD protocols with clear phase separation.
 
 - **Authentication Module**  
-  Pluggable authentication schemes for securing the classical channel.
+  ML-DSA-65 identities, signatures, and explicit pre-provisioned trust. QKD integration is not yet implemented.
 
 - **Mathematical Layer**  
   Lightweight abstractions for modeling quantum-like behavior.
@@ -81,11 +85,12 @@ from the key length.
 The current length estimator is an **asymptotic BB84 model**, not a complete composable finite-key
 security proof. It assumes a symmetric phase-error rate represented by sampled QBER and subtracts
 actual simulated reconciliation and confirmation leakage exactly once. The classical channel is
-assumed authenticated. PQC authentication remains an intentionally separate future QuantumSec
-layer; without authentication, the simulator must not be interpreted as end-to-end secure QKD.
+assumed authenticated. The standalone PQC identity layer is intentionally not connected to QKD yet;
+without that future composition, the simulator must not be interpreted as end-to-end secure QKD.
 
 Optical loss, experiment sweeps, physical transmission timing/secret bits per second, production
-LDPC reconciliation, PQC authentication, and QKDN functionality are not implemented yet.
+LDPC reconciliation, PQC key establishment/handshakes, QKD/PQC integration, and QKDN functionality
+are not implemented yet.
 
 ## 🖥️ Web UI V1
 

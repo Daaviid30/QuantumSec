@@ -53,7 +53,7 @@ pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "basic"  # Podría ser strict
-include = ["core", "quantum", "qkd", "ui/backend", "tests"]
+include = ["core", "quantum", "qkd", "pqc", "ui/backend", "tests"]
 exclude = [
     ".venv/",
     "__pycache__/",

@@ -12,6 +12,6 @@
 - Comandos reproducibles para Windows/uv: `mem:suggested_commands`.
 - Estilo, validación, tipos y pruebas: `mem:conventions`.
 - Puertas de calidad obligatorias antes de terminar una tarea: `mem:task_completion`.
-- `pqc/`, `experiments/`, configuraciones y modelos ópticos son capas previstas; no fingir que existen ni mezclar su lógica en los módulos actuales.
+- `pqc/` ya contiene la base de Fase 1: ML-DSA-65 real mediante liboqs, identidades públicas/privadas, confianza preaprovisionada y `PQCParty`. Sigue siendo hermano de `qkd/`; KEM, handshakes e integración QKD/PQC no existen aún. `experiments/`, configuraciones y modelos ópticos siguen siendo capas previstas.
 - `docs/structure.md` es la fuente de verdad arquitectónica; `README.md` conserva parte de una visión objetivo antigua y puede mencionar directorios aún no implementados.
 - `graphify-out/` contiene el mapa de relaciones. Tras cambios arquitectónicos o de símbolos, actualizar Graphify con `graphify update .`.

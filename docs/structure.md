@@ -87,10 +87,16 @@ QuantumSec/
 |
 |-- pqc/
 |   |-- __init__.py
+|   |-- errors.py
+|   |-- backends/
+|   |   `-- oqs_backend.py
 |   |-- signatures/
-|   |-- kem/
-|   |-- hybrid/
-|   `-- auth/
+|   |   |-- base.py
+|   |   `-- ml_dsa.py
+|   `-- protocol/
+|       |-- identity.py
+|       |-- trust.py
+|       `-- party.py
 |
 |-- experiments/
 |   |-- __init__.py
@@ -274,22 +280,32 @@ explicitly.
 
 Post-quantum cryptography and authentication. This module should not import from `qkd/`. Its job is to provide cryptographic tools and interfaces that can be used by experiments or authentication adapters.
 
-Suggested structure:
+Implemented Phase 1 structure:
 
 ```text
-pqc/signatures/
-pqc/kem/
-pqc/hybrid/
-pqc/auth/
+pqc/backends/       = isolated external-provider adapters
+pqc/signatures/     = signature interface and ML-DSA-65 implementation
+pqc/protocol/       = private/public identities, trust stores, and parties
 ```
 
-Responsibilities:
+ML-DSA-65 currently provides post-quantum digital identity and authentication primitives through
+`liboqs-python`. `PublicIdentity` is an immutable, non-secret trust artifact; `PQCParty` signs with
+its own private identity and verifies peers only through explicitly pre-provisioned public keys.
+Receiving a public key never makes it trusted automatically.
+
+PQC cryptographic randomness comes from liboqs and the operating-system CSPRNG. It is intentionally
+not injected or seeded: reproducible `SeededRNG` instances remain specific to QKD simulations and
+other scientific models.
+
+Current responsibilities:
 
 - signature interfaces: `keygen`, `sign`, `verify`
-- KEM interfaces: `keygen`, `encapsulate`, `decapsulate`
-- hybrid schemes
-- QKD classical-channel authentication wrappers
-- benchmarkable authentication overhead results
+- real ML-DSA-65 execution behind a backend-independent adapter
+- named private identities and immutable public identities
+- explicit pre-provisioned peer trust
+
+Key establishment is **not implemented**. ML-KEM, HQC, KDFs, handshakes, session keys, hybrid
+schemes, and QKD/PQC composition belong to later phases.
 
 ### `experiments/`
 
@@ -388,8 +404,9 @@ authentication belongs in a future upper-layer integration and is intentionally 
 | `ChannelPipeline` | `qkd/channel/pipeline.py` |
 | `BB84Protocol` | `qkd/protocols/bb84.py` |
 | `qber` | `qkd/metrics/qber.py` |
-| `DilithiumSignature` | `pqc/signatures/dilithium.py` |
-| `QKDSessionAuthenticator` | `pqc/auth/` or `experiments/auth/` boundary |
+| `MLDSA65` | `pqc/signatures/ml_dsa.py` |
+| `PQCParty`, `PublicIdentity` | `pqc/protocol/` |
+| future QKD/PQC composition | upper orchestration layer, never direct `qkd`/`pqc` imports |
 
 ---
 
@@ -405,7 +422,7 @@ Current development order:
 6. Noise experiments using the CPTP channel models
 7. Optical transmission and loss as a separate physical layer
 8. Advanced postprocessing (parameter estimation, Cascade, confirmation, and Toeplitz extraction complete)
-9. PQC authentication and comparative experiments
+9. PQC authentication: ML-DSA identity/trust foundation complete; key establishment and comparative experiments remain
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
 
@@ -440,7 +457,8 @@ tests/
 
 Testing rules:
 
-- any test involving randomness must use `SeededRNG`
+- simulation tests involving injected randomness must use `SeededRNG`
+- PQC cryptographic tests must use secure backend randomness and assert invariants, not deterministic keys/signatures
 - validation tests should include invalid shapes, non-normalized states, and floating-point tolerance cases
 - QKD tests should include known analytical behavior, such as ideal BB84 producing QBER 0
 - experiment tests should verify reproducibility from the same seed
@@ -501,7 +519,8 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 
 ## 10. Current Immediate Goal
 
-The mathematical primitives, quantum-channel foundation, complete BB84 post-processing, and Web UI
-are in place. The next simulation milestone is structured noise experimentation over
-`ChannelPipeline`. Optical loss remains a later, physically separate model. PQC authentication must
-still be added before treating these simulated final-key workflows as authenticated QKD sessions.
+The mathematical primitives, quantum-channel foundation, complete BB84 post-processing, Web UI,
+and Phase 1 ML-DSA identity/trust foundation are in place. The PQC layer can authenticate standalone
+byte messages between pre-provisioned parties, but it is not connected to BB84. Key establishment,
+handshakes, and QKD/PQC orchestration remain future work, so simulated QKD workflows must not yet be
+treated as end-to-end authenticated sessions.
