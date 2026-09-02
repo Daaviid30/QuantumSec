@@ -5,7 +5,8 @@ research, and post-quantum authentication mechanisms.
 
 The current release includes a functional BB84 engine and a dark-first web laboratory for composing
 logical-qubit channels, running seeded simulations, and inspecting genuine simulation output. It
-also includes a standalone ML-DSA-65 identity and pre-provisioned trust foundation backed by liboqs.
+also includes ML-DSA-65 identities and pre-provisioned trust, plus authenticated ephemeral KEM
+offers using ML-KEM-768 and optional HQC-3, all backed by liboqs.
 
 ## 📌 Overview
 
@@ -52,7 +53,7 @@ an upper orchestration layer.
   Logical implementation of QKD protocols with clear phase separation.
 
 - **Authentication Module**  
-  ML-DSA-65 identities, signatures, and explicit pre-provisioned trust. QKD integration is not yet implemented.
+  ML-DSA-65 identities, explicit trust, ephemeral KEM material, and authenticated server offers.
 
 - **Mathematical Layer**  
   Lightweight abstractions for modeling quantum-like behavior.
@@ -67,6 +68,17 @@ an upper orchestration layer.
 - deterministic runs through the injected `SeededRNG`
 - composable Identity, Depolarizing, Pauli, Bit Flip, Phase Flip, and Amplitude Damping channels
 - per-position raw-result inspection, stage shrinkage, and security summaries in the Web UI
+
+The standalone PQC profiles currently implemented are:
+
+```text
+LOW  = ML-KEM-768, authenticated with ML-DSA-65
+HIGH = ML-KEM-768 + HQC-3 diverse-KEM offer, authenticated with ML-DSA-65
+```
+
+QuantumSec can construct an authenticated `ServerKeyOffer`, while retaining Bob's ephemeral KEM
+private keys locally. Alice does not verify or encapsulate yet, and no KEM secret has been
+established between Alice and Bob.
 
 The complete session flow is:
 
@@ -85,12 +97,13 @@ from the key length.
 The current length estimator is an **asymptotic BB84 model**, not a complete composable finite-key
 security proof. It assumes a symmetric phase-error rate represented by sampled QBER and subtracts
 actual simulated reconciliation and confirmation leakage exactly once. The classical channel is
-assumed authenticated. The standalone PQC identity layer is intentionally not connected to QKD yet;
-without that future composition, the simulator must not be interpreted as end-to-end secure QKD.
+assumed authenticated. The standalone PQC offer layer is intentionally not connected to QKD yet;
+without future handshake completion and composition, the simulator must not be interpreted as
+end-to-end secure QKD.
 
 Optical loss, experiment sweeps, physical transmission timing/secret bits per second, production
-LDPC reconciliation, PQC key establishment/handshakes, QKD/PQC integration, and QKDN functionality
-are not implemented yet.
+LDPC reconciliation, Alice-side offer verification, KEM exchange/shared secrets, handshake KDFs,
+QKD/PQC integration, and QKDN functionality are not implemented yet.
 
 ## 🖥️ Web UI V1
 

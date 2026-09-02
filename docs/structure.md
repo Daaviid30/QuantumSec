@@ -88,15 +88,23 @@ QuantumSec/
 |-- pqc/
 |   |-- __init__.py
 |   |-- errors.py
+|   |-- profiles.py
 |   |-- backends/
-|   |   `-- oqs_backend.py
+|   |   |-- oqs_backend.py
+|   |   `-- oqs_kem_backend.py
+|   |-- kem/
+|   |   |-- base.py
+|   |   |-- ml_kem.py
+|   |   `-- hqc.py
 |   |-- signatures/
 |   |   |-- base.py
 |   |   `-- ml_dsa.py
 |   `-- protocol/
 |       |-- identity.py
 |       |-- trust.py
-|       `-- party.py
+|       |-- party.py
+|       |-- messages.py
+|       `-- server_offer.py
 |
 |-- experiments/
 |   |-- __init__.py
@@ -281,12 +289,14 @@ explicitly.
 
 Post-quantum cryptography and authentication. This module should not import from `qkd/`. Its job is to provide cryptographic tools and interfaces that can be used by experiments or authentication adapters.
 
-Implemented Phase 1 structure:
+Implemented PQC structure through Phase 2:
 
 ```text
 pqc/backends/       = isolated external-provider adapters
 pqc/signatures/     = signature interface and ML-DSA-65 implementation
-pqc/protocol/       = private/public identities, trust stores, and parties
+pqc/kem/            = KEM interface plus ML-KEM-768 and HQC-3 providers
+pqc/profiles.py     = centralized LOW/HIGH QuantumSec profiles
+pqc/protocol/       = identities, trust, parties, canonical messages, and offer creation
 ```
 
 ML-DSA-65 currently provides post-quantum digital identity and authentication primitives through
@@ -304,9 +314,16 @@ Current responsibilities:
 - real ML-DSA-65 execution behind a backend-independent adapter
 - named private identities and immutable public identities
 - explicit pre-provisioned peer trust
+- real ML-KEM-768 and HQC-3 ephemeral key generation behind a separate OQS KEM adapter
+- LOW (`ML-KEM-768`) and HIGH (`ML-KEM-768 + HQC-3`) QuantumSec profiles
+- canonical, domain-separated `ServerKeyOffer` serialization
+- ML-DSA-65 authentication of Bob's public ephemeral KEM offer
 
-Key establishment is **not implemented**. ML-KEM, HQC, KDFs, handshakes, session keys, hybrid
-schemes, and QKD/PQC composition belong to later phases.
+QuantumSec can now construct an authenticated KEM offer, but no KEM secret has yet been established
+between Alice and Bob. Alice-side verification, protocol encapsulation/decapsulation, combined
+secrets, KDFs, Finished messages, session keys, and QKD/PQC composition belong to later phases.
+LOW and HIGH are QuantumSec deployment profiles, not NIST categories; HIGH is a diverse dual-KEM
+offer and is not the future QKD + PQC `HYBRID` profile.
 
 ### `experiments/`
 
@@ -407,6 +424,10 @@ authentication belongs in a future upper-layer integration and is intentionally 
 | `qber` | `qkd/metrics/qber.py` |
 | `MLDSA65` | `pqc/signatures/ml_dsa.py` |
 | `PQCParty`, `PublicIdentity` | `pqc/protocol/` |
+| `MLKEM768`, `HQC3` | `pqc/kem/` |
+| `PQCProfile` | `pqc/profiles.py` |
+| `ServerKeyOffer`, `SignedServerKeyOffer` | `pqc/protocol/messages.py` |
+| `ResponderKEMState`, `ServerKeyOfferFactory` | `pqc/protocol/server_offer.py` |
 | future QKD/PQC composition | upper orchestration layer, never direct `qkd`/`pqc` imports |
 
 ---
@@ -423,7 +444,7 @@ Current development order:
 6. Noise experiments using the CPTP channel models
 7. Optical transmission and loss as a separate physical layer
 8. Advanced postprocessing (parameter estimation, Cascade, confirmation, and Toeplitz extraction complete)
-9. PQC authentication: ML-DSA identity/trust foundation complete; key establishment and comparative experiments remain
+9. PQC authentication: ML-DSA identity/trust and authenticated ephemeral KEM offers complete; shared-secret handshake and comparative experiments remain
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
 
@@ -521,7 +542,7 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 ## 10. Current Immediate Goal
 
 The mathematical primitives, quantum-channel foundation, complete BB84 post-processing, Web UI,
-and Phase 1 ML-DSA identity/trust foundation are in place. The PQC layer can authenticate standalone
-byte messages between pre-provisioned parties, but it is not connected to BB84. Key establishment,
-handshakes, and QKD/PQC orchestration remain future work, so simulated QKD workflows must not yet be
-treated as end-to-end authenticated sessions.
+and PQC Phases 1-2 are in place. Bob can create LOW or HIGH ephemeral KEM material and sign a
+canonical `ServerKeyOffer` with ML-DSA-65, but Alice does not yet verify or encapsulate and no shared
+secret exists. Handshake completion and QKD/PQC orchestration remain future work, so simulated QKD
+workflows must not yet be treated as end-to-end authenticated sessions.
