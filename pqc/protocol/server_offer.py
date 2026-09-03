@@ -15,14 +15,19 @@ from pqc.protocol.messages import (
 from pqc.protocol.party import PQCParty
 
 
-@dataclass(frozen=True, slots=True, repr=False)
+@dataclass(slots=True, repr=False)
 class ResponderKEMState:
-    """Private ephemeral KEM capabilities retained by one responder session."""
+    """Private ephemeral KEM capabilities retained by one responder session.
+
+    Protocol-level decapsulation is deliberately reserved for a later handshake
+    phase. Call :meth:`close` when an offer expires or its session is aborted.
+    """
 
     session_id: bytes = field(repr=False)
     profile: PQCProfile
-    _ml_kem: MLKEM768 = field(repr=False)
+    _ml_kem: MLKEM768 | None = field(repr=False)
     _hqc: HQC3 | None = field(default=None, repr=False)
+    _closed: bool = field(default=False, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.session_id, bytes):
@@ -40,23 +45,50 @@ class ResponderKEMState:
             raise ValueError("LOW responder state must not contain HQC material.")
         if self.profile is PQCProfile.HIGH and not isinstance(self._hqc, HQC3):
             raise ValueError("HIGH responder state must contain HQC3 material.")
-        object.__setattr__(self, "session_id", bytes(self.session_id))
+        self.session_id = bytes(self.session_id)
+
+    def _active_ml_kem(self) -> MLKEM768:
+        if self._closed or self._ml_kem is None:
+            raise RuntimeError("Responder KEM state is closed.")
+        return self._ml_kem
 
     @property
     def ml_kem_public_key(self) -> bytes:
         """Return the public ML-KEM key for the associated offer."""
 
-        return self._ml_kem.public_key
+        return self._active_ml_kem().public_key
 
     @property
     def hqc_public_key(self) -> bytes | None:
         """Return the public HQC key when the HIGH profile is active."""
 
+        if self._closed:
+            raise RuntimeError("Responder KEM state is closed.")
         return None if self._hqc is None else self._hqc.public_key
+
+    @property
+    def is_closed(self) -> bool:
+        """Return whether the private KEM references have been released."""
+
+        return self._closed
+
+    def close(self) -> None:
+        """Release references to ephemeral private capabilities, idempotently.
+
+        Python ``bytes`` cannot be reliably zeroized in place; this method does
+        not claim a guaranteed memory wipe.
+        """
+
+        self._ml_kem = None
+        self._hqc = None
+        self._closed = True
 
     def __repr__(self) -> str:
         algorithms = profile_definition(self.profile).kem_algorithms
-        return f"ResponderKEMState(profile={self.profile.value!r}, algorithms={algorithms!r})"
+        return (
+            f"ResponderKEMState(profile={self.profile.value!r}, algorithms={algorithms!r}, "
+            f"closed={self._closed!r})"
+        )
 
 
 class ServerKeyOfferFactory:

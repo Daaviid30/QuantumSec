@@ -24,7 +24,7 @@ def hqc_3_metadata() -> KEMMetadata:
         algorithm_type="key encapsulation mechanism",
         family="code based",
         nist_security_category=details.claimed_nist_level,
-        standardization="NIST selected for standardization; FIPS not yet finalized",
+        standardization="NIST Round 4 Selection",
         implementation_version=details.version,
         public_key_length=details.public_key_length,
         secret_key_length=details.secret_key_length,

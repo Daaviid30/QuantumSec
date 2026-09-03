@@ -77,8 +77,10 @@ HIGH = ML-KEM-768 + HQC-3 diverse-KEM offer, authenticated with ML-DSA-65
 ```
 
 QuantumSec can construct an authenticated `ServerKeyOffer`, while retaining Bob's ephemeral KEM
-private keys locally. Alice does not verify or encapsulate yet, and no KEM secret has been
-established between Alice and Bob.
+private keys locally until the responder state is explicitly closed. Public offers support
+validated JSON-compatible Base64 transport mappings without performing implicit trust or signature
+verification. Alice does not verify or encapsulate yet, and no KEM secret has been established
+between Alice and Bob.
 
 The complete session flow is:
 

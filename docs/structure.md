@@ -316,7 +316,9 @@ Current responsibilities:
 - explicit pre-provisioned peer trust
 - real ML-KEM-768 and HQC-3 ephemeral key generation behind a separate OQS KEM adapter
 - LOW (`ML-KEM-768`) and HIGH (`ML-KEM-768 + HQC-3`) QuantumSec profiles
-- canonical, domain-separated `ServerKeyOffer` serialization
+- canonical, domain-separated `ServerKeyOffer` serialization for signing
+- validated JSON-compatible Base64 transport mappings for public offer messages
+- explicit, idempotent release of ephemeral responder KEM references on session abort/expiry
 - ML-DSA-65 authentication of Bob's public ephemeral KEM offer
 
 QuantumSec can now construct an authenticated KEM offer, but no KEM secret has yet been established

@@ -4,9 +4,17 @@ from dataclasses import fields, replace
 
 import pytest
 
-from pqc import PQCParty, PQCProfile, ServerKeyOfferFactory
-from pqc.kem import HQC3, HQC_3_ALGORITHM, ML_KEM_768_ALGORITHM, MLKEM768
-from pqc.protocol import ResponderKEMState, SignedServerKeyOffer
+from pqc import (
+    HQC3,
+    MLKEM768,
+    PQCParty,
+    PQCProfile,
+    ServerKeyOffer,
+    ServerKeyOfferFactory,
+    SignedServerKeyOffer,
+)
+from pqc.kem import HQC_3_ALGORITHM, ML_KEM_768_ALGORITHM
+from pqc.protocol import ResponderKEMState
 from pqc.protocol.messages import (
     SERVER_KEY_OFFER_DOMAIN_SEPARATOR,
     SERVER_KEY_OFFER_NONCE_LENGTH,
@@ -108,6 +116,27 @@ def test_canonical_serialization_is_deterministic_and_domain_separated(
     assert b"ML-KEM-768" in offer.canonical_bytes()
 
 
+@pytest.mark.parametrize("creation_fixture", ["low_creation", "high_creation"])
+def test_signed_offer_transport_serialization_round_trip(
+    creation_fixture: str,
+    request: pytest.FixtureRequest,
+) -> None:
+    signed_offer = request.getfixturevalue(creation_fixture)[1]
+
+    restored = SignedServerKeyOffer.from_dict(signed_offer.to_dict())
+
+    assert restored == signed_offer
+    assert restored.offer.canonical_bytes() == signed_offer.offer.canonical_bytes()
+
+
+def test_offer_transport_parser_rejects_invalid_base64(low_creation: OfferCreation) -> None:
+    payload = low_creation[1].offer.to_dict()
+    payload["ml_kem_public_key"] = "not Base64!"
+
+    with pytest.raises(ValueError, match="ml_kem_public_key must be valid Base64"):
+        ServerKeyOffer.from_dict(payload)
+
+
 def test_changing_any_offer_field_changes_canonical_bytes(
     low_creation: OfferCreation,
     high_creation: OfferCreation,
@@ -135,6 +164,21 @@ def test_private_kem_keys_never_enter_offer_or_repr(low_creation: OfferCreation)
     assert secret_key not in canonical
     assert repr(secret_key) not in repr(state)
     assert "secret" not in repr(state).lower()
+
+
+def test_responder_state_close_releases_private_capabilities(bob: PQCParty) -> None:
+    state, _ = ServerKeyOfferFactory().create(responder=bob, profile=PQCProfile.HIGH)
+
+    state.close()
+    state.close()
+
+    assert state.is_closed
+    assert object.__getattribute__(state, "_ml_kem") is None
+    assert object.__getattribute__(state, "_hqc") is None
+    with pytest.raises(RuntimeError, match="state is closed"):
+        _ = state.ml_kem_public_key
+    with pytest.raises(RuntimeError, match="state is closed"):
+        _ = state.hqc_public_key
 
 
 def test_bob_signs_canonical_offer_with_existing_identity(

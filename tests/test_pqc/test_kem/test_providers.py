@@ -38,8 +38,7 @@ def test_hqc_3_real_key_generation_and_metadata(hqc: HQC3) -> None:
     assert hqc.metadata.algorithm_type == "key encapsulation mechanism"
     assert hqc.metadata.family == "code based"
     assert hqc.metadata.nist_security_category == 3
-    assert "selected for standardization" in hqc.metadata.standardization
-    assert "FIPS not yet finalized" in hqc.metadata.standardization
+    assert hqc.metadata.standardization == "NIST Round 4 Selection"
     assert hqc.metadata.public_key_length == 4514
     assert hqc.metadata.secret_key_length == 4602
     assert hqc.metadata.ciphertext_length == 8978
@@ -73,6 +72,22 @@ def test_hqc_3_primitive_round_trip(hqc: HQC3) -> None:
 
     assert hqc.decapsulate(encapsulation.ciphertext) == encapsulation.shared_secret
     assert repr(encapsulation.shared_secret) not in repr(encapsulation)
+
+
+@pytest.mark.parametrize("provider_name", ["ml_kem", "hqc"])
+def test_modified_ciphertext_does_not_recover_original_secret(
+    provider_name: str,
+    request: pytest.FixtureRequest,
+) -> None:
+    provider = request.getfixturevalue(provider_name)
+    encapsulation = type(provider).encapsulate(provider.public_key)
+    modified = bytearray(encapsulation.ciphertext)
+    modified[0] ^= 1
+
+    rejected_secret = provider.decapsulate(bytes(modified))
+
+    assert rejected_secret != encapsulation.shared_secret
+    assert rejected_secret == provider.decapsulate(bytes(modified))
 
 
 def test_kem_rejects_malformed_public_key_before_backend() -> None:

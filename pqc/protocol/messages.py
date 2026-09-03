@@ -1,8 +1,11 @@
 """Immutable public messages for the staged PQC handshake."""
 
+import base64
+import binascii
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from struct import pack
-from typing import Final
+from typing import Final, Self
 
 from pqc.kem import (
     HQC_3_ALGORITHM,
@@ -34,6 +37,26 @@ def _length_prefixed(value: bytes) -> bytes:
     if len(value) > 0xFFFFFFFF:
         raise ValueError("Canonical field exceeds the 32-bit length prefix.")
     return pack(">I", len(value)) + value
+
+
+def _decode_base64_field(value: object, *, name: str) -> bytes:
+    if not isinstance(value, str):
+        raise TypeError(f"{name} must be a Base64 string. Got {type(value).__name__}.")
+    try:
+        return base64.b64decode(value, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError(f"{name} must be valid Base64.") from exc
+
+
+def _require_transport_fields(
+    payload: Mapping[str, object],
+    *,
+    message_name: str,
+    fields: set[str],
+) -> None:
+    missing = fields.difference(payload)
+    if missing:
+        raise ValueError(f"{message_name} payload is missing fields: {', '.join(sorted(missing))}.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,6 +141,78 @@ class ServerKeyOffer:
             )
         return b"".join(fields)
 
+    def to_dict(self) -> dict[str, object]:
+        """Serialize this public offer to a JSON-compatible mapping."""
+
+        return {
+            "protocol_version": self.protocol_version,
+            "session_id": base64.b64encode(self.session_id).decode("ascii"),
+            "profile": self.profile.value,
+            "nonce": base64.b64encode(self.nonce).decode("ascii"),
+            "ml_kem_algorithm": self.ml_kem_algorithm,
+            "ml_kem_public_key": base64.b64encode(self.ml_kem_public_key).decode("ascii"),
+            "hqc_algorithm": self.hqc_algorithm,
+            "hqc_public_key": (
+                None if self.hqc_public_key is None else base64.b64encode(self.hqc_public_key).decode("ascii")
+            ),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> Self:
+        """Restore and validate an offer from its JSON-compatible mapping."""
+
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
+        _require_transport_fields(
+            payload,
+            message_name="Server key offer",
+            fields={
+                "protocol_version",
+                "session_id",
+                "profile",
+                "nonce",
+                "ml_kem_algorithm",
+                "ml_kem_public_key",
+                "hqc_algorithm",
+                "hqc_public_key",
+            },
+        )
+        protocol_version = payload["protocol_version"]
+        profile_value = payload["profile"]
+        ml_kem_algorithm = payload["ml_kem_algorithm"]
+        hqc_algorithm = payload["hqc_algorithm"]
+        if isinstance(protocol_version, bool) or not isinstance(protocol_version, int):
+            raise TypeError("protocol_version must be an integer.")
+        if not isinstance(profile_value, str):
+            raise TypeError("profile must be a string.")
+        try:
+            profile = PQCProfile(profile_value)
+        except ValueError as exc:
+            raise ValueError(f"Unknown PQC profile {profile_value!r}.") from exc
+        if not isinstance(ml_kem_algorithm, str):
+            raise TypeError("ml_kem_algorithm must be a string.")
+        if hqc_algorithm is not None and not isinstance(hqc_algorithm, str):
+            raise TypeError("hqc_algorithm must be a string or null.")
+        encoded_hqc_public_key = payload["hqc_public_key"]
+        hqc_public_key = (
+            None
+            if encoded_hqc_public_key is None
+            else _decode_base64_field(encoded_hqc_public_key, name="hqc_public_key")
+        )
+        return cls(
+            protocol_version=protocol_version,
+            session_id=_decode_base64_field(payload["session_id"], name="session_id"),
+            profile=profile,
+            nonce=_decode_base64_field(payload["nonce"], name="nonce"),
+            ml_kem_algorithm=ml_kem_algorithm,
+            ml_kem_public_key=_decode_base64_field(
+                payload["ml_kem_public_key"],
+                name="ml_kem_public_key",
+            ),
+            hqc_algorithm=hqc_algorithm,
+            hqc_public_key=hqc_public_key,
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class SignedServerKeyOffer:
@@ -135,3 +230,38 @@ class SignedServerKeyOffer:
         if self.signature_algorithm != ML_DSA_65_METADATA.name:
             raise ValueError(f"signature_algorithm must be {ML_DSA_65_METADATA.name!r}.")
         object.__setattr__(self, "signature", _require_bytes(self.signature, name="signature"))
+
+    def to_dict(self) -> dict[str, object]:
+        """Serialize this signed public offer to a JSON-compatible mapping."""
+
+        return {
+            "offer": self.offer.to_dict(),
+            "signer": self.signer,
+            "signature_algorithm": self.signature_algorithm,
+            "signature": base64.b64encode(self.signature).decode("ascii"),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> Self:
+        """Restore a signed offer without implicitly trusting or verifying it."""
+
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
+        _require_transport_fields(
+            payload,
+            message_name="Signed server key offer",
+            fields={"offer", "signer", "signature_algorithm", "signature"},
+        )
+        offer_payload = payload["offer"]
+        signer = payload["signer"]
+        signature_algorithm = payload["signature_algorithm"]
+        if not isinstance(offer_payload, Mapping):
+            raise TypeError("offer must be a mapping.")
+        if not isinstance(signer, str) or not isinstance(signature_algorithm, str):
+            raise TypeError("signer and signature_algorithm must be strings.")
+        return cls(
+            offer=ServerKeyOffer.from_dict(offer_payload),
+            signer=signer,
+            signature_algorithm=signature_algorithm,
+            signature=_decode_base64_field(payload["signature"], name="signature"),
+        )

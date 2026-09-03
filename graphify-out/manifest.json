@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788284540.3152337,
-    "seen": 1788284660.1481795,
-    "ast_hash": "5d592115b23e2f73f0d24cf083427632",
+    "mtime": 1788360530.749519,
+    "seen": 1788360615.7937052,
+    "ast_hash": "4066dc8067514996ac2d52f665b36fbf",
     "semantic_hash": ""
   },
   "core/docs/rng_man.md": {
@@ -282,9 +282,9 @@
     "semantic_hash": "0c566f8b084dbacf2100a8866eccd6f2"
   },
   "docs/structure.md": {
-    "mtime": 1788286076.4319966,
-    "seen": 1788286141.1135406,
-    "ast_hash": "4f79edd9d7f999d9e5569e18ea499869",
+    "mtime": 1788360531.542145,
+    "seen": 1788360615.7937088,
+    "ast_hash": "26e54c0d7677bdf405c5d100106dd325",
     "semantic_hash": ""
   },
   "docs/tasks.md": {
@@ -876,9 +876,9 @@
     "semantic_hash": "a0f30ecb0b9af038b3dbbd8767b74fed"
   },
   ".serena/memories/core.md": {
-    "mtime": 1788284755.845689,
-    "seen": 1788284798.5143733,
-    "ast_hash": "9bedcbe4039616956c4558e805101618",
+    "mtime": 1788360542.4365385,
+    "seen": 1788360615.793691,
+    "ast_hash": "b1634fa96f85fdcc74b73384ebf85f7f",
     "semantic_hash": ""
   },
   ".serena/memories/infrastructure/core.md": {
@@ -948,9 +948,9 @@
     "semantic_hash": ""
   },
   "pqc/__init__.py": {
-    "mtime": 1788284458.939964,
-    "seen": 1788284660.1480126,
-    "ast_hash": "7051f1374067f57776dc6b32517482b7",
+    "mtime": 1788360437.674247,
+    "seen": 1788360615.7935271,
+    "ast_hash": "377d75d4ddd114bb5ad69a268fe38aba",
     "semantic_hash": ""
   },
   "pqc/backends/__init__.py": {
@@ -972,9 +972,9 @@
     "semantic_hash": ""
   },
   "pqc/protocol/__init__.py": {
-    "mtime": 1788284458.1181276,
-    "seen": 1788284660.148018,
-    "ast_hash": "cdd4a92403635fa2a389f3bd6ac63409",
+    "mtime": 1788288364.591543,
+    "seen": 1788360615.793541,
+    "ast_hash": "2ab71eea8e6ab0f06f97fd73b9f3a699",
     "semantic_hash": ""
   },
   "pqc/protocol/identity.py": {
@@ -1041,6 +1041,78 @@
     "mtime": 1788287019.7751663,
     "seen": 1788287113.06574,
     "ast_hash": "ce4b005a1366dfc2f4c994ae216ff367",
+    "semantic_hash": ""
+  },
+  "pqc/backends/oqs_kem_backend.py": {
+    "mtime": 1788288447.6580172,
+    "seen": 1788360615.7935314,
+    "ast_hash": "b4665f4789a081efde82e2304b80b1ac",
+    "semantic_hash": ""
+  },
+  "pqc/kem/__init__.py": {
+    "mtime": 1788288451.9937227,
+    "seen": 1788360615.793534,
+    "ast_hash": "a9426682b514803995784d520f4bcff6",
+    "semantic_hash": ""
+  },
+  "pqc/kem/_oqs_provider.py": {
+    "mtime": 1788288648.5276134,
+    "seen": 1788360615.7935352,
+    "ast_hash": "cb75fe250b140b69aa2355a89761bb92",
+    "semantic_hash": ""
+  },
+  "pqc/kem/base.py": {
+    "mtime": 1788288289.244974,
+    "seen": 1788360615.7935364,
+    "ast_hash": "3428b6cd2174a9839b5a755233e4e6e3",
+    "semantic_hash": ""
+  },
+  "pqc/kem/hqc.py": {
+    "mtime": 1788360436.884866,
+    "seen": 1788360615.7935374,
+    "ast_hash": "5f8443040f8d526969add4022e096588",
+    "semantic_hash": ""
+  },
+  "pqc/kem/ml_kem.py": {
+    "mtime": 1788288582.8142345,
+    "seen": 1788360615.7935386,
+    "ast_hash": "c64f75d98c94b4b83ca191a344f89e2e",
+    "semantic_hash": ""
+  },
+  "pqc/profiles.py": {
+    "mtime": 1788288293.3915765,
+    "seen": 1788360615.7935395,
+    "ast_hash": "eb6624ee09cdfb2ddf37a134c99392b4",
+    "semantic_hash": ""
+  },
+  "pqc/protocol/messages.py": {
+    "mtime": 1788360503.9379823,
+    "seen": 1788360615.7935429,
+    "ast_hash": "04f0a76e3718239368ad7d6feb799a70",
+    "semantic_hash": ""
+  },
+  "pqc/protocol/server_offer.py": {
+    "mtime": 1788360436.0449708,
+    "seen": 1788360615.7935452,
+    "ast_hash": "da43a45be832d3e79999925c86043fb5",
+    "semantic_hash": ""
+  },
+  "tests/test_pqc/test_kem/test_providers.py": {
+    "mtime": 1788360438.4812608,
+    "seen": 1788360615.7936015,
+    "ast_hash": "0018b5b18c67d4544ef88d657045cf57",
+    "semantic_hash": ""
+  },
+  "tests/test_pqc/test_profiles.py": {
+    "mtime": 1788288527.1946661,
+    "seen": 1788360615.793605,
+    "ast_hash": "1b48475c0c11519e9cc5087db7b7d3d7",
+    "semantic_hash": ""
+  },
+  "tests/test_pqc/test_server_offer.py": {
+    "mtime": 1788360439.2774527,
+    "seen": 1788360615.793606,
+    "ast_hash": "ab1d0ff95ab08f84d07bdd1206b8c00c",
     "semantic_hash": ""
   }
 }
