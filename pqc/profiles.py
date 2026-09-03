@@ -11,7 +11,7 @@ from pqc.signatures import ML_DSA_65_METADATA
 
 
 class PQCProfile(StrEnum):
-    """QuantumSec profiles; these are not NIST security categories."""
+    """Enumeration of QuantumSec handshake profiles defining selected algorithm suites."""
 
     LOW = "low"
     HIGH = "high"
@@ -19,7 +19,7 @@ class PQCProfile(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class PQCProfileDefinition:
-    """Immutable algorithm selection for one QuantumSec profile."""
+    """Immutable algorithm suite specification for a QuantumSec PQC profile."""
 
     profile: PQCProfile
     kem_algorithms: tuple[str, ...]
@@ -43,7 +43,7 @@ PQC_PROFILE_DEFINITIONS: Final[Mapping[PQCProfile, PQCProfileDefinition]] = Mapp
 
 
 def profile_definition(profile: PQCProfile) -> PQCProfileDefinition:
-    """Return the immutable definition of a QuantumSec PQC profile."""
+    """Retrieve the immutable algorithm suite definition for the specified QuantumSec PQC profile."""
 
     if not isinstance(profile, PQCProfile):
         raise TypeError(f"profile must be a PQCProfile. Got {type(profile).__name__}.")

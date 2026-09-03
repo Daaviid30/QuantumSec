@@ -14,7 +14,7 @@ HQC_3_ALGORITHM: Final = "HQC-3"
 
 @cache
 def hqc_3_metadata() -> KEMMetadata:
-    """Return backend-derived HQC-3 metadata."""
+    """Retrieve and cache standardized HQC-3 (NIST Round 4) metadata validated against liboqs."""
 
     details = OQSKEMBackend().details(HQC_3_ALGORITHM)
     if details.name != HQC_3_ALGORITHM or details.claimed_nist_level != 3:
@@ -35,12 +35,12 @@ def hqc_3_metadata() -> KEMMetadata:
 
 @dataclass(frozen=True, slots=True, repr=False)
 class HQC3(OQSKEMProvider):
-    """Private ephemeral HQC-3 capability backed by liboqs."""
+    """Ephemeral HQC-3 key encapsulation provider backed by liboqs for NIST Category 3 code-based security."""
 
     ALGORITHM: ClassVar[str] = HQC_3_ALGORITHM
 
     @classmethod
     def algorithm_metadata(cls) -> KEMMetadata:
-        """Return selected and backend-derived HQC-3 metadata."""
+        """Return cached algorithm metadata and expected key/ciphertext dimensions for HQC-3."""
 
         return hqc_3_metadata()

@@ -2,24 +2,24 @@
 
 
 class PQCError(Exception):
-    """Base class for PQC domain errors."""
+    """Base exception class for all post-quantum cryptography domain errors in QuantumSec."""
 
 
 class BackendUnavailableError(PQCError):
-    """Raised when the configured PQC backend cannot be loaded or initialized."""
+    """Raised when the post-quantum cryptography backend (liboqs) cannot be loaded or initialized."""
 
 
 class BackendOperationError(PQCError):
-    """Raised when an available PQC backend fails during an operation."""
+    """Raised when an active post-quantum cryptography backend fails during execution."""
 
 
 class UnsupportedAlgorithmError(PQCError):
-    """Raised when the backend cannot provide a requested algorithm."""
+    """Raised when a requested post-quantum algorithm is unsupported or disabled in the backend."""
 
 
 class UnknownTrustedPeerError(PQCError):
-    """Raised when a peer is absent from the pre-provisioned trust store."""
+    """Raised when an operation requires an identity from a peer not found in the local trust store."""
 
 
 class TrustedIdentityConflictError(PQCError):
-    """Raised when trust provisioning would silently replace an identity."""
+    """Raised when adding an identity for an existing peer without overwrite permission."""

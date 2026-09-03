@@ -11,6 +11,7 @@ from pqc.signatures.registry import _metadata_for_algorithm, verify_signature
 
 
 def _validated_identity_name(value: object) -> str:
+    """Validate that the given identity name is a non-empty string and return its trimmed form."""
     if not isinstance(value, str):
         raise TypeError(f"identity name must be a string. Got {type(value).__name__}.")
     clean = value.strip()
@@ -21,13 +22,14 @@ def _validated_identity_name(value: object) -> str:
 
 @dataclass(frozen=True, slots=True)
 class PublicIdentity:
-    """Immutable public verification identity with no signing material."""
+    """Immutable public verification identity associating an owner name with public key bytes."""
 
     owner: str
     algorithm: str
     public_key: bytes = field(repr=False)
 
     def __post_init__(self) -> None:
+        """Validate owner, algorithm, and public key buffer dimensions, storing an immutable copy."""
         owner = _validated_identity_name(self.owner)
         if not isinstance(self.algorithm, str):
             raise TypeError(f"algorithm must be a string. Got {type(self.algorithm).__name__}.")
@@ -49,12 +51,12 @@ class PublicIdentity:
         object.__setattr__(self, "public_key", bytes(self.public_key))
 
     def verify(self, message: bytes, signature: bytes) -> bool:
-        """Verify a signature using only this public identity."""
+        """Verify a signature against the message using this public identity's algorithm and key."""
 
         return verify_signature(self.algorithm, message, signature, self.public_key)
 
     def to_dict(self) -> dict[str, str]:
-        """Serialize this non-secret identity to a JSON-compatible mapping."""
+        """Serialize this public identity into a JSON-compatible dictionary with Base64-encoded key bytes."""
 
         return {
             "owner": self.owner,
@@ -64,7 +66,7 @@ class PublicIdentity:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> Self:
-        """Restore a public identity from its JSON-compatible mapping."""
+        """Deserialize and validate a public identity from a JSON-compatible dictionary payload."""
 
         if not isinstance(payload, Mapping):
             raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
@@ -85,32 +87,33 @@ class PublicIdentity:
 
 @dataclass(frozen=True, slots=True, repr=False)
 class MLDSAIdentity:
-    """Named private identity with ML-DSA-65 signing capability."""
+    """Named private identity holding an ML-DSA-65 signing capability and associated owner name."""
 
     owner: str
     _signer: MLDSA65 = field(repr=False)
 
     def __post_init__(self) -> None:
+        """Validate the owner name and ensure the internal signer is an MLDSA65 instance."""
         object.__setattr__(self, "owner", _validated_identity_name(self.owner))
         if not isinstance(self._signer, MLDSA65):
             raise TypeError(f"signer must be MLDSA65. Got {type(self._signer).__name__}.")
 
     @classmethod
     def generate(cls, owner: str) -> Self:
-        """Generate a named ML-DSA-65 identity using secure backend randomness."""
+        """Generate a new named private ML-DSA-65 signing identity with fresh cryptographic keys."""
 
         clean_owner = _validated_identity_name(owner)
         return cls(owner=clean_owner, _signer=MLDSA65.generate())
 
     @property
     def metadata(self) -> SignatureMetadata:
-        """Return public ML-DSA-65 metadata."""
+        """Return public algorithm metadata and key lengths for this identity's ML-DSA-65 signer."""
 
         return ML_DSA_65_METADATA
 
     @property
     def public_identity(self) -> PublicIdentity:
-        """Export the non-secret form suitable for trust provisioning."""
+        """Export the non-secret public identity suitable for peer trust stores."""
 
         return PublicIdentity(
             owner=self.owner,
@@ -119,16 +122,17 @@ class MLDSAIdentity:
         )
 
     def sign(self, message: bytes) -> bytes:
-        """Sign a message with this identity's private capability."""
+        """Generate an ML-DSA-65 signature over message bytes using this identity's private key."""
 
         return self._signer.sign(message)
 
     def verify(self, message: bytes, signature: bytes, identity: PublicIdentity) -> bool:
-        """Verify against an explicitly selected public identity."""
+        """Verify a message signature against an explicitly provided public identity."""
 
         if not isinstance(identity, PublicIdentity):
             raise TypeError(f"identity must be a PublicIdentity. Got {type(identity).__name__}.")
         return identity.verify(message, signature)
 
     def __repr__(self) -> str:
+        """Return a safe string representation showing owner and algorithm without exposing secret keys."""
         return f"MLDSAIdentity(owner={self.owner!r}, algorithm={self.metadata.name!r})"

@@ -7,7 +7,7 @@ from typing import Self
 
 @dataclass(frozen=True, slots=True)
 class SignatureMetadata:
-    """Non-secret description of a digital-signature algorithm."""
+    """Immutable specification and buffer dimensions for a post-quantum digital signature algorithm."""
 
     name: str
     algorithm_type: str
@@ -19,6 +19,7 @@ class SignatureMetadata:
     signature_length: int
 
     def __post_init__(self) -> None:
+        """Validate metadata text fields and ensure category and buffer sizes are positive integers."""
         for field_name in ("name", "algorithm_type", "family", "standardization"):
             value = getattr(self, field_name)
             if not isinstance(value, str):
@@ -35,38 +36,38 @@ class SignatureMetadata:
 
 
 class SignatureProvider(ABC):
-    """Minimal backend-independent signing capability used by QuantumSec."""
+    """Abstract base contract defining post-quantum digital signature operations."""
 
     @classmethod
     @abstractmethod
     def generate(cls) -> Self:
-        """Generate a new signing identity using backend cryptographic randomness."""
+        """Generate a fresh signing key pair using secure cryptographic backend randomness."""
 
         raise NotImplementedError
 
     @property
     @abstractmethod
     def metadata(self) -> SignatureMetadata:
-        """Return public algorithm metadata."""
+        """Return the public algorithm metadata and key/signature buffer dimensions."""
 
         raise NotImplementedError
 
     @property
     @abstractmethod
     def public_key(self) -> bytes:
-        """Return the immutable public verification key."""
+        """Return the immutable public verification key bytes."""
 
         raise NotImplementedError
 
     @abstractmethod
     def sign(self, message: bytes) -> bytes:
-        """Sign a byte string with this provider's private identity."""
+        """Generate a digital signature over the provided message bytes using the private key."""
 
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def verify(message: bytes, signature: bytes, public_key: bytes) -> bool:
-        """Verify a signature against an explicitly supplied public key."""
+        """Verify whether a signature is authentic for the message and explicit public verification key."""
 
         raise NotImplementedError

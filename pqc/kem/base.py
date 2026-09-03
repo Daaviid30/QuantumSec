@@ -7,7 +7,7 @@ from typing import Self
 
 @dataclass(frozen=True, slots=True)
 class KEMMetadata:
-    """Non-secret description and sizes of a key-encapsulation mechanism."""
+    """Immutable specification and buffer dimensions for a Key Encapsulation Mechanism."""
 
     name: str
     algorithm_type: str
@@ -21,6 +21,7 @@ class KEMMetadata:
     shared_secret_length: int
 
     def __post_init__(self) -> None:
+        """Validate that descriptive strings are non-empty and buffer sizes are positive integers."""
         for field_name in (
             "name",
             "algorithm_type",
@@ -47,12 +48,13 @@ class KEMMetadata:
 
 @dataclass(frozen=True, slots=True, repr=False)
 class KEMEncapsulation:
-    """Primitive KEM output; its shared secret is never shown in representations."""
+    """Immutable container holding the ciphertext and shared secret produced during encapsulation."""
 
     ciphertext: bytes = field(repr=False)
     shared_secret: bytes = field(repr=False)
 
     def __post_init__(self) -> None:
+        """Validate that ciphertext and shared secret are non-empty bytes and store immutable copies."""
         for field_name in ("ciphertext", "shared_secret"):
             value = getattr(self, field_name)
             if not isinstance(value, bytes):
@@ -62,6 +64,7 @@ class KEMEncapsulation:
             object.__setattr__(self, field_name, bytes(value))
 
     def __repr__(self) -> str:
+        """Return a safe string representation showing buffer lengths without exposing secret bytes."""
         return (
             f"KEMEncapsulation(ciphertext_length={len(self.ciphertext)}, "
             f"shared_secret_length={len(self.shared_secret)})"
@@ -69,38 +72,38 @@ class KEMEncapsulation:
 
 
 class KEMProvider(ABC):
-    """Minimal KEM capability independent of a concrete cryptographic backend."""
+    """Abstract base contract defining core Key Encapsulation Mechanism (KEM) operations."""
 
     @classmethod
     @abstractmethod
     def generate(cls) -> Self:
-        """Generate a new KEM key pair using backend cryptographic randomness."""
+        """Generate a fresh ephemeral KEM key pair using secure cryptographic backend randomness."""
 
         raise NotImplementedError
 
     @property
     @abstractmethod
     def metadata(self) -> KEMMetadata:
-        """Return public KEM metadata."""
+        """Return the public algorithm metadata and key/ciphertext buffer dimensions."""
 
         raise NotImplementedError
 
     @property
     @abstractmethod
     def public_key(self) -> bytes:
-        """Return the immutable public encapsulation key."""
+        """Return the immutable public encapsulation key bytes."""
 
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def encapsulate(cls, public_key: bytes) -> KEMEncapsulation:
-        """Encapsulate to a public key as a standalone primitive operation."""
+        """Generate and encapsulate a fresh shared secret against the target public key."""
 
         raise NotImplementedError
 
     @abstractmethod
     def decapsulate(self, ciphertext: bytes) -> bytes:
-        """Decapsulate using this provider's private key."""
+        """Decapsulate an incoming ciphertext using this provider instance's private key."""
 
         raise NotImplementedError

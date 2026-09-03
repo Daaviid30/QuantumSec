@@ -10,6 +10,8 @@ from pqc.errors import BackendOperationError, BackendUnavailableError, Unsupport
 
 
 class _OQSSignature(Protocol):
+    """Protocol defining the interface for a liboqs signature context manager."""
+
     def __enter__(self) -> Self: ...
 
     def __exit__(
@@ -29,10 +31,14 @@ class _OQSSignature(Protocol):
 
 
 class _SignatureFactory(Protocol):
+    """Protocol for the liboqs Signature constructor callable."""
+
     def __call__(self, alg_name: str, secret_key: bytes | None = None) -> _OQSSignature: ...
 
 
 class _OQSModule(Protocol):
+    """Protocol describing the exported interface of the imported oqs module."""
+
     Signature: _SignatureFactory
     MechanismNotEnabledError: type[Exception]
     MechanismNotSupportedError: type[Exception]
@@ -42,7 +48,7 @@ class _OQSModule(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class OQSKeyPair:
-    """Private transfer object used only across the OQS adapter boundary."""
+    """Immutable container transferring generated key pairs across the liboqs adapter boundary."""
 
     public_key: bytes = field(repr=False)
     secret_key: bytes = field(repr=False)
@@ -50,6 +56,7 @@ class OQSKeyPair:
 
 @lru_cache(maxsize=1)
 def _load_oqs() -> _OQSModule:
+    """Dynamically import and cache the liboqs Python module, raising BackendUnavailableError on failure."""
     try:
         module: ModuleType = import_module("oqs")
     except (ImportError, OSError, RuntimeError) as exc:
@@ -59,6 +66,7 @@ def _load_oqs() -> _OQSModule:
 
 @cache
 def _ensure_signature_algorithm_enabled(algorithm: str) -> None:
+    """Verify that the requested signature algorithm is enabled in the liboqs library."""
     module = _load_oqs()
     try:
         algorithm_enabled = bool(module.is_sig_enabled(algorithm))
@@ -69,6 +77,7 @@ def _ensure_signature_algorithm_enabled(algorithm: str) -> None:
 
 
 def _new_signature(algorithm: str, *, secret_key: bytes | None = None) -> _OQSSignature:
+    """Initialize and return a new liboqs signature instance for the specified algorithm."""
     module = _load_oqs()
     _ensure_signature_algorithm_enabled(algorithm)
     try:
@@ -80,9 +89,10 @@ def _new_signature(algorithm: str, *, secret_key: bytes | None = None) -> _OQSSi
 
 
 class OQSSignatureBackend:
-    """Execute signature operations through liboqs without leaking its lifecycle."""
+    """Low-level adapter managing liboqs signature contexts, key generation, signing, and verification."""
 
     def generate_keypair(self, algorithm: str) -> OQSKeyPair:
+        """Generate a fresh key pair for the specified signature algorithm using liboqs."""
         signer = _new_signature(algorithm)
         try:
             with signer:
@@ -93,6 +103,7 @@ class OQSSignatureBackend:
         return OQSKeyPair(public_key=public_key, secret_key=secret_key)
 
     def sign(self, algorithm: str, message: bytes, secret_key: bytes) -> bytes:
+        """Generate a signature over message bytes using the given algorithm and secret key via liboqs."""
         signer = _new_signature(algorithm, secret_key=secret_key)
         try:
             with signer:
@@ -101,6 +112,7 @@ class OQSSignatureBackend:
             raise BackendOperationError(f"liboqs signing failed for {algorithm!r}.") from exc
 
     def verify(self, algorithm: str, message: bytes, signature: bytes, public_key: bytes) -> bool:
+        """Verify a signature against the message and public key using the liboqs backend."""
         verifier = _new_signature(algorithm)
         try:
             with verifier:

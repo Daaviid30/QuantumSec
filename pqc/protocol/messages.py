@@ -24,6 +24,7 @@ SERVER_KEY_OFFER_DOMAIN_SEPARATOR: Final = b"QuantumSec/PQCHandshake/v1/ServerKe
 
 
 def _require_bytes(value: object, *, name: str, length: int | None = None) -> bytes:
+    """Validate that an argument is non-empty bytes and matches an optional expected length."""
     if not isinstance(value, bytes):
         raise TypeError(f"{name} must be bytes. Got {type(value).__name__}.")
     if length is not None and len(value) != length:
@@ -34,12 +35,14 @@ def _require_bytes(value: object, *, name: str, length: int | None = None) -> by
 
 
 def _length_prefixed(value: bytes) -> bytes:
+    """Prefix byte data with a 4-byte big-endian length header for canonical unambiguous serialization."""
     if len(value) > 0xFFFFFFFF:
         raise ValueError("Canonical field exceeds the 32-bit length prefix.")
     return pack(">I", len(value)) + value
 
 
 def _decode_base64_field(value: object, *, name: str) -> bytes:
+    """Decode a Base64-encoded string into raw bytes, raising ValueError if the data is invalid."""
     if not isinstance(value, str):
         raise TypeError(f"{name} must be a Base64 string. Got {type(value).__name__}.")
     try:
@@ -54,6 +57,7 @@ def _require_transport_fields(
     message_name: str,
     fields: set[str],
 ) -> None:
+    """Ensure all required transport keys exist in the provided payload dictionary."""
     missing = fields.difference(payload)
     if missing:
         raise ValueError(f"{message_name} payload is missing fields: {', '.join(sorted(missing))}.")
@@ -61,7 +65,7 @@ def _require_transport_fields(
 
 @dataclass(frozen=True, slots=True)
 class ServerKeyOffer:
-    """Public responder KEM material authenticated as one canonical message."""
+    """Immutable message containing responder ephemeral KEM public keys and handshake session parameters."""
 
     protocol_version: int
     session_id: bytes = field(repr=False)
@@ -73,6 +77,7 @@ class ServerKeyOffer:
     hqc_public_key: bytes | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
+        """Validate protocol version, session ID, nonce, profile, and algorithm public key buffer lengths."""
         if (
             isinstance(self.protocol_version, bool)
             or self.protocol_version != SERVER_KEY_OFFER_PROTOCOL_VERSION
@@ -118,7 +123,7 @@ class ServerKeyOffer:
         object.__setattr__(self, "hqc_public_key", hqc_public_key)
 
     def canonical_bytes(self) -> bytes:
-        """Serialize authenticated fields in one deterministic, unambiguous order."""
+        """Serialize authenticated offer fields into a deterministic length-prefixed byte stream."""
 
         fields = [
             _length_prefixed(SERVER_KEY_OFFER_DOMAIN_SEPARATOR),
@@ -216,7 +221,7 @@ class ServerKeyOffer:
 
 @dataclass(frozen=True, slots=True)
 class SignedServerKeyOffer:
-    """A server key offer plus its long-lived responder identity signature."""
+    """Immutable container wrapping a ServerKeyOffer and its responder signature."""
 
     offer: ServerKeyOffer
     signer: str
@@ -224,6 +229,7 @@ class SignedServerKeyOffer:
     signature: bytes = field(repr=False)
 
     def __post_init__(self) -> None:
+        """Validate wrapped offer type, signer name, signature algorithm, and signature bytes."""
         if not isinstance(self.offer, ServerKeyOffer):
             raise TypeError(f"offer must be a ServerKeyOffer. Got {type(self.offer).__name__}.")
         object.__setattr__(self, "signer", _validated_identity_name(self.signer))
@@ -243,7 +249,7 @@ class SignedServerKeyOffer:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> Self:
-        """Restore a signed offer without implicitly trusting or verifying it."""
+        """Deserialize a signed server key offer from a dictionary without verifying signatures."""
 
         if not isinstance(payload, Mapping):
             raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")

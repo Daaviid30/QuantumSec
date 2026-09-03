@@ -17,11 +17,7 @@ from pqc.protocol.party import PQCParty
 
 @dataclass(slots=True, repr=False)
 class ResponderKEMState:
-    """Private ephemeral KEM capabilities retained by one responder session.
-
-    Protocol-level decapsulation is deliberately reserved for a later handshake
-    phase. Call :meth:`close` when an offer expires or its session is aborted.
-    """
+    """Maintains ephemeral private KEM key pairs for an active handshake responder session."""
 
     session_id: bytes = field(repr=False)
     profile: PQCProfile
@@ -30,6 +26,7 @@ class ResponderKEMState:
     _closed: bool = field(default=False, init=False, repr=False)
 
     def __post_init__(self) -> None:
+        """Validate session ID length, profile compatibility, and presence of required KEM instances."""
         if not isinstance(self.session_id, bytes):
             raise TypeError(f"session_id must be bytes. Got {type(self.session_id).__name__}.")
         if len(self.session_id) != SERVER_KEY_OFFER_SESSION_ID_LENGTH:
@@ -48,19 +45,20 @@ class ResponderKEMState:
         self.session_id = bytes(self.session_id)
 
     def _active_ml_kem(self) -> MLKEM768:
+        """Return the active ML-KEM provider instance or raise RuntimeError if state is closed."""
         if self._closed or self._ml_kem is None:
             raise RuntimeError("Responder KEM state is closed.")
         return self._ml_kem
 
     @property
     def ml_kem_public_key(self) -> bytes:
-        """Return the public ML-KEM key for the associated offer."""
+        """Return the public ML-KEM encapsulation key associated with this responder session."""
 
         return self._active_ml_kem().public_key
 
     @property
     def hqc_public_key(self) -> bytes | None:
-        """Return the public HQC key when the HIGH profile is active."""
+        """Return the public HQC encapsulation key if the session uses the HIGH profile, or None otherwise."""
 
         if self._closed:
             raise RuntimeError("Responder KEM state is closed.")
@@ -68,22 +66,19 @@ class ResponderKEMState:
 
     @property
     def is_closed(self) -> bool:
-        """Return whether the private KEM references have been released."""
+        """Return whether this responder KEM state has been closed and its private keys released."""
 
         return self._closed
 
     def close(self) -> None:
-        """Release references to ephemeral private capabilities, idempotently.
-
-        Python ``bytes`` cannot be reliably zeroized in place; this method does
-        not claim a guaranteed memory wipe.
-        """
+        """Release references to ephemeral private KEM instances to prevent subsequent reuse."""
 
         self._ml_kem = None
         self._hqc = None
         self._closed = True
 
     def __repr__(self) -> str:
+        """Return a safe string representation showing profile and closed status."""
         algorithms = profile_definition(self.profile).kem_algorithms
         return (
             f"ResponderKEMState(profile={self.profile.value!r}, algorithms={algorithms!r}, "
@@ -92,7 +87,7 @@ class ResponderKEMState:
 
 
 class ServerKeyOfferFactory:
-    """Create fresh KEM state, canonical offers, and responder signatures."""
+    """Factory creating responder ephemeral KEM states and authenticated SignedServerKeyOffers."""
 
     def create(
         self,
@@ -100,7 +95,7 @@ class ServerKeyOfferFactory:
         responder: PQCParty,
         profile: PQCProfile,
     ) -> tuple[ResponderKEMState, SignedServerKeyOffer]:
-        """Create and sign one fresh server offer without establishing a secret."""
+        """Generate fresh ephemeral KEM keys and create a signed server offer for a new session."""
 
         if not isinstance(responder, PQCParty):
             raise TypeError(f"responder must be a PQCParty. Got {type(responder).__name__}.")

@@ -22,6 +22,7 @@ ML_DSA_65_METADATA: Final = SignatureMetadata(
 
 
 def _require_bytes(value: object, *, name: str) -> bytes:
+    """Validate that the input value is a byte string, raising a TypeError if it is not."""
     if not isinstance(value, bytes):
         raise TypeError(f"{name} must be bytes. Got {type(value).__name__}.")
     return value
@@ -29,13 +30,14 @@ def _require_bytes(value: object, *, name: str) -> bytes:
 
 @dataclass(frozen=True, slots=True, repr=False)
 class MLDSA65(SignatureProvider):
-    """Private ML-DSA-65 signing capability backed by liboqs."""
+    """ML-DSA-65 (NIST FIPS 204) digital signature provider backed by liboqs."""
 
     _public_key: bytes = field(repr=False)
     _secret_key: bytes = field(repr=False)
     _backend: OQSSignatureBackend = field(default_factory=OQSSignatureBackend, repr=False, compare=False)
 
     def __post_init__(self) -> None:
+        """Validate ML-DSA-65 key buffer sizes and store immutable defensive copies of the keys."""
         public_key = _require_bytes(self._public_key, name="public_key")
         secret_key = _require_bytes(self._secret_key, name="secret_key")
         if not public_key:
@@ -57,14 +59,14 @@ class MLDSA65(SignatureProvider):
 
     @classmethod
     def generate(cls) -> Self:
-        """Generate a real ML-DSA-65 key pair using liboqs CSPRNG state."""
+        """Generate a fresh ML-DSA-65 key pair via liboqs and return a new provider instance."""
 
         key_pair = OQSSignatureBackend().generate_keypair(ML_DSA_65_METADATA.name)
         return cls(_public_key=key_pair.public_key, _secret_key=key_pair.secret_key)
 
     @property
     def metadata(self) -> SignatureMetadata:
-        """Return standardized ML-DSA-65 metadata."""
+        """Return standardized FIPS 204 metadata and key/signature lengths for ML-DSA-65."""
 
         return ML_DSA_65_METADATA
 
@@ -75,14 +77,14 @@ class MLDSA65(SignatureProvider):
         return self._public_key
 
     def sign(self, message: bytes) -> bytes:
-        """Sign a message using the private ML-DSA-65 key."""
+        """Generate an ML-DSA-65 signature over message bytes using the private signing key."""
 
         clean_message = _require_bytes(message, name="message")
         return self._backend.sign(self.metadata.name, clean_message, self._secret_key)
 
     @staticmethod
     def verify(message: bytes, signature: bytes, public_key: bytes) -> bool:
-        """Return whether a signature is valid for a message and public key."""
+        """Verify an ML-DSA-65 signature against the message and public verification key."""
 
         clean_message = _require_bytes(message, name="message")
         clean_signature = _require_bytes(signature, name="signature")
@@ -100,4 +102,5 @@ class MLDSA65(SignatureProvider):
         )
 
     def __repr__(self) -> str:
+        """Return a safe string representation with public key length without leaking secret bytes."""
         return f"MLDSA65(algorithm={self.metadata.name!r}, public_key_length={len(self._public_key)})"

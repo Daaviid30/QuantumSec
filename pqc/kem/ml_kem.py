@@ -14,7 +14,7 @@ ML_KEM_768_ALGORITHM: Final = "ML-KEM-768"
 
 @cache
 def ml_kem_768_metadata() -> KEMMetadata:
-    """Return backend-derived ML-KEM-768 metadata."""
+    """Retrieve and cache standardized ML-KEM-768 (NIST FIPS 203) metadata validated against liboqs."""
 
     details = OQSKEMBackend().details(ML_KEM_768_ALGORITHM)
     if details.name != ML_KEM_768_ALGORITHM or details.claimed_nist_level != 3:
@@ -35,12 +35,12 @@ def ml_kem_768_metadata() -> KEMMetadata:
 
 @dataclass(frozen=True, slots=True, repr=False)
 class MLKEM768(OQSKEMProvider):
-    """Private ephemeral ML-KEM-768 capability backed by liboqs."""
+    """Ephemeral ML-KEM-768 key encapsulation provider backed by liboqs."""
 
     ALGORITHM: ClassVar[str] = ML_KEM_768_ALGORITHM
 
     @classmethod
     def algorithm_metadata(cls) -> KEMMetadata:
-        """Return standardized and backend-derived ML-KEM-768 metadata."""
+        """Return cached algorithm metadata and expected key/ciphertext dimensions for ML-KEM-768."""
 
         return ml_kem_768_metadata()

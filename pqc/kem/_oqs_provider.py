@@ -10,6 +10,7 @@ from pqc.kem.base import KEMEncapsulation, KEMMetadata, KEMProvider
 
 
 def _require_bytes(value: object, *, name: str) -> bytes:
+    """Validate that the input value is a byte string, raising a TypeError if it is not."""
     if not isinstance(value, bytes):
         raise TypeError(f"{name} must be bytes. Got {type(value).__name__}.")
     return value
@@ -17,7 +18,7 @@ def _require_bytes(value: object, *, name: str) -> bytes:
 
 @dataclass(frozen=True, slots=True, repr=False)
 class OQSKEMProvider(KEMProvider):
-    """Private base for KEMs sharing the same liboqs lifecycle."""
+    """Base provider implementing KEM operations through the liboqs backend."""
 
     ALGORITHM: ClassVar[str]
 
@@ -26,6 +27,7 @@ class OQSKEMProvider(KEMProvider):
     _backend: OQSKEMBackend = field(default_factory=OQSKEMBackend, repr=False, compare=False)
 
     def __post_init__(self) -> None:
+        """Validate key lengths against algorithm metadata and store immutable defensive copies."""
         public_key = _require_bytes(self._public_key, name="public_key")
         secret_key = _require_bytes(self._secret_key, name="secret_key")
         metadata = self.algorithm_metadata()
@@ -45,32 +47,32 @@ class OQSKEMProvider(KEMProvider):
     @classmethod
     @abstractmethod
     def algorithm_metadata(cls) -> KEMMetadata:
-        """Return cached metadata for the concrete OQS mechanism."""
+        """Return standardized algorithm metadata defining expected key and ciphertext buffer lengths."""
 
         raise NotImplementedError
 
     @classmethod
     def generate(cls) -> Self:
-        """Generate an ephemeral key pair through liboqs."""
+        """Generate a new ephemeral key pair via liboqs and return a ready-to-use provider instance."""
 
         key_pair = OQSKEMBackend().generate_keypair(cls.ALGORITHM)
         return cls(_public_key=key_pair.public_key, _secret_key=key_pair.secret_key)
 
     @property
     def metadata(self) -> KEMMetadata:
-        """Return cached backend-derived metadata."""
+        """Return the algorithm metadata associated with this provider instance."""
 
         return self.algorithm_metadata()
 
     @property
     def public_key(self) -> bytes:
-        """Return the immutable public encapsulation key."""
+        """Return the public key bytes used for encapsulating secrets."""
 
         return self._public_key
 
     @classmethod
     def encapsulate(cls, public_key: bytes) -> KEMEncapsulation:
-        """Encapsulate to a public key through liboqs."""
+        """Generate and encapsulate a shared secret against a given public key using liboqs."""
 
         clean_public_key = _require_bytes(public_key, name="public_key")
         metadata = cls.algorithm_metadata()
@@ -87,7 +89,7 @@ class OQSKEMProvider(KEMProvider):
         return KEMEncapsulation(ciphertext=result.ciphertext, shared_secret=result.shared_secret)
 
     def decapsulate(self, ciphertext: bytes) -> bytes:
-        """Decapsulate a ciphertext through liboqs."""
+        """Recover the shared secret from a ciphertext using this provider's private key via liboqs."""
 
         clean_ciphertext = _require_bytes(ciphertext, name="ciphertext")
         metadata = self.metadata
@@ -102,6 +104,7 @@ class OQSKEMProvider(KEMProvider):
         return shared_secret
 
     def __repr__(self) -> str:
+        """Return a safe string representation with public key size without exposing secret key bytes."""
         return (
             f"{type(self).__name__}(algorithm={self.ALGORITHM!r}, public_key_length={len(self._public_key)})"
         )

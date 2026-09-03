@@ -12,6 +12,8 @@ from pqc.signatures.ml_dsa import ML_DSA_65_METADATA, MLDSA65
 
 @dataclass(frozen=True, slots=True)
 class _RegisteredSignature:
+    """Internal container pairing algorithm metadata with its corresponding signature provider class."""
+
     metadata: SignatureMetadata
     provider: type[SignatureProvider]
 
@@ -27,12 +29,13 @@ _SIGNATURES: Final[Mapping[str, _RegisteredSignature]] = MappingProxyType(
 
 
 def _metadata_for_algorithm(algorithm: str) -> SignatureMetadata | None:
+    """Look up algorithm metadata from the registry, or return None if unsupported."""
     registration = _SIGNATURES.get(algorithm)
     return None if registration is None else registration.metadata
 
 
 def verify_signature(algorithm: str, message: bytes, signature: bytes, public_key: bytes) -> bool:
-    """Verify using the registered public provider for an algorithm."""
+    """Verify a signature by dispatching to the registered provider for the specified algorithm name."""
 
     if not isinstance(algorithm, str):
         raise TypeError(f"algorithm must be a string. Got {type(algorithm).__name__}.")

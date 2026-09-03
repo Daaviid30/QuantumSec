@@ -7,15 +7,16 @@ from pqc.protocol.identity import PublicIdentity, _validated_identity_name
 
 
 class TrustedIdentityStore:
-    """Map peer names to public identities trusted out of band."""
+    """Thread-safe in-memory registry mapping peer names to pre-provisioned trusted PublicIdentity objects."""
 
     __slots__ = ("_identities",)
 
     def __init__(self) -> None:
+        """Initialize an empty trusted identity store."""
         self._identities: dict[str, PublicIdentity] = {}
 
     def trust(self, identity: PublicIdentity, *, overwrite: bool = False) -> None:
-        """Explicitly provision a peer, rejecting silent key replacement."""
+        """Register a public identity as trusted, raising an error if already present unless overwrite."""
 
         if not isinstance(identity, PublicIdentity):
             raise TypeError(f"identity must be a PublicIdentity. Got {type(identity).__name__}.")
@@ -28,7 +29,7 @@ class TrustedIdentityStore:
         self._identities[identity.owner] = identity
 
     def lookup(self, owner: str) -> PublicIdentity:
-        """Return a pre-provisioned identity or raise an explicit trust error."""
+        """Return the trusted public identity for an owner, raising UnknownTrustedPeerError if absent."""
 
         clean_owner = _validated_identity_name(owner)
         try:
@@ -38,19 +39,23 @@ class TrustedIdentityStore:
 
     @property
     def owners(self) -> tuple[str, ...]:
-        """Return trusted owner names in deterministic order."""
+        """Return a sorted tuple of all trusted owner names registered in the store."""
 
         return tuple(sorted(self._identities))
 
     def __contains__(self, owner: object) -> bool:
+        """Check whether an owner name is registered in the trusted identity store."""
         return isinstance(owner, str) and owner.strip() in self._identities
 
     def __iter__(self) -> Iterator[PublicIdentity]:
+        """Iterate over all trusted public identities in deterministic owner order."""
         for owner in self.owners:
             yield self._identities[owner]
 
     def __len__(self) -> int:
+        """Return the total number of trusted peer identities in the store."""
         return len(self._identities)
 
     def __repr__(self) -> str:
+        """Return a string representation listing registered trusted owner names."""
         return f"TrustedIdentityStore(owners={self.owners!r})"

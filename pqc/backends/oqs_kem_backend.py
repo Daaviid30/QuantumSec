@@ -11,6 +11,8 @@ from pqc.errors import BackendOperationError, BackendUnavailableError, Unsupport
 
 
 class _OQSKEM(Protocol):
+    """Protocol defining the interface for a liboqs KeyEncapsulation context manager."""
+
     details: Mapping[str, object]
 
     def __enter__(self) -> Self: ...
@@ -32,10 +34,14 @@ class _OQSKEM(Protocol):
 
 
 class _KEMFactory(Protocol):
+    """Protocol for the liboqs KeyEncapsulation constructor callable."""
+
     def __call__(self, alg_name: str, secret_key: bytes | None = None) -> _OQSKEM: ...
 
 
 class _OQSModule(Protocol):
+    """Protocol describing the exported interface of the imported oqs module."""
+
     KeyEncapsulation: _KEMFactory
     MechanismNotEnabledError: type[Exception]
     MechanismNotSupportedError: type[Exception]
@@ -45,7 +51,7 @@ class _OQSModule(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class OQSKEMKeyPair:
-    """Private transfer object used only across the OQS KEM boundary."""
+    """Immutable container transferring generated key pairs across the liboqs adapter boundary."""
 
     public_key: bytes = field(repr=False)
     secret_key: bytes = field(repr=False)
@@ -53,7 +59,7 @@ class OQSKEMKeyPair:
 
 @dataclass(frozen=True, slots=True)
 class OQSKEMEncapsulation:
-    """Ciphertext and shared secret returned by the OQS adapter."""
+    """Immutable container holding ciphertext and shared secret produced by liboqs encapsulation."""
 
     ciphertext: bytes = field(repr=False)
     shared_secret: bytes = field(repr=False)
@@ -61,7 +67,7 @@ class OQSKEMEncapsulation:
 
 @dataclass(frozen=True, slots=True)
 class OQSKEMDetails:
-    """Validated non-secret metadata reported by liboqs."""
+    """Immutable data structure storing algorithm parameters and buffer dimensions from liboqs."""
 
     name: str
     version: str
@@ -74,6 +80,7 @@ class OQSKEMDetails:
 
 @lru_cache(maxsize=1)
 def _load_oqs() -> _OQSModule:
+    """Dynamically import and cache the liboqs Python module, raising BackendUnavailableError on failure."""
     try:
         module: ModuleType = import_module("oqs")
     except (ImportError, OSError, RuntimeError) as exc:
@@ -83,6 +90,7 @@ def _load_oqs() -> _OQSModule:
 
 @cache
 def _ensure_kem_algorithm_enabled(algorithm: str) -> None:
+    """Verify that the requested KEM algorithm is enabled in the liboqs library."""
     module = _load_oqs()
     try:
         algorithm_enabled = bool(module.is_kem_enabled(algorithm))
@@ -93,6 +101,7 @@ def _ensure_kem_algorithm_enabled(algorithm: str) -> None:
 
 
 def _new_kem(algorithm: str, *, secret_key: bytes | None = None) -> _OQSKEM:
+    """Initialize and return a new liboqs KeyEncapsulation instance for the specified algorithm."""
     module = _load_oqs()
     _ensure_kem_algorithm_enabled(algorithm)
     try:
@@ -108,6 +117,7 @@ def _required_detail(
     name: str,
     expected_type: type[str] | type[int],
 ) -> str | int:
+    """Extract and validate a required metadata field from the liboqs algorithm details mapping."""
     value = details.get(name)
     if expected_type is int:
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
@@ -119,9 +129,10 @@ def _required_detail(
 
 
 class OQSKEMBackend:
-    """Execute KEM operations through liboqs without leaking its lifecycle."""
+    """Low-level adapter managing liboqs KeyEncapsulation contexts and cryptographic operations."""
 
     def details(self, algorithm: str) -> OQSKEMDetails:
+        """Query and return validated metadata and buffer dimensions for a KEM algorithm from liboqs."""
         kem = _new_kem(algorithm)
         try:
             with kem:
@@ -139,6 +150,7 @@ class OQSKEMBackend:
         )
 
     def generate_keypair(self, algorithm: str) -> OQSKEMKeyPair:
+        """Generate a fresh key pair for the specified KEM algorithm using liboqs."""
         kem = _new_kem(algorithm)
         try:
             with kem:
@@ -149,6 +161,7 @@ class OQSKEMBackend:
         return OQSKEMKeyPair(public_key=public_key, secret_key=secret_key)
 
     def encapsulate(self, algorithm: str, public_key: bytes) -> OQSKEMEncapsulation:
+        """Encapsulate a secret against the public key via liboqs, returning ciphertext and shared secret."""
         kem = _new_kem(algorithm)
         try:
             with kem:
@@ -158,6 +171,7 @@ class OQSKEMBackend:
         return OQSKEMEncapsulation(ciphertext=bytes(ciphertext), shared_secret=bytes(shared_secret))
 
     def decapsulate(self, algorithm: str, ciphertext: bytes, secret_key: bytes) -> bytes:
+        """Decapsulate a ciphertext using the provided secret key via liboqs to recover the shared secret."""
         kem = _new_kem(algorithm, secret_key=secret_key)
         try:
             with kem:
