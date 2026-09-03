@@ -289,14 +289,14 @@ explicitly.
 
 Post-quantum cryptography and authentication. This module should not import from `qkd/`. Its job is to provide cryptographic tools and interfaces that can be used by experiments or authentication adapters.
 
-Implemented PQC structure through Phase 3:
+Implemented PQC structure through Phase 4:
 
 ```text
 pqc/backends/       = isolated external-provider adapters
 pqc/signatures/     = signature interface and ML-DSA-65 implementation
 pqc/kem/            = KEM interface plus ML-KEM-768 and HQC-3 providers
 pqc/profiles.py     = centralized LOW/HIGH QuantumSec profiles
-pqc/protocol/       = identities, trust, canonical messages, offer creation, and initiator processing
+pqc/protocol/       = identities, trust, canonical messages, and initiator/responder orchestration
 ```
 
 ML-DSA-65 currently provides post-quantum digital identity and authentication primitives through
@@ -317,20 +317,27 @@ Current responsibilities:
 - real ML-KEM-768 and HQC-3 ephemeral key generation behind a separate OQS KEM adapter
 - LOW (`ML-KEM-768`) and HIGH (`ML-KEM-768 + HQC-3`) QuantumSec profiles
 - canonical, domain-separated `ServerKeyOffer` serialization for signing
+- canonical, domain-separated `ClientKeyExchange` serialization bound to the exact offer by SHA-384
 - validated JSON-compatible Base64 transport mappings for public handshake messages
 - explicit, idempotent release of ephemeral responder KEM references on session abort/expiry
 - ML-DSA-65 authentication of Bob's public ephemeral KEM offer
 - trust-backed Alice-side authentication before any KEM encapsulation
 - private `InitiatorKEMState` secrets separated from public `EncapsulationResponse` ciphertexts
 - explicit, idempotent release of Alice's shared-secret references on session abort/expiry
+- Alice's ML-DSA-65 signature over the existing Phase 3 ciphertexts, without re-encapsulation
+- Bob-side session, profile, offer-hash, trust, and signature validation before any decapsulation
+- private `ResponderSharedSecretState` separated from the public signed client exchange
+- one-shot release of Bob's ephemeral KEM private capabilities after every required decapsulation succeeds
 
-QuantumSec can now construct an authenticated KEM offer and Alice can verify Bob through her
-pre-provisioned trust store before creating ML-KEM-768 and optional HQC-3 ciphertexts. The resulting
-shared secrets remain private to Alice. Bob has not received or authenticated the response and has
-not decapsulated it at the protocol level; response signing, combined secrets, KDFs, Finished
-messages, session keys, and QKD/PQC composition belong to later phases.
-`InitiatorKEMState` intentionally exposes no raw-secret export API yet: the later KDF phase must own
-that consumption contract rather than broadening the Phase 3 public surface prematurely.
+The staged flow now covers four phases: (1) ML-DSA identities and explicit trust, (2) Bob's signed
+ephemeral KEM offer, (3) Alice's verification and encapsulation, and (4) Alice's signed
+`ClientKeyExchange` followed by Bob's verify-before-decapsulate processing. Alice and Bob therefore
+possess matching KEM shared-secret material after mutual ML-DSA authentication. In HIGH, the
+ML-KEM and HQC secrets remain independent at this phase. Neither private state exposes a raw-secret
+export API yet: Phase 5 must define the consumption and combination contract.
+
+No final session key has been derived and no key confirmation has occurred. Combined secrets,
+HKDFs, Finished messages, session keys, and QKD/PQC composition belong to later phases.
 LOW and HIGH are QuantumSec deployment profiles, not NIST categories; HIGH is a diverse dual-KEM
 offer and is not the future QKD + PQC `HYBRID` profile.
 
@@ -435,9 +442,10 @@ authentication belongs in a future upper-layer integration and is intentionally 
 | `PQCParty`, `PublicIdentity` | `pqc/protocol/` |
 | `MLKEM768`, `HQC3` | `pqc/kem/` |
 | `PQCProfile` | `pqc/profiles.py` |
-| `ServerKeyOffer`, `SignedServerKeyOffer`, `EncapsulationResponse` | `pqc/protocol/messages.py` |
+| `ServerKeyOffer`, `SignedServerKeyOffer`, `EncapsulationResponse`, `ClientKeyExchange`, `SignedClientKeyExchange` | `pqc/protocol/messages.py` |
 | `ResponderKEMState`, `ServerKeyOfferFactory` | `pqc/protocol/server_offer.py` |
 | `ServerKeyOfferProcessor`, `InitiatorKEMState` | `pqc/protocol/initiator.py` |
+| `ClientKeyExchangeFactory`, `ClientKeyExchangeProcessor`, `ResponderSharedSecretState` | `pqc/protocol/client_exchange.py` |
 | future QKD/PQC composition | upper orchestration layer, never direct `qkd`/`pqc` imports |
 
 ---
@@ -454,7 +462,7 @@ Current development order:
 6. Noise experiments using the CPTP channel models
 7. Optical transmission and loss as a separate physical layer
 8. Advanced postprocessing (parameter estimation, Cascade, confirmation, and Toeplitz extraction complete)
-9. PQC authentication: identity/trust, authenticated ephemeral offers, and Alice-side encapsulation complete; signed response, Bob decapsulation, shared-key derivation, and comparative experiments remain
+9. PQC authentication: identity/trust, authenticated ephemeral offers, Alice-side encapsulation, signed client response, and Bob-side decapsulation complete; shared-key derivation and comparative experiments remain
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
 
@@ -552,8 +560,9 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 ## 10. Current Immediate Goal
 
 The mathematical primitives, quantum-channel foundation, complete BB84 post-processing, Web UI,
-and PQC Phases 1-3 are in place. Alice authenticates Bob's canonical LOW or HIGH offer using only
-her provisioned trust store, then creates public ciphertexts and private KEM shared secrets. Bob has
-not received or authenticated the response and has not decapsulated it at protocol level. Handshake
-completion and QKD/PQC orchestration remain future work, so simulated QKD workflows must not yet be
-treated as end-to-end authenticated sessions.
+and PQC Phases 1-4 are in place. Alice authenticates Bob's canonical LOW or HIGH offer, encapsulates,
+binds her response to that exact offer, and signs it. Bob validates the local session and binding,
+authenticates Alice through his provisioned trust store, and only then decapsulates. Both sides hold
+matching private KEM material, but Phase 5 still needs to define the KDF/dual-KEM combination and a
+later phase must provide key confirmation. QKD/PQC orchestration also remains future work, so
+simulated QKD workflows must not yet be treated as end-to-end authenticated sessions.

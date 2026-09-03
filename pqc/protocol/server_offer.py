@@ -50,6 +50,15 @@ class ResponderKEMState:
             raise RuntimeError("Responder KEM state is closed.")
         return self._ml_kem
 
+    def _active_hqc(self) -> HQC3:
+        """Return the active HQC provider instance required by a HIGH-profile session."""
+
+        if self._closed:
+            raise RuntimeError("Responder KEM state is closed.")
+        if self._hqc is None:
+            raise RuntimeError("Responder KEM state does not contain an HQC key pair.")
+        return self._hqc
+
     @property
     def ml_kem_public_key(self) -> bytes:
         """Return the public ML-KEM encapsulation key associated with this responder session."""
@@ -63,6 +72,16 @@ class ResponderKEMState:
         if self._closed:
             raise RuntimeError("Responder KEM state is closed.")
         return None if self._hqc is None else self._hqc.public_key
+
+    def decapsulate_ml_kem(self, ciphertext: bytes) -> bytes:
+        """Decapsulate an ML-KEM ciphertext with this session's private key."""
+
+        return self._active_ml_kem().decapsulate(ciphertext)
+
+    def decapsulate_hqc(self, ciphertext: bytes) -> bytes:
+        """Decapsulate an HQC ciphertext with this HIGH-profile session's private key."""
+
+        return self._active_hqc().decapsulate(ciphertext)
 
     @property
     def is_closed(self) -> bool:

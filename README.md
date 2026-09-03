@@ -5,9 +5,9 @@ research, and post-quantum authentication mechanisms.
 
 The current release includes a functional BB84 engine and a dark-first web laboratory for composing
 logical-qubit channels, running seeded simulations, and inspecting genuine simulation output. It
-also includes ML-DSA-65 identities and pre-provisioned trust, authenticated ephemeral KEM offers,
-and Alice-side ML-KEM-768 plus optional HQC-3 encapsulation after verification, all backed by
-liboqs.
+also includes a four-phase PQC exchange backed by liboqs: ML-DSA-65 identities and pre-provisioned
+trust, authenticated ephemeral KEM offers, Alice-side ML-KEM-768 plus optional HQC-3 encapsulation,
+and an authenticated client response that Bob verifies before decapsulation.
 
 ## 📌 Overview
 
@@ -77,14 +77,17 @@ LOW  = ML-KEM-768, authenticated with ML-DSA-65
 HIGH = ML-KEM-768 + HQC-3 diverse-KEM offer, authenticated with ML-DSA-65
 ```
 
-QuantumSec can construct an authenticated `ServerKeyOffer`, while retaining Bob's ephemeral KEM
-private keys locally until the responder state is explicitly closed. Alice now resolves Bob only
-through her pre-provisioned trust store, verifies the ML-DSA-65 signature, and then creates public
-KEM ciphertexts plus private Alice-side shared secrets. The public response has validated Base64
-transport mappings, while the private initiator state can explicitly release its secret references.
-Authentication failure aborts before any encapsulation. Bob has not received or authenticated that
-response and does not decapsulate it at the protocol level yet, so the shared-key handshake remains
-incomplete.
+QuantumSec can construct an authenticated `ServerKeyOffer`. Alice resolves Bob only through her
+pre-provisioned trust store, verifies his ML-DSA-65 signature, and only then creates public KEM
+ciphertexts plus private Alice-side shared secrets. She binds those existing ciphertexts to the
+exact offer using SHA-384 and signs the canonical `ClientKeyExchange`. Bob checks his local session,
+the offer binding, Alice's provisioned identity, and her signature before any decapsulation.
+
+After this mutually authenticated exchange, Alice and Bob possess matching KEM shared-secret
+material. In HIGH, the ML-KEM and HQC secrets remain independent. Bob's one-shot ephemeral private
+KEM state is released only after both required decapsulations succeed, and both parties' shared
+secrets stay in private, non-serializable state objects. No final session key has been derived and
+no key confirmation has occurred yet.
 
 The complete session flow is:
 
@@ -103,14 +106,13 @@ from the key length.
 The current length estimator is an **asymptotic BB84 model**, not a complete composable finite-key
 security proof. It assumes a symmetric phase-error rate represented by sampled QBER and subtracts
 actual simulated reconciliation and confirmation leakage exactly once. The classical channel is
-assumed authenticated. The standalone PQC offer layer is intentionally not connected to QKD yet;
+assumed authenticated. The standalone PQC handshake layer is intentionally not connected to QKD yet;
 without future handshake completion and composition, the simulator must not be interpreted as
 end-to-end secure QKD.
 
 Optical loss, experiment sweeps, physical transmission timing/secret bits per second, production
-LDPC reconciliation, Alice response signing/transmission, Bob-side protocol decapsulation, KEM
-secret combination, handshake KDFs, QKD/PQC integration, and QKDN functionality are not implemented
-yet.
+LDPC reconciliation, KEM secret combination, handshake KDFs, Finished/key-confirmation messages,
+QKD/PQC integration, and QKDN functionality are not implemented yet.
 
 ## 🖥️ Web UI V1
 
