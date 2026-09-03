@@ -181,6 +181,19 @@ def test_responder_state_close_releases_private_capabilities(bob: PQCParty) -> N
         _ = state.hqc_public_key
 
 
+def test_responder_state_context_manager_closes_on_exit(bob: PQCParty) -> None:
+    state, signed_offer = ServerKeyOfferFactory().create(responder=bob, profile=PQCProfile.HIGH)
+
+    with state as managed_state:
+        assert managed_state is state
+        assert state.ml_kem_public_key == signed_offer.offer.ml_kem_public_key
+        assert state.hqc_public_key == signed_offer.offer.hqc_public_key
+
+    assert state.is_closed
+    assert object.__getattribute__(state, "_ml_kem") is None
+    assert object.__getattribute__(state, "_hqc") is None
+
+
 def test_bob_signs_canonical_offer_with_existing_identity(
     bob: PQCParty,
     high_creation: OfferCreation,

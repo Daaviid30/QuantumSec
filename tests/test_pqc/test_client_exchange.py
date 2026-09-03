@@ -1,5 +1,6 @@
 """Tests for authenticated Alice responses and Bob-side KEM decapsulation."""
 
+import base64
 from dataclasses import dataclass, fields, replace
 from hashlib import sha384
 from unittest.mock import patch
@@ -26,6 +27,7 @@ from pqc.errors import BackendOperationError
 from pqc.protocol import InitiatorKEMState, ResponderKEMState, ResponderSharedSecretState
 from pqc.protocol.messages import (
     CLIENT_KEY_EXCHANGE_DOMAIN_SEPARATOR,
+    CLIENT_KEY_EXCHANGE_NONCE_LENGTH,
     CLIENT_KEY_EXCHANGE_SERVER_OFFER_HASH_LENGTH,
     SERVER_KEY_OFFER_SESSION_ID_LENGTH,
 )
@@ -136,10 +138,17 @@ def test_client_exchange_binds_existing_phase3_response_without_reencapsulation(
             signed_server_offer=server_offer,
             processed_offer=processed_offer,
         )
+        second_signed_exchange = ClientKeyExchangeFactory().create(
+            initiator=alice,
+            signed_server_offer=server_offer,
+            processed_offer=processed_offer,
+        )
 
     exchange = signed_exchange.exchange
     assert exchange.ml_kem_ciphertext == public_response.ml_kem_ciphertext
     assert exchange.hqc_ciphertext == public_response.hqc_ciphertext
+    assert len(exchange.client_nonce) == CLIENT_KEY_EXCHANGE_NONCE_LENGTH
+    assert exchange.client_nonce != second_signed_exchange.exchange.client_nonce
     assert exchange.server_offer_hash == sha384(server_offer.offer.canonical_bytes()).digest()
     assert alice.public_identity.verify(exchange.canonical_bytes(), signed_exchange.signature)
     ml_encapsulate.assert_not_called()
@@ -338,6 +347,15 @@ def test_closed_responder_state_cannot_be_reused_after_success() -> None:
     ml_decapsulate.assert_not_called()
 
 
+def test_low_responder_state_rejects_hqc_decapsulation() -> None:
+    flow = _create_flow(PQCProfile.LOW)
+
+    with pytest.raises(RuntimeError, match="does not contain an HQC key pair"):
+        flow.responder_kem_state.decapsulate_hqc(b"not-an-hqc-ciphertext")
+
+    assert not flow.responder_kem_state.is_closed
+
+
 @pytest.mark.parametrize("profile", [PQCProfile.LOW, PQCProfile.HIGH])
 def test_signed_client_exchange_transport_round_trip(profile: PQCProfile) -> None:
     signed_exchange = _create_flow(profile).signed_exchange
@@ -350,6 +368,7 @@ def test_signed_client_exchange_transport_round_trip(profile: PQCProfile) -> Non
     assert restored == signed_exchange
     assert restored.exchange.canonical_bytes() == signed_exchange.exchange.canonical_bytes()
     assert isinstance(exchange_payload["session_id"], str)
+    assert isinstance(exchange_payload["client_nonce"], str)
     assert isinstance(exchange_payload["server_offer_hash"], str)
     assert isinstance(exchange_payload["ml_kem_ciphertext"], str)
     assert isinstance(payload["signature"], str)
@@ -365,6 +384,16 @@ def test_client_exchange_transport_rejects_invalid_base64() -> None:
         SignedClientKeyExchange.from_dict(payload)
 
 
+def test_client_exchange_transport_rejects_wrong_offer_hash_length() -> None:
+    payload = _create_flow(PQCProfile.LOW).signed_exchange.to_dict()
+    exchange_payload = payload["exchange"]
+    assert isinstance(exchange_payload, dict)
+    exchange_payload["server_offer_hash"] = base64.b64encode(b"short digest").decode("ascii")
+
+    with pytest.raises(ValueError, match="server_offer_hash must contain 48 bytes"):
+        SignedClientKeyExchange.from_dict(payload)
+
+
 def test_client_canonical_serialization_authenticates_every_field() -> None:
     low = _create_flow(PQCProfile.LOW).signed_exchange.exchange
     high = _create_flow(PQCProfile.HIGH).signed_exchange.exchange
@@ -374,10 +403,12 @@ def test_client_canonical_serialization_authenticates_every_field() -> None:
     ciphertext = low.ml_kem_ciphertext
     high_ciphertext = high.hqc_ciphertext
     assert high_ciphertext is not None
+    changed_nonce = bytes([low.client_nonce[0] ^ 1]) + low.client_nonce[1:]
 
     assert baseline == replace(low).canonical_bytes()
     assert CLIENT_KEY_EXCHANGE_DOMAIN_SEPARATOR in baseline
     assert replace(low, session_id=b"S" * SERVER_KEY_OFFER_SESSION_ID_LENGTH).canonical_bytes() != baseline
+    assert replace(low, client_nonce=changed_nonce).canonical_bytes() != baseline
     assert (
         replace(low, server_offer_hash=b"H" * CLIENT_KEY_EXCHANGE_SERVER_OFFER_HASH_LENGTH).canonical_bytes()
         != baseline
@@ -428,7 +459,10 @@ def test_responder_shared_secret_state_close_releases_secret_references() -> Non
     ml_secret = object.__getattribute__(state, "_ml_kem_shared_secret")
     hqc_secret = object.__getattribute__(state, "_hqc_shared_secret")
 
-    state.close()
+    with state as managed_state:
+        assert managed_state is state
+        assert not state.is_closed
+
     state.close()
 
     assert state.is_closed

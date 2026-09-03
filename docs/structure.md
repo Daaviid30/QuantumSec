@@ -317,7 +317,7 @@ Current responsibilities:
 - real ML-KEM-768 and HQC-3 ephemeral key generation behind a separate OQS KEM adapter
 - LOW (`ML-KEM-768`) and HIGH (`ML-KEM-768 + HQC-3`) QuantumSec profiles
 - canonical, domain-separated `ServerKeyOffer` serialization for signing
-- canonical, domain-separated `ClientKeyExchange` serialization bound to the exact offer by SHA-384
+- canonical, domain-separated `ClientKeyExchange` serialization containing Alice's fresh nonce and bound to the exact offer by SHA-384
 - validated JSON-compatible Base64 transport mappings for public handshake messages
 - explicit, idempotent release of ephemeral responder KEM references on session abort/expiry
 - ML-DSA-65 authentication of Bob's public ephemeral KEM offer
@@ -328,6 +328,7 @@ Current responsibilities:
 - Bob-side session, profile, offer-hash, trust, and signature validation before any decapsulation
 - private `ResponderSharedSecretState` separated from the public signed client exchange
 - one-shot release of Bob's ephemeral KEM private capabilities after every required decapsulation succeeds
+- a private shared-secret state base centralizing validation, repr safety, idempotent closure, and context-manager lifecycle without merging the semantic Alice/Bob state types
 
 The staged flow now covers four phases: (1) ML-DSA identities and explicit trust, (2) Bob's signed
 ephemeral KEM offer, (3) Alice's verification and encapsulation, and (4) Alice's signed
@@ -446,6 +447,7 @@ authentication belongs in a future upper-layer integration and is intentionally 
 | `ResponderKEMState`, `ServerKeyOfferFactory` | `pqc/protocol/server_offer.py` |
 | `ServerKeyOfferProcessor`, `InitiatorKEMState` | `pqc/protocol/initiator.py` |
 | `ClientKeyExchangeFactory`, `ClientKeyExchangeProcessor`, `ResponderSharedSecretState` | `pqc/protocol/client_exchange.py` |
+| shared private lifecycle for initiator/responder KEM secrets | `pqc/protocol/_shared_secret_state.py` |
 | future QKD/PQC composition | upper orchestration layer, never direct `qkd`/`pqc` imports |
 
 ---

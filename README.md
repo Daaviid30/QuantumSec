@@ -79,15 +79,17 @@ HIGH = ML-KEM-768 + HQC-3 diverse-KEM offer, authenticated with ML-DSA-65
 
 QuantumSec can construct an authenticated `ServerKeyOffer`. Alice resolves Bob only through her
 pre-provisioned trust store, verifies his ML-DSA-65 signature, and only then creates public KEM
-ciphertexts plus private Alice-side shared secrets. She binds those existing ciphertexts to the
-exact offer using SHA-384 and signs the canonical `ClientKeyExchange`. Bob checks his local session,
-the offer binding, Alice's provisioned identity, and her signature before any decapsulation.
+ciphertexts plus private Alice-side shared secrets. She adds a fresh 32-byte `client_nonce`, binds
+those existing ciphertexts to the exact offer using SHA-384, and signs the canonical
+`ClientKeyExchange`. Bob checks his local session, the offer binding, Alice's provisioned identity,
+and her signature before any decapsulation.
 
 After this mutually authenticated exchange, Alice and Bob possess matching KEM shared-secret
 material. In HIGH, the ML-KEM and HQC secrets remain independent. Bob's one-shot ephemeral private
 KEM state is released only after both required decapsulations succeed, and both parties' shared
-secrets stay in private, non-serializable state objects. No final session key has been derived and
-no key confirmation has occurred yet.
+secrets stay in private, non-serializable state objects. These private states support managed
+lifetimes with `with` as well as idempotent explicit closure. No final session key has been derived
+and no key confirmation has occurred yet.
 
 The complete session flow is:
 

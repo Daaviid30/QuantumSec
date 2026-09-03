@@ -1,23 +1,23 @@
 """Authenticated Alice-to-Bob KEM response processing for staged PQC handshakes."""
 
 import hmac
+import secrets
 from dataclasses import dataclass, field
 from enum import StrEnum
 from hashlib import sha384
 
 from pqc.errors import UnknownTrustedPeerError
-from pqc.kem import hqc_3_metadata, ml_kem_768_metadata
 from pqc.profiles import PQCProfile, profile_definition
+from pqc.protocol._shared_secret_state import _KEMSharedSecretStateBase
 from pqc.protocol.identity import _validated_identity_name
 from pqc.protocol.initiator import ProcessedServerOffer
 from pqc.protocol.messages import (
+    CLIENT_KEY_EXCHANGE_NONCE_LENGTH,
     CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION,
-    SERVER_KEY_OFFER_SESSION_ID_LENGTH,
     ClientKeyExchange,
     ServerKeyOffer,
     SignedClientKeyExchange,
     SignedServerKeyOffer,
-    _require_bytes,
 )
 from pqc.protocol.party import PQCParty
 from pqc.protocol.server_offer import ResponderKEMState
@@ -36,69 +36,15 @@ class ClientKeyExchangeProcessingStatus(StrEnum):
     INVALID_SIGNATURE = "invalid_signature"
 
 
-@dataclass(slots=True, repr=False)
-class ResponderSharedSecretState:
+@dataclass(slots=True, repr=False, eq=False)
+class ResponderSharedSecretState(_KEMSharedSecretStateBase):
     """Bob-local KEM secrets recovered after authenticating Alice's response.
 
     Raw-secret export remains deliberately absent until the KDF phase defines a
     precise consumption contract. Call :meth:`close` on abort or expiry.
     """
 
-    session_id: bytes = field(repr=False)
-    profile: PQCProfile
-    _ml_kem_shared_secret: bytes | None = field(repr=False)
-    _hqc_shared_secret: bytes | None = field(default=None, repr=False)
-    _closed: bool = field(default=False, init=False, repr=False)
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.profile, PQCProfile):
-            raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
-        session_id = _require_bytes(
-            self.session_id,
-            name="session_id",
-            length=SERVER_KEY_OFFER_SESSION_ID_LENGTH,
-        )
-        ml_kem_shared_secret = _require_bytes(
-            self._ml_kem_shared_secret,
-            name="ml_kem_shared_secret",
-            length=ml_kem_768_metadata().shared_secret_length,
-        )
-        hqc_shared_secret: bytes | None = None
-        if self.profile is PQCProfile.LOW:
-            if self._hqc_shared_secret is not None:
-                raise ValueError("LOW responder secret state must not contain an HQC shared secret.")
-        else:
-            if self._hqc_shared_secret is None:
-                raise ValueError("HIGH responder secret state must contain an HQC shared secret.")
-            hqc_shared_secret = _require_bytes(
-                self._hqc_shared_secret,
-                name="hqc_shared_secret",
-                length=hqc_3_metadata().shared_secret_length,
-            )
-
-        self.session_id = session_id
-        self._ml_kem_shared_secret = ml_kem_shared_secret
-        self._hqc_shared_secret = hqc_shared_secret
-
-    @property
-    def is_closed(self) -> bool:
-        """Return whether this private state's shared-secret references were released."""
-
-        return self._closed
-
-    def close(self) -> None:
-        """Release secret references idempotently without claiming memory zeroization."""
-
-        self._ml_kem_shared_secret = None
-        self._hqc_shared_secret = None
-        self._closed = True
-
-    def __repr__(self) -> str:
-        algorithms = profile_definition(self.profile).kem_algorithms
-        return (
-            f"ResponderSharedSecretState(profile={self.profile.value!r}, "
-            f"algorithms={algorithms!r}, closed={self._closed!r})"
-        )
+    pass
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -203,6 +149,7 @@ class ClientKeyExchangeFactory:
             protocol_version=CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION,
             session_id=response.session_id,
             profile=response.profile,
+            client_nonce=secrets.token_bytes(CLIENT_KEY_EXCHANGE_NONCE_LENGTH),
             server_offer_hash=sha384(offer.canonical_bytes()).digest(),
             ml_kem_algorithm=response.ml_kem_algorithm,
             ml_kem_ciphertext=response.ml_kem_ciphertext,

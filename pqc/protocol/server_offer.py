@@ -2,6 +2,8 @@
 
 import secrets
 from dataclasses import dataclass, field
+from types import TracebackType
+from typing import Self
 
 from pqc.kem import HQC3, MLKEM768
 from pqc.profiles import PQCProfile, profile_definition
@@ -95,6 +97,21 @@ class ResponderKEMState:
         self._ml_kem = None
         self._hqc = None
         self._closed = True
+
+    def __enter__(self) -> Self:
+        """Enter a managed lifetime for this ephemeral responder state."""
+
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        """Release the private KEM capabilities when leaving a managed lifetime."""
+
+        self.close()
 
     def __repr__(self) -> str:
         """Return a safe string representation showing profile and closed status."""

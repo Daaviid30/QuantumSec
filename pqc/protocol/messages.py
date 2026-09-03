@@ -19,6 +19,7 @@ SERVER_KEY_OFFER_SESSION_ID_LENGTH: Final = 16
 SERVER_KEY_OFFER_NONCE_LENGTH: Final = 32
 SERVER_KEY_OFFER_DOMAIN_SEPARATOR: Final = b"QuantumSec/PQCHandshake/v1/ServerKeyOffer"
 CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION: Final = 1
+CLIENT_KEY_EXCHANGE_NONCE_LENGTH: Final = 32
 CLIENT_KEY_EXCHANGE_SERVER_OFFER_HASH_LENGTH: Final = 48
 CLIENT_KEY_EXCHANGE_DOMAIN_SEPARATOR: Final = b"QuantumSec/PQCHandshake/v1/ClientKeyExchange"
 
@@ -401,6 +402,7 @@ class ClientKeyExchange:
     protocol_version: int
     session_id: bytes = field(repr=False)
     profile: PQCProfile
+    client_nonce: bytes = field(repr=False)
     server_offer_hash: bytes = field(repr=False)
     ml_kem_algorithm: str
     ml_kem_ciphertext: bytes = field(repr=False)
@@ -418,6 +420,11 @@ class ClientKeyExchange:
                 f"protocol_version must be {CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION}. "
                 f"Got {self.protocol_version!r}."
             )
+        client_nonce = _require_bytes(
+            self.client_nonce,
+            name="client_nonce",
+            length=CLIENT_KEY_EXCHANGE_NONCE_LENGTH,
+        )
         server_offer_hash = _require_bytes(
             self.server_offer_hash,
             name="server_offer_hash",
@@ -433,6 +440,7 @@ class ClientKeyExchange:
         )
 
         object.__setattr__(self, "session_id", encapsulation.session_id)
+        object.__setattr__(self, "client_nonce", client_nonce)
         object.__setattr__(self, "server_offer_hash", server_offer_hash)
         object.__setattr__(self, "ml_kem_ciphertext", encapsulation.ml_kem_ciphertext)
         object.__setattr__(self, "hqc_ciphertext", encapsulation.hqc_ciphertext)
@@ -445,6 +453,7 @@ class ClientKeyExchange:
             pack(">H", self.protocol_version),
             _length_prefixed(self.session_id),
             _length_prefixed(self.profile.value.encode("ascii")),
+            _length_prefixed(self.client_nonce),
             _length_prefixed(self.server_offer_hash),
             _length_prefixed(self.ml_kem_algorithm.encode("ascii")),
             _length_prefixed(self.ml_kem_ciphertext),
@@ -468,6 +477,7 @@ class ClientKeyExchange:
             "protocol_version": self.protocol_version,
             "session_id": base64.b64encode(self.session_id).decode("ascii"),
             "profile": self.profile.value,
+            "client_nonce": base64.b64encode(self.client_nonce).decode("ascii"),
             "server_offer_hash": base64.b64encode(self.server_offer_hash).decode("ascii"),
             "ml_kem_algorithm": self.ml_kem_algorithm,
             "ml_kem_ciphertext": base64.b64encode(self.ml_kem_ciphertext).decode("ascii"),
@@ -490,6 +500,7 @@ class ClientKeyExchange:
                 "protocol_version",
                 "session_id",
                 "profile",
+                "client_nonce",
                 "server_offer_hash",
                 "ml_kem_algorithm",
                 "ml_kem_ciphertext",
@@ -514,6 +525,7 @@ class ClientKeyExchange:
             protocol_version=protocol_version,
             session_id=encapsulation.session_id,
             profile=encapsulation.profile,
+            client_nonce=_decode_base64_field(payload["client_nonce"], name="client_nonce"),
             server_offer_hash=_decode_base64_field(
                 payload["server_offer_hash"],
                 name="server_offer_hash",

@@ -308,6 +308,23 @@ def test_initiator_state_close_releases_secret_references(
     assert repr(hqc_secret) not in repr(state)
 
 
+def test_initiator_state_context_manager_closes_on_exception(
+    alice: PQCParty,
+    high_offer: SignedServerKeyOffer,
+) -> None:
+    result = ServerKeyOfferProcessor().process(initiator=alice, signed_offer=high_offer)
+    state, _ = _require_success(result)
+
+    with pytest.raises(RuntimeError, match="abort handshake"):
+        with state as managed_state:
+            assert managed_state is state
+            raise RuntimeError("abort handshake")
+
+    assert state.is_closed
+    assert object.__getattribute__(state, "_ml_kem_shared_secret") is None
+    assert object.__getattribute__(state, "_hqc_shared_secret") is None
+
+
 def test_profile_algorithm_matching_uses_semantic_profile_fields(
     high_offer: SignedServerKeyOffer,
 ) -> None:
