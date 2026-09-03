@@ -5,8 +5,9 @@ research, and post-quantum authentication mechanisms.
 
 The current release includes a functional BB84 engine and a dark-first web laboratory for composing
 logical-qubit channels, running seeded simulations, and inspecting genuine simulation output. It
-also includes ML-DSA-65 identities and pre-provisioned trust, plus authenticated ephemeral KEM
-offers using ML-KEM-768 and optional HQC-3, all backed by liboqs.
+also includes ML-DSA-65 identities and pre-provisioned trust, authenticated ephemeral KEM offers,
+and Alice-side ML-KEM-768 plus optional HQC-3 encapsulation after verification, all backed by
+liboqs.
 
 ## 📌 Overview
 
@@ -77,10 +78,11 @@ HIGH = ML-KEM-768 + HQC-3 diverse-KEM offer, authenticated with ML-DSA-65
 ```
 
 QuantumSec can construct an authenticated `ServerKeyOffer`, while retaining Bob's ephemeral KEM
-private keys locally until the responder state is explicitly closed. Public offers support
-validated JSON-compatible Base64 transport mappings without performing implicit trust or signature
-verification. Alice does not verify or encapsulate yet, and no KEM secret has been established
-between Alice and Bob.
+private keys locally until the responder state is explicitly closed. Alice now resolves Bob only
+through her pre-provisioned trust store, verifies the ML-DSA-65 signature, and then creates public
+KEM ciphertexts plus private Alice-side shared secrets. Authentication failure aborts before any
+encapsulation. Bob has not received or authenticated that response and does not decapsulate it at
+the protocol level yet, so the shared-key handshake remains incomplete.
 
 The complete session flow is:
 
@@ -104,8 +106,9 @@ without future handshake completion and composition, the simulator must not be i
 end-to-end secure QKD.
 
 Optical loss, experiment sweeps, physical transmission timing/secret bits per second, production
-LDPC reconciliation, Alice-side offer verification, KEM exchange/shared secrets, handshake KDFs,
-QKD/PQC integration, and QKDN functionality are not implemented yet.
+LDPC reconciliation, Alice response signing/transmission, Bob-side protocol decapsulation, KEM
+secret combination, handshake KDFs, QKD/PQC integration, and QKDN functionality are not implemented
+yet.
 
 ## 🖥️ Web UI V1
 

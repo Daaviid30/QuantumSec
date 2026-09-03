@@ -12,6 +12,6 @@
 - Comandos reproducibles para Windows/uv: `mem:suggested_commands`.
 - Estilo, validación, tipos y pruebas: `mem:conventions`.
 - Puertas de calidad obligatorias antes de terminar una tarea: `mem:task_completion`.
-- `pqc/` contiene Fases 1-2: ML-DSA-65, identidades/confianza, perfiles LOW/HIGH, KEM efímeros ML-KEM-768/HQC-3 y `ServerKeyOffer` canónico firmado, con transporte dict/Base64 validado y cierre explícito del estado efímero. Alice aún no verifica ni encapsula y no existe secreto compartido. Sigue siendo hermano de `qkd/`; el handshake completo y la integración QKD/PQC no existen aún.
+- `pqc/` contiene Fases 1-3: ML-DSA-65, identidades/confianza, perfiles LOW/HIGH, KEM efímeros ML-KEM-768/HQC-3, oferta canónica firmada y procesamiento de Alice con autenticación previa obligatoria. `InitiatorKEMState` conserva los secretos solo localmente y `EncapsulationResponse` contiene únicamente ciphertexts públicos. Bob aún no recibe, autentica ni decapsula la respuesta a nivel de protocolo. Sigue siendo hermano de `qkd/`; el handshake completo y la integración QKD/PQC no existen aún.
 - `docs/structure.md` es la fuente de verdad arquitectónica; `README.md` conserva parte de una visión objetivo antigua y puede mencionar directorios aún no implementados.
 - `graphify-out/` contiene el mapa de relaciones. Tras cambios arquitectónicos o de símbolos, actualizar Graphify con `graphify update .`.
