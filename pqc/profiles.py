@@ -22,20 +22,31 @@ class PQCProfileDefinition:
     """Immutable algorithm suite specification for a QuantumSec PQC profile."""
 
     profile: PQCProfile
-    kem_algorithms: tuple[str, ...]
+    ml_kem_algorithm: str
+    hqc_algorithm: str | None
     signature_algorithm: str
+
+    @property
+    def kem_algorithms(self) -> tuple[str, ...]:
+        """Return the configured KEM names in canonical protocol order."""
+
+        if self.hqc_algorithm is None:
+            return (self.ml_kem_algorithm,)
+        return (self.ml_kem_algorithm, self.hqc_algorithm)
 
 
 PQC_PROFILE_DEFINITIONS: Final[Mapping[PQCProfile, PQCProfileDefinition]] = MappingProxyType(
     {
         PQCProfile.LOW: PQCProfileDefinition(
             profile=PQCProfile.LOW,
-            kem_algorithms=(ML_KEM_768_ALGORITHM,),
+            ml_kem_algorithm=ML_KEM_768_ALGORITHM,
+            hqc_algorithm=None,
             signature_algorithm=ML_DSA_65_METADATA.name,
         ),
         PQCProfile.HIGH: PQCProfileDefinition(
             profile=PQCProfile.HIGH,
-            kem_algorithms=(ML_KEM_768_ALGORITHM, HQC_3_ALGORITHM),
+            ml_kem_algorithm=ML_KEM_768_ALGORITHM,
+            hqc_algorithm=HQC_3_ALGORITHM,
             signature_algorithm=ML_DSA_65_METADATA.name,
         ),
     }

@@ -110,9 +110,9 @@ class ServerKeyOfferFactory:
             session_id=session_id,
             profile=profile,
             nonce=secrets.token_bytes(SERVER_KEY_OFFER_NONCE_LENGTH),
-            ml_kem_algorithm=definition.kem_algorithms[0],
+            ml_kem_algorithm=definition.ml_kem_algorithm,
             ml_kem_public_key=state.ml_kem_public_key,
-            hqc_algorithm=definition.kem_algorithms[1] if profile is PQCProfile.HIGH else None,
+            hqc_algorithm=definition.hqc_algorithm,
             hqc_public_key=state.hqc_public_key,
         )
         signed_offer = SignedServerKeyOffer(

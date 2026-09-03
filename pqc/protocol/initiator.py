@@ -6,8 +6,6 @@ from enum import StrEnum
 from pqc.errors import UnknownTrustedPeerError
 from pqc.kem import (
     HQC3,
-    HQC_3_ALGORITHM,
-    ML_KEM_768_ALGORITHM,
     MLKEM768,
     hqc_3_metadata,
     ml_kem_768_metadata,
@@ -16,18 +14,12 @@ from pqc.profiles import PQCProfile, profile_definition
 from pqc.protocol.identity import _validated_identity_name
 from pqc.protocol.messages import (
     SERVER_KEY_OFFER_SESSION_ID_LENGTH,
+    EncapsulationResponse,
     ServerKeyOffer,
     SignedServerKeyOffer,
+    _require_bytes,
 )
 from pqc.protocol.party import PQCParty
-
-
-def _require_exact_bytes(value: object, *, name: str, length: int) -> bytes:
-    if not isinstance(value, bytes):
-        raise TypeError(f"{name} must be bytes. Got {type(value).__name__}.")
-    if len(value) != length:
-        raise ValueError(f"{name} must contain {length} bytes. Got {len(value)}.")
-    return bytes(value)
 
 
 class ServerOfferProcessingStatus(StrEnum):
@@ -39,24 +31,29 @@ class ServerOfferProcessingStatus(StrEnum):
     INVALID_SIGNATURE = "invalid_signature"
 
 
-@dataclass(frozen=True, slots=True, repr=False)
+@dataclass(slots=True, repr=False)
 class InitiatorKEMState:
-    """Alice-local KEM secrets created only after authenticating the responder."""
+    """Alice-local KEM secrets created only after authenticating the responder.
+
+    Raw-secret export remains deliberately absent until the later KDF phase owns
+    a precise consumption contract. Call :meth:`close` on abort or expiry.
+    """
 
     session_id: bytes = field(repr=False)
     profile: PQCProfile
-    _ml_kem_shared_secret: bytes = field(repr=False)
+    _ml_kem_shared_secret: bytes | None = field(repr=False)
     _hqc_shared_secret: bytes | None = field(default=None, repr=False)
+    _closed: bool = field(default=False, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.profile, PQCProfile):
             raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
-        session_id = _require_exact_bytes(
+        session_id = _require_bytes(
             self.session_id,
             name="session_id",
             length=SERVER_KEY_OFFER_SESSION_ID_LENGTH,
         )
-        ml_kem_shared_secret = _require_exact_bytes(
+        ml_kem_shared_secret = _require_bytes(
             self._ml_kem_shared_secret,
             name="ml_kem_shared_secret",
             length=ml_kem_768_metadata().shared_secret_length,
@@ -68,73 +65,33 @@ class InitiatorKEMState:
         else:
             if self._hqc_shared_secret is None:
                 raise ValueError("HIGH initiator state must contain an HQC shared secret.")
-            hqc_shared_secret = _require_exact_bytes(
+            hqc_shared_secret = _require_bytes(
                 self._hqc_shared_secret,
                 name="hqc_shared_secret",
                 length=hqc_3_metadata().shared_secret_length,
             )
-        object.__setattr__(self, "session_id", session_id)
-        object.__setattr__(self, "_ml_kem_shared_secret", ml_kem_shared_secret)
-        object.__setattr__(self, "_hqc_shared_secret", hqc_shared_secret)
+        self.session_id = session_id
+        self._ml_kem_shared_secret = ml_kem_shared_secret
+        self._hqc_shared_secret = hqc_shared_secret
+
+    @property
+    def is_closed(self) -> bool:
+        """Return whether the private shared-secret references were released."""
+
+        return self._closed
+
+    def close(self) -> None:
+        """Release secret references idempotently without claiming memory zeroization."""
+
+        self._ml_kem_shared_secret = None
+        self._hqc_shared_secret = None
+        self._closed = True
 
     def __repr__(self) -> str:
         algorithms = profile_definition(self.profile).kem_algorithms
-        return f"InitiatorKEMState(profile={self.profile.value!r}, algorithms={algorithms!r})"
-
-
-@dataclass(frozen=True, slots=True, repr=False)
-class EncapsulationResponse:
-    """Unsigned public KEM ciphertext material prepared for the next phase."""
-
-    session_id: bytes = field(repr=False)
-    profile: PQCProfile
-    ml_kem_algorithm: str
-    ml_kem_ciphertext: bytes = field(repr=False)
-    hqc_algorithm: str | None = None
-    hqc_ciphertext: bytes | None = field(default=None, repr=False)
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.profile, PQCProfile):
-            raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
-        session_id = _require_exact_bytes(
-            self.session_id,
-            name="session_id",
-            length=SERVER_KEY_OFFER_SESSION_ID_LENGTH,
-        )
-        definition = profile_definition(self.profile)
-        if self.ml_kem_algorithm != definition.kem_algorithms[0]:
-            raise ValueError(f"ml_kem_algorithm must be {ML_KEM_768_ALGORITHM!r}.")
-        ml_kem_ciphertext = _require_exact_bytes(
-            self.ml_kem_ciphertext,
-            name="ml_kem_ciphertext",
-            length=ml_kem_768_metadata().ciphertext_length,
-        )
-
-        hqc_fields_present = self.hqc_algorithm is not None or self.hqc_ciphertext is not None
-        hqc_ciphertext: bytes | None = None
-        if self.profile is PQCProfile.LOW:
-            if hqc_fields_present:
-                raise ValueError("LOW encapsulation response must not contain HQC fields.")
-        else:
-            if self.hqc_algorithm != HQC_3_ALGORITHM or self.hqc_ciphertext is None:
-                raise ValueError("HIGH encapsulation response must contain an HQC-3 ciphertext.")
-            hqc_ciphertext = _require_exact_bytes(
-                self.hqc_ciphertext,
-                name="hqc_ciphertext",
-                length=hqc_3_metadata().ciphertext_length,
-            )
-
-        object.__setattr__(self, "session_id", session_id)
-        object.__setattr__(self, "ml_kem_ciphertext", ml_kem_ciphertext)
-        object.__setattr__(self, "hqc_ciphertext", hqc_ciphertext)
-
-    def __repr__(self) -> str:
-        hqc_length = None if self.hqc_ciphertext is None else len(self.hqc_ciphertext)
         return (
-            f"EncapsulationResponse(profile={self.profile.value!r}, "
-            f"ml_kem_algorithm={self.ml_kem_algorithm!r}, "
-            f"ml_kem_ciphertext_length={len(self.ml_kem_ciphertext)}, "
-            f"hqc_algorithm={self.hqc_algorithm!r}, hqc_ciphertext_length={hqc_length!r})"
+            f"InitiatorKEMState(profile={self.profile.value!r}, algorithms={algorithms!r}, "
+            f"closed={self._closed!r})"
         )
 
 
@@ -250,14 +207,10 @@ class ServerKeyOfferProcessor:
     @staticmethod
     def _offer_algorithms_match_profile(offer: ServerKeyOffer) -> bool:
         definition = profile_definition(offer.profile)
-        if offer.ml_kem_algorithm != definition.kem_algorithms[0]:
-            return False
-        if offer.profile is PQCProfile.LOW:
-            return offer.hqc_algorithm is None and offer.hqc_public_key is None
         return (
-            len(definition.kem_algorithms) == 2
-            and offer.hqc_algorithm == definition.kem_algorithms[1]
-            and offer.hqc_public_key is not None
+            offer.ml_kem_algorithm == definition.ml_kem_algorithm
+            and offer.hqc_algorithm == definition.hqc_algorithm
+            and (offer.hqc_public_key is None) == (definition.hqc_algorithm is None)
         )
 
     @staticmethod

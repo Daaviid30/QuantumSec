@@ -9,6 +9,8 @@ from pqc.profiles import PQC_PROFILE_DEFINITIONS, PQCProfile, profile_definition
 def test_low_profile_uses_one_kem_assumption() -> None:
     definition = profile_definition(PQCProfile.LOW)
 
+    assert definition.ml_kem_algorithm == ML_KEM_768_ALGORITHM
+    assert definition.hqc_algorithm is None
     assert definition.kem_algorithms == (ML_KEM_768_ALGORITHM,)
     assert definition.signature_algorithm == "ML-DSA-65"
 
@@ -16,6 +18,8 @@ def test_low_profile_uses_one_kem_assumption() -> None:
 def test_high_profile_uses_two_diverse_kem_assumptions() -> None:
     definition = profile_definition(PQCProfile.HIGH)
 
+    assert definition.ml_kem_algorithm == ML_KEM_768_ALGORITHM
+    assert definition.hqc_algorithm == HQC_3_ALGORITHM
     assert definition.kem_algorithms == (ML_KEM_768_ALGORITHM, HQC_3_ALGORITHM)
     assert definition.signature_algorithm == "ML-DSA-65"
 

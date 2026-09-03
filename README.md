@@ -80,9 +80,11 @@ HIGH = ML-KEM-768 + HQC-3 diverse-KEM offer, authenticated with ML-DSA-65
 QuantumSec can construct an authenticated `ServerKeyOffer`, while retaining Bob's ephemeral KEM
 private keys locally until the responder state is explicitly closed. Alice now resolves Bob only
 through her pre-provisioned trust store, verifies the ML-DSA-65 signature, and then creates public
-KEM ciphertexts plus private Alice-side shared secrets. Authentication failure aborts before any
-encapsulation. Bob has not received or authenticated that response and does not decapsulate it at
-the protocol level yet, so the shared-key handshake remains incomplete.
+KEM ciphertexts plus private Alice-side shared secrets. The public response has validated Base64
+transport mappings, while the private initiator state can explicitly release its secret references.
+Authentication failure aborts before any encapsulation. Bob has not received or authenticated that
+response and does not decapsulate it at the protocol level yet, so the shared-key handshake remains
+incomplete.
 
 The complete session flow is:
 

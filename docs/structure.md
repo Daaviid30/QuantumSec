@@ -317,17 +317,20 @@ Current responsibilities:
 - real ML-KEM-768 and HQC-3 ephemeral key generation behind a separate OQS KEM adapter
 - LOW (`ML-KEM-768`) and HIGH (`ML-KEM-768 + HQC-3`) QuantumSec profiles
 - canonical, domain-separated `ServerKeyOffer` serialization for signing
-- validated JSON-compatible Base64 transport mappings for public offer messages
+- validated JSON-compatible Base64 transport mappings for public handshake messages
 - explicit, idempotent release of ephemeral responder KEM references on session abort/expiry
 - ML-DSA-65 authentication of Bob's public ephemeral KEM offer
 - trust-backed Alice-side authentication before any KEM encapsulation
 - private `InitiatorKEMState` secrets separated from public `EncapsulationResponse` ciphertexts
+- explicit, idempotent release of Alice's shared-secret references on session abort/expiry
 
 QuantumSec can now construct an authenticated KEM offer and Alice can verify Bob through her
 pre-provisioned trust store before creating ML-KEM-768 and optional HQC-3 ciphertexts. The resulting
 shared secrets remain private to Alice. Bob has not received or authenticated the response and has
 not decapsulated it at the protocol level; response signing, combined secrets, KDFs, Finished
 messages, session keys, and QKD/PQC composition belong to later phases.
+`InitiatorKEMState` intentionally exposes no raw-secret export API yet: the later KDF phase must own
+that consumption contract rather than broadening the Phase 3 public surface prematurely.
 LOW and HIGH are QuantumSec deployment profiles, not NIST categories; HIGH is a diverse dual-KEM
 offer and is not the future QKD + PQC `HYBRID` profile.
 
@@ -432,9 +435,9 @@ authentication belongs in a future upper-layer integration and is intentionally 
 | `PQCParty`, `PublicIdentity` | `pqc/protocol/` |
 | `MLKEM768`, `HQC3` | `pqc/kem/` |
 | `PQCProfile` | `pqc/profiles.py` |
-| `ServerKeyOffer`, `SignedServerKeyOffer` | `pqc/protocol/messages.py` |
+| `ServerKeyOffer`, `SignedServerKeyOffer`, `EncapsulationResponse` | `pqc/protocol/messages.py` |
 | `ResponderKEMState`, `ServerKeyOfferFactory` | `pqc/protocol/server_offer.py` |
-| `ServerKeyOfferProcessor`, `InitiatorKEMState`, `EncapsulationResponse` | `pqc/protocol/initiator.py` |
+| `ServerKeyOfferProcessor`, `InitiatorKEMState` | `pqc/protocol/initiator.py` |
 | future QKD/PQC composition | upper orchestration layer, never direct `qkd`/`pqc` imports |
 
 ---

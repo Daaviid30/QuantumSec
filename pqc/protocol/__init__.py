@@ -2,13 +2,12 @@
 
 from pqc.protocol.identity import MLDSAIdentity, PublicIdentity
 from pqc.protocol.initiator import (
-    EncapsulationResponse,
     InitiatorKEMState,
     ProcessedServerOffer,
     ServerKeyOfferProcessor,
     ServerOfferProcessingStatus,
 )
-from pqc.protocol.messages import ServerKeyOffer, SignedServerKeyOffer
+from pqc.protocol.messages import EncapsulationResponse, ServerKeyOffer, SignedServerKeyOffer
 from pqc.protocol.party import PQCParty
 from pqc.protocol.server_offer import ResponderKEMState, ServerKeyOfferFactory
 from pqc.protocol.trust import TrustedIdentityStore

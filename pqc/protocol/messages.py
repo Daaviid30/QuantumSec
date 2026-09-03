@@ -8,14 +8,11 @@ from struct import pack
 from typing import Final, Self
 
 from pqc.kem import (
-    HQC_3_ALGORITHM,
-    ML_KEM_768_ALGORITHM,
     hqc_3_metadata,
     ml_kem_768_metadata,
 )
-from pqc.profiles import PQCProfile
+from pqc.profiles import PQCProfile, profile_definition
 from pqc.protocol.identity import _validated_identity_name
-from pqc.signatures import ML_DSA_65_METADATA
 
 SERVER_KEY_OFFER_PROTOCOL_VERSION: Final = 1
 SERVER_KEY_OFFER_SESSION_ID_LENGTH: Final = 16
@@ -94,8 +91,9 @@ class ServerKeyOffer:
             length=SERVER_KEY_OFFER_SESSION_ID_LENGTH,
         )
         nonce = _require_bytes(self.nonce, name="nonce", length=SERVER_KEY_OFFER_NONCE_LENGTH)
-        if self.ml_kem_algorithm != ML_KEM_768_ALGORITHM:
-            raise ValueError(f"ml_kem_algorithm must be {ML_KEM_768_ALGORITHM!r}.")
+        definition = profile_definition(self.profile)
+        if self.ml_kem_algorithm != definition.ml_kem_algorithm:
+            raise ValueError(f"ml_kem_algorithm must be {definition.ml_kem_algorithm!r}.")
         ml_kem_metadata = ml_kem_768_metadata()
         ml_kem_public_key = _require_bytes(
             self.ml_kem_public_key,
@@ -105,11 +103,11 @@ class ServerKeyOffer:
 
         hqc_fields_present = self.hqc_algorithm is not None or self.hqc_public_key is not None
         hqc_public_key: bytes | None = None
-        if self.profile is PQCProfile.LOW:
+        if definition.hqc_algorithm is None:
             if hqc_fields_present:
                 raise ValueError("LOW ServerKeyOffer must not contain HQC fields.")
         else:
-            if self.hqc_algorithm != HQC_3_ALGORITHM or self.hqc_public_key is None:
+            if self.hqc_algorithm != definition.hqc_algorithm or self.hqc_public_key is None:
                 raise ValueError("HIGH ServerKeyOffer must contain an HQC-3 public key.")
             hqc_public_key = _require_bytes(
                 self.hqc_public_key,
@@ -233,8 +231,9 @@ class SignedServerKeyOffer:
         if not isinstance(self.offer, ServerKeyOffer):
             raise TypeError(f"offer must be a ServerKeyOffer. Got {type(self.offer).__name__}.")
         object.__setattr__(self, "signer", _validated_identity_name(self.signer))
-        if self.signature_algorithm != ML_DSA_65_METADATA.name:
-            raise ValueError(f"signature_algorithm must be {ML_DSA_65_METADATA.name!r}.")
+        expected_algorithm = profile_definition(self.offer.profile).signature_algorithm
+        if self.signature_algorithm != expected_algorithm:
+            raise ValueError(f"signature_algorithm must be {expected_algorithm!r}.")
         object.__setattr__(self, "signature", _require_bytes(self.signature, name="signature"))
 
     def to_dict(self) -> dict[str, object]:
@@ -270,4 +269,123 @@ class SignedServerKeyOffer:
             signer=signer,
             signature_algorithm=signature_algorithm,
             signature=_decode_base64_field(payload["signature"], name="signature"),
+        )
+
+
+@dataclass(frozen=True, slots=True, repr=False)
+class EncapsulationResponse:
+    """Unsigned public KEM ciphertext message prepared for the next phase."""
+
+    session_id: bytes = field(repr=False)
+    profile: PQCProfile
+    ml_kem_algorithm: str
+    ml_kem_ciphertext: bytes = field(repr=False)
+    hqc_algorithm: str | None = None
+    hqc_ciphertext: bytes | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.profile, PQCProfile):
+            raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
+        session_id = _require_bytes(
+            self.session_id,
+            name="session_id",
+            length=SERVER_KEY_OFFER_SESSION_ID_LENGTH,
+        )
+        definition = profile_definition(self.profile)
+        if self.ml_kem_algorithm != definition.ml_kem_algorithm:
+            raise ValueError(f"ml_kem_algorithm must be {definition.ml_kem_algorithm!r}.")
+        ml_kem_ciphertext = _require_bytes(
+            self.ml_kem_ciphertext,
+            name="ml_kem_ciphertext",
+            length=ml_kem_768_metadata().ciphertext_length,
+        )
+
+        hqc_fields_present = self.hqc_algorithm is not None or self.hqc_ciphertext is not None
+        hqc_ciphertext: bytes | None = None
+        if definition.hqc_algorithm is None:
+            if hqc_fields_present:
+                raise ValueError("LOW encapsulation response must not contain HQC fields.")
+        else:
+            if self.hqc_algorithm != definition.hqc_algorithm or self.hqc_ciphertext is None:
+                raise ValueError("HIGH encapsulation response must contain an HQC-3 ciphertext.")
+            hqc_ciphertext = _require_bytes(
+                self.hqc_ciphertext,
+                name="hqc_ciphertext",
+                length=hqc_3_metadata().ciphertext_length,
+            )
+
+        object.__setattr__(self, "session_id", session_id)
+        object.__setattr__(self, "ml_kem_ciphertext", ml_kem_ciphertext)
+        object.__setattr__(self, "hqc_ciphertext", hqc_ciphertext)
+
+    def to_dict(self) -> dict[str, object]:
+        """Serialize this public response to a JSON-compatible mapping."""
+
+        return {
+            "session_id": base64.b64encode(self.session_id).decode("ascii"),
+            "profile": self.profile.value,
+            "ml_kem_algorithm": self.ml_kem_algorithm,
+            "ml_kem_ciphertext": base64.b64encode(self.ml_kem_ciphertext).decode("ascii"),
+            "hqc_algorithm": self.hqc_algorithm,
+            "hqc_ciphertext": (
+                None if self.hqc_ciphertext is None else base64.b64encode(self.hqc_ciphertext).decode("ascii")
+            ),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> Self:
+        """Restore and validate a public response from a transport mapping."""
+
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
+        _require_transport_fields(
+            payload,
+            message_name="Encapsulation response",
+            fields={
+                "session_id",
+                "profile",
+                "ml_kem_algorithm",
+                "ml_kem_ciphertext",
+                "hqc_algorithm",
+                "hqc_ciphertext",
+            },
+        )
+        profile_value = payload["profile"]
+        ml_kem_algorithm = payload["ml_kem_algorithm"]
+        hqc_algorithm = payload["hqc_algorithm"]
+        if not isinstance(profile_value, str):
+            raise TypeError("profile must be a string.")
+        try:
+            profile = PQCProfile(profile_value)
+        except ValueError as exc:
+            raise ValueError(f"Unknown PQC profile {profile_value!r}.") from exc
+        if not isinstance(ml_kem_algorithm, str):
+            raise TypeError("ml_kem_algorithm must be a string.")
+        if hqc_algorithm is not None and not isinstance(hqc_algorithm, str):
+            raise TypeError("hqc_algorithm must be a string or null.")
+        encoded_hqc_ciphertext = payload["hqc_ciphertext"]
+        hqc_ciphertext = (
+            None
+            if encoded_hqc_ciphertext is None
+            else _decode_base64_field(encoded_hqc_ciphertext, name="hqc_ciphertext")
+        )
+        return cls(
+            session_id=_decode_base64_field(payload["session_id"], name="session_id"),
+            profile=profile,
+            ml_kem_algorithm=ml_kem_algorithm,
+            ml_kem_ciphertext=_decode_base64_field(
+                payload["ml_kem_ciphertext"],
+                name="ml_kem_ciphertext",
+            ),
+            hqc_algorithm=hqc_algorithm,
+            hqc_ciphertext=hqc_ciphertext,
+        )
+
+    def __repr__(self) -> str:
+        hqc_length = None if self.hqc_ciphertext is None else len(self.hqc_ciphertext)
+        return (
+            f"EncapsulationResponse(profile={self.profile.value!r}, "
+            f"ml_kem_algorithm={self.ml_kem_algorithm!r}, "
+            f"ml_kem_ciphertext_length={len(self.ml_kem_ciphertext)}, "
+            f"hqc_algorithm={self.hqc_algorithm!r}, hqc_ciphertext_length={hqc_length!r})"
         )

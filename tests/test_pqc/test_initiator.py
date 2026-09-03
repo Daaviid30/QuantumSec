@@ -20,6 +20,7 @@ from pqc import (
 )
 from pqc.backends.oqs_kem_backend import OQSKEMBackend
 from pqc.kem import hqc_3_metadata, ml_kem_768_metadata
+from pqc.profiles import profile_definition
 from pqc.protocol import InitiatorKEMState
 from pqc.protocol.messages import SERVER_KEY_OFFER_NONCE_LENGTH
 
@@ -253,3 +254,69 @@ def test_public_response_rejects_profile_inconsistencies(
         )
     with pytest.raises(ValueError, match="HIGH encapsulation response must contain"):
         replace(high_public, hqc_algorithm=None, hqc_ciphertext=None)
+
+
+@pytest.mark.parametrize("offer_fixture", ["low_offer", "high_offer"])
+def test_encapsulation_response_transport_round_trip(
+    alice: PQCParty,
+    offer_fixture: str,
+    request: pytest.FixtureRequest,
+) -> None:
+    signed_offer = request.getfixturevalue(offer_fixture)
+    _, public = _require_success(
+        ServerKeyOfferProcessor().process(initiator=alice, signed_offer=signed_offer)
+    )
+
+    payload = public.to_dict()
+    restored = EncapsulationResponse.from_dict(payload)
+
+    assert restored == public
+    assert restored.__class__.__module__ == "pqc.protocol.messages"
+    assert isinstance(payload["session_id"], str)
+    assert isinstance(payload["ml_kem_ciphertext"], str)
+    assert all("secret" not in field_name for field_name in payload)
+
+
+def test_encapsulation_response_transport_rejects_invalid_base64(
+    alice: PQCParty,
+    low_offer: SignedServerKeyOffer,
+) -> None:
+    _, public = _require_success(ServerKeyOfferProcessor().process(initiator=alice, signed_offer=low_offer))
+    payload = public.to_dict()
+    payload["ml_kem_ciphertext"] = "not Base64!"
+
+    with pytest.raises(ValueError, match="ml_kem_ciphertext must be valid Base64"):
+        EncapsulationResponse.from_dict(payload)
+
+
+def test_initiator_state_close_releases_secret_references(
+    alice: PQCParty,
+    high_offer: SignedServerKeyOffer,
+) -> None:
+    result = ServerKeyOfferProcessor().process(initiator=alice, signed_offer=high_offer)
+    state, _ = _require_success(result)
+    ml_secret = object.__getattribute__(state, "_ml_kem_shared_secret")
+    hqc_secret = object.__getattribute__(state, "_hqc_shared_secret")
+
+    state.close()
+    state.close()
+
+    assert state.is_closed
+    assert object.__getattribute__(state, "_ml_kem_shared_secret") is None
+    assert object.__getattribute__(state, "_hqc_shared_secret") is None
+    assert repr(ml_secret) not in repr(state)
+    assert repr(hqc_secret) not in repr(state)
+
+
+def test_profile_algorithm_matching_uses_semantic_profile_fields(
+    high_offer: SignedServerKeyOffer,
+) -> None:
+    definition = profile_definition(PQCProfile.HIGH)
+    swapped = replace(
+        definition,
+        ml_kem_algorithm=definition.hqc_algorithm or "",
+        hqc_algorithm=definition.ml_kem_algorithm,
+    )
+
+    with patch("pqc.protocol.initiator.profile_definition", return_value=swapped):
+        assert not ServerKeyOfferProcessor._offer_algorithms_match_profile(high_offer.offer)
