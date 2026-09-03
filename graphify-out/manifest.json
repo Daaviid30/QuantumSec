@@ -876,9 +876,9 @@
     "semantic_hash": "a0f30ecb0b9af038b3dbbd8767b74fed"
   },
   ".serena/memories/core.md": {
-    "mtime": 1788454439.1596735,
-    "seen": 1788454633.814525,
-    "ast_hash": "62738dd3d49929d0c9460168586a5e78",
+    "mtime": 1788459217.3155112,
+    "seen": 1788459473.4622018,
+    "ast_hash": "9444e5051286e2d575f5532aeac3695b",
     "semantic_hash": ""
   },
   ".serena/memories/infrastructure/core.md": {
@@ -912,15 +912,15 @@
     "semantic_hash": ""
   },
   ".serena/memories/task_completion.md": {
-    "mtime": 1788454624.3867013,
-    "seen": 1788454633.814532,
-    "ast_hash": "dee9ba7a6f9c93d20829c079ffe614d7",
+    "mtime": 1788459222.556898,
+    "seen": 1788459473.4622111,
+    "ast_hash": "bc4288f015236e17b8337678580ea91a",
     "semantic_hash": ""
   },
   ".serena/memories/tech_stack.md": {
-    "mtime": 1788283619.0670817,
-    "seen": 1788283656.5735593,
-    "ast_hash": "519ed004ac2f8f4922dec7905632956e",
+    "mtime": 1788459220.133982,
+    "seen": 1788459473.462212,
+    "ast_hash": "6a1b48ac81ffea31e81d3e0412656ff2",
     "semantic_hash": ""
   },
   ".serena/project.yml": {
@@ -1143,6 +1143,12 @@
     "mtime": 1788458446.7417505,
     "seen": 1788458606.2273767,
     "ast_hash": "50892e676afc497edb25af6040a175f0",
+    "semantic_hash": ""
+  },
+  ".serena/memories/pqc/core.md": {
+    "mtime": 1788459213.8881686,
+    "seen": 1788459473.4622061,
+    "ast_hash": "b6261bc7a8e2a6620cd75738c6aa031e",
     "semantic_hash": ""
   }
 }

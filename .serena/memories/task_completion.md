@@ -14,4 +14,4 @@
 7. Informar resultados exactos, incluidas pruebas omitidas o bloqueos; no declarar éxito basándose solo en una edición.
 8. No añadir dependencias obligatorias sin uso real; actualizar `pyproject.toml` y `uv.lock` (o `package.json` y `package-lock.json`) juntos cuando corresponda.
 
-Puertas de calidad verificadas tras la revisión de PQC Fase 3: 466 tests Python pasando, Ruff limpio y Pyright sin errores. La interfaz no cambió en esta fase; su última validación registrada mantiene 6 tests Vitest pasando.
+Puertas de calidad verificadas tras la revisión de PQC Fase 4: 485 tests Python pasando, Ruff limpio y Pyright sin errores. La interfaz no cambió en esta fase; su última validación registrada mantiene 6 tests Vitest pasando.
