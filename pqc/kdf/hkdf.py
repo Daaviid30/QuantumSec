@@ -12,17 +12,29 @@ def _validated_bytes(value: object, *, name: str) -> bytes:
     return bytes(value)
 
 
+def _validated_salt(value: object) -> bytes | None:
+    if value is None:
+        return None
+    if not isinstance(value, bytes):
+        raise TypeError(f"salt must be bytes or None. Got {type(value).__name__}.")
+    return bytes(value)
+
+
 def derive_hkdf_sha384(
     *,
     key_material: bytes,
-    salt: bytes,
+    salt: bytes | None,
     info: bytes,
     length: int,
 ) -> bytes:
-    """Derive one domain-separated key with a fresh one-shot HKDF-SHA-384 instance."""
+    """Derive one domain-separated key with a fresh one-shot HKDF-SHA-384 instance.
+
+    ``None`` and an empty byte string are valid RFC 5869 salt representations.
+    Protocol key schedules should still supply their meaningful authenticated salt.
+    """
 
     clean_key_material = _validated_bytes(key_material, name="key_material")
-    clean_salt = _validated_bytes(salt, name="salt")
+    clean_salt = _validated_salt(salt)
     clean_info = _validated_bytes(info, name="info")
     if isinstance(length, bool) or not isinstance(length, int):
         raise TypeError(f"length must be an integer. Got {type(length).__name__}.")

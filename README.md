@@ -92,9 +92,10 @@ LOW encodes its ML-KEM-768 secret with explicit algorithm and length fields. HIG
 ML-KEM-768 first and HQC-3 second before HKDF-SHA-384. HIGH is a QuantumSec research diversity
 construction, not a standardized NIST multi-KEM combiner.
 
-Raw KEM secrets and `K_SESSION` remain in private, non-serializable, repr-safe states. Source KEM
-states deliberately remain alive after Phase 5 so Phase 6 can derive a distinct confirmation key
-under another HKDF domain; lifecycle ownership remains explicit through `close()` and `with`.
+Raw KEM secrets and `K_SESSION` remain in private, non-serializable, repr-safe states. Symmetric-key
+consumers must deliberately call `export_session_key()` on a live derived state; closed states reject
+export. Source KEM states deliberately remain alive after Phase 5 so Phase 6 can derive a distinct
+confirmation key under another HKDF domain; lifecycle ownership remains explicit through `close()` and `with`.
 Cryptographic key confirmation has not occurred yet, so the handshake is not finished.
 
 The complete session flow is:

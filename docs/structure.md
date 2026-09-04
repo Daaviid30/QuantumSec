@@ -344,11 +344,11 @@ Current responsibilities:
 - one-shot release of Bob's ephemeral KEM private capabilities after every required decapsulation succeeds
 - a private shared-secret state base centralizing validation, repr safety, idempotent closure, and context-manager lifecycle without merging the semantic Alice/Bob state types
 - exact authenticated public-message references retained by successful Phase 3/4 results to prevent transcript/result mixing
-- immutable canonical `PQCHandshakeTranscript` containing both messages, signer identities, algorithms, and signatures
+- immutable canonical `PQCHandshakeTranscript` containing both messages, signer identities, algorithms, and signatures, with public JSON-compatible structural round-trip helpers that do not authenticate signatures
 - public SHA-384 transcript hash used as the HKDF salt
 - LOW canonical ML-KEM input and HIGH fixed-order ML-KEM-768/HQC-3 input with algorithm and length boundaries
 - shared Alice/Bob `PQCSessionKeyDeriver` backed by `cryptography` HKDF-SHA-384
-- private, repr-safe `DerivedSessionKeyState` containing the 32-byte transcript-bound session key
+- private, repr-safe, non-serializable `DerivedSessionKeyState` containing the 32-byte transcript-bound session key and requiring explicit live-state export for symmetric-key consumers
 
 The staged flow now covers five phases: (1) ML-DSA identities and explicit trust, (2) Bob's signed
 ephemeral KEM offer, (3) Alice's verification and encapsulation, and (4) Alice's signed
@@ -359,9 +359,10 @@ KEM secrets through QuantumSec's explicit research diversity construction; this 
 standardized NIST multi-KEM combiner or a formal robust-combiner claim.
 
 The KEM source states expose only a private KDF-input method and remain alive for the distinct Phase
-6 confirmation-key derivation. `K_SESSION` has no public accessor or transport mapping. No Finished
-message or cryptographic key confirmation exists yet, so handshake completion and QKD/PQC
-composition remain later work.
+6 confirmation-key derivation. `K_SESSION` has no transport mapping and is available only through the
+explicit `export_session_key()` operation while its derived state remains open. No Finished message
+or cryptographic key confirmation exists yet, so handshake completion and QKD/PQC composition
+remain later work.
 LOW and HIGH are QuantumSec deployment profiles, not NIST categories; HIGH is a diverse dual-KEM
 offer and is not the future QKD + PQC `HYBRID` profile.
 

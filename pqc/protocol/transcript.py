@@ -1,6 +1,7 @@
 """Canonical public transcript for mutually authenticated PQC handshake messages."""
 
 import hmac
+from collections.abc import Mapping
 from dataclasses import dataclass
 from hashlib import sha384
 from typing import Final, Self
@@ -68,6 +69,41 @@ class PQCHandshakeTranscript:
         return cls(
             signed_server_offer=signed_server_offer,
             signed_client_exchange=signed_client_exchange,
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        """Serialize this public transcript to a JSON-compatible mapping."""
+
+        return {
+            "signed_server_offer": self.signed_server_offer.to_dict(),
+            "signed_client_exchange": self.signed_client_exchange.to_dict(),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> Self:
+        """Deserialize public messages without authenticating their signatures.
+
+        Successful Phase 3/4 results remain mandatory before this transcript can
+        be consumed by :class:`PQCSessionKeyDeriver`.
+        """
+
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
+        required_fields = {"signed_server_offer", "signed_client_exchange"}
+        missing = required_fields.difference(payload)
+        if missing:
+            raise ValueError(
+                f"PQC handshake transcript payload is missing fields: {', '.join(sorted(missing))}."
+            )
+        server_payload = payload["signed_server_offer"]
+        client_payload = payload["signed_client_exchange"]
+        if not isinstance(server_payload, Mapping):
+            raise TypeError("signed_server_offer must be a mapping.")
+        if not isinstance(client_payload, Mapping):
+            raise TypeError("signed_client_exchange must be a mapping.")
+        return cls.from_messages(
+            SignedServerKeyOffer.from_dict(server_payload),
+            SignedClientKeyExchange.from_dict(client_payload),
         )
 
     @property

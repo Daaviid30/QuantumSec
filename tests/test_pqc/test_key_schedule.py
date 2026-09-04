@@ -118,8 +118,8 @@ def test_valid_phase5_flow_derives_matching_transcript_bound_session_keys(
 ) -> None:
     flow = _create_flow(profile)
     alice_key_state, bob_key_state = _derive_both(flow)
-    alice_session_key = object.__getattribute__(alice_key_state, "_session_key")
-    bob_session_key = object.__getattribute__(bob_key_state, "_session_key")
+    alice_session_key = alice_key_state.export_session_key()
+    bob_session_key = bob_key_state.export_session_key()
     transcript = PQCHandshakeTranscript.from_messages(
         flow.signed_server_offer,
         flow.signed_client_exchange,
@@ -149,10 +149,7 @@ def test_independent_sessions_derive_different_keys(profile: PQCProfile) -> None
     second_alice_key, _ = _derive_both(_create_flow(profile))
 
     assert first_alice_key.transcript_hash != second_alice_key.transcript_hash
-    assert object.__getattribute__(first_alice_key, "_session_key") != object.__getattribute__(
-        second_alice_key,
-        "_session_key",
-    )
+    assert first_alice_key.export_session_key() != second_alice_key.export_session_key()
 
 
 def test_hkdf_sha384_is_deterministic_and_domain_separated() -> None:
@@ -185,6 +182,24 @@ def test_hkdf_sha384_is_deterministic_and_domain_separated() -> None:
     assert len(first) == PQC_SESSION_KEY_LENGTH
 
 
+def test_hkdf_sha384_accepts_rfc5869_optional_or_empty_salt() -> None:
+    with_none = derive_hkdf_sha384(
+        key_material=b"controlled KEM input",
+        salt=None,
+        info=b"QuantumSec test purpose",
+        length=PQC_SESSION_KEY_LENGTH,
+    )
+    with_empty = derive_hkdf_sha384(
+        key_material=b"controlled KEM input",
+        salt=b"",
+        info=b"QuantumSec test purpose",
+        length=PQC_SESSION_KEY_LENGTH,
+    )
+
+    assert with_none == with_empty
+    assert len(with_none) == PQC_SESSION_KEY_LENGTH
+
+
 def test_session_key_info_binds_domain_version_and_profile() -> None:
     low_info = _session_key_info(protocol_version=1, profile=PQCProfile.LOW)
     high_info = _session_key_info(protocol_version=1, profile=PQCProfile.HIGH)
@@ -211,6 +226,31 @@ def test_transcript_canonicalization_includes_both_exact_signed_messages() -> No
     assert _length_prefixed(flow.signed_server_offer.signature) in canonical
     assert _length_prefixed(flow.signed_client_exchange.exchange.canonical_bytes()) in canonical
     assert _length_prefixed(flow.signed_client_exchange.signature) in canonical
+
+
+def test_public_transcript_transport_round_trip_preserves_canonical_hash() -> None:
+    flow = _create_flow(PQCProfile.HIGH)
+    transcript = PQCHandshakeTranscript.from_messages(
+        flow.signed_server_offer,
+        flow.signed_client_exchange,
+    )
+
+    payload = transcript.to_dict()
+    restored = PQCHandshakeTranscript.from_dict(payload)
+
+    assert set(payload) == {"signed_server_offer", "signed_client_exchange"}
+    assert restored == transcript
+    assert restored.canonical_bytes() == transcript.canonical_bytes()
+    assert restored.transcript_hash == transcript.transcript_hash
+
+
+def test_public_transcript_transport_rejects_malformed_payloads() -> None:
+    with pytest.raises(TypeError, match="payload must be a mapping"):
+        PQCHandshakeTranscript.from_dict([])  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="missing fields: signed_client_exchange"):
+        PQCHandshakeTranscript.from_dict({"signed_server_offer": {}})
+    with pytest.raises(TypeError, match="signed_server_offer must be a mapping"):
+        PQCHandshakeTranscript.from_dict({"signed_server_offer": "invalid", "signed_client_exchange": {}})
 
 
 def test_each_signature_changes_the_transcript_hash() -> None:
@@ -580,11 +620,11 @@ def test_session_key_and_kem_secrets_never_enter_public_repr_or_transport() -> N
         flow.signed_server_offer,
         flow.signed_client_exchange,
     )
-    session_key = object.__getattribute__(alice_key_state, "_session_key")
+    session_key = alice_key_state.export_session_key()
     ml_secret = object.__getattribute__(_initiator_state(flow), "_ml_kem_shared_secret")
     hqc_secret = object.__getattribute__(_initiator_state(flow), "_hqc_shared_secret")
     public_repr = repr(transcript) + repr(alice_key_state) + repr(bob_key_state)
-    public_transport = repr(flow.signed_server_offer.to_dict()) + repr(flow.signed_client_exchange.to_dict())
+    public_transport = repr(transcript.to_dict())
 
     assert session_key is not None and ml_secret is not None and hqc_secret is not None
     assert not hasattr(alice_key_state, "to_dict")
@@ -597,12 +637,15 @@ def test_session_key_and_kem_secrets_never_enter_public_repr_or_transport() -> N
 def test_derived_session_key_state_context_manager_releases_key() -> None:
     flow = _create_flow(PQCProfile.LOW)
     state, _ = _derive_both(flow)
-    session_key = object.__getattribute__(state, "_session_key")
+    session_key = state.export_session_key()
 
     with state as managed_state:
         assert managed_state is state
         assert not state.is_closed
+        assert managed_state.export_session_key() == session_key
 
     assert state.is_closed
     assert object.__getattribute__(state, "_session_key") is None
     assert repr(session_key) not in repr(state)
+    with pytest.raises(RuntimeError, match="Derived session key state is closed"):
+        state.export_session_key()

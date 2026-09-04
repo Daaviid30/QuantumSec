@@ -83,6 +83,17 @@ class DerivedSessionKeyState:
 
         return self._closed
 
+    def export_session_key(self) -> bytes:
+        """Explicitly export the live 256-bit key for a symmetric-key consumer.
+
+        The returned value is secret material. It must not be logged, serialized,
+        or used as the future Finished confirmation key.
+        """
+
+        if self._closed or self._session_key is None:
+            raise RuntimeError("Derived session key state is closed.")
+        return bytes(self._session_key)
+
     def close(self) -> None:
         """Release the session-key reference idempotently without claiming memory zeroization."""
 
