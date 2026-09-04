@@ -5,9 +5,9 @@ research, and post-quantum authentication mechanisms.
 
 The current release includes a functional BB84 engine and a dark-first web laboratory for composing
 logical-qubit channels, running seeded simulations, and inspecting genuine simulation output. It
-also includes a five-phase PQC exchange backed by liboqs and `cryptography`: ML-DSA-65 identities
-and pre-provisioned trust, authenticated ephemeral KEM establishment, mutual signed messages, and
-transcript-bound HKDF-SHA-384 derivation of a 256-bit session key.
+also includes a complete six-phase PQC handshake backed by liboqs and `cryptography`: ML-DSA-65
+identities and pre-provisioned trust, authenticated ephemeral KEM establishment, mutual signed
+messages, transcript-bound key derivation, and bilateral HMAC-SHA-384 Finished confirmation.
 
 ## 📌 Overview
 
@@ -55,7 +55,7 @@ an upper orchestration layer.
 
 - **Authentication Module**  
   ML-DSA-65 identities, explicit trust, ephemeral KEM material, authenticated messages, and a
-  transcript-bound PQC key schedule.
+  transcript-bound PQC key schedule with mutual Finished confirmation.
 
 - **Mathematical Layer**  
   Lightweight abstractions for modeling quantum-like behavior.
@@ -92,11 +92,17 @@ LOW encodes its ML-KEM-768 secret with explicit algorithm and length fields. HIG
 ML-KEM-768 first and HQC-3 second before HKDF-SHA-384. HIGH is a QuantumSec research diversity
 construction, not a standardized NIST multi-KEM combiner.
 
-Raw KEM secrets and `K_SESSION` remain in private, non-serializable, repr-safe states. Symmetric-key
-consumers must deliberately call `export_session_key()` on a live derived state; closed states reject
-export. Source KEM states deliberately remain alive after Phase 5 so Phase 6 can derive a distinct
-confirmation key under another HKDF domain; lifecycle ownership remains explicit through `close()` and `with`.
-Cryptographic key confirmation has not occurred yet, so the handshake is not finished.
+Phase 6 reuses the canonical KEM input to derive a separate 32-byte `K_CONFIRM` under the
+`QuantumSec/PQCHandshake/v1/ConfirmationKey` HKDF domain. Bob sends a responder-role
+HMAC-SHA-384 Finished; Alice verifies it before creating her initiator-role Finished, which also
+binds Bob's `verify_data`. Bob verifies Alice before a `ConfirmedPQCHandshake` and role-local
+`EstablishedPQCSession` can exist. Session establishment never compares or transmits `K_SESSION`.
+
+Raw KEM secrets, `K_SESSION`, and `K_CONFIRM` remain in non-serializable, repr-safe states.
+`K_CONFIRM` has no export API, and the source KEM states release their secret references only after
+confirmation-key derivation succeeds. The established session retains controlled access to its
+role-local `K_SESSION` through `export_session_key()` and explicit `close()`/`with` ownership.
+No application-data encryption or QKD/PQC composition is implemented yet.
 
 The complete session flow is:
 

@@ -41,6 +41,4 @@ graphify-out/[0-9][0-9][0-9][0-9]-*/
 .codex/
 
 # extra files generated
-review_prompt.md
-docs/reviews/
 prompt.md

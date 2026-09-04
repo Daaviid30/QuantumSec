@@ -117,7 +117,8 @@ QuantumSec/
 |       |-- initiator.py
 |       |-- client_exchange.py
 |       |-- transcript.py
-|       `-- key_schedule.py
+|       |-- key_schedule.py
+|       `-- key_confirmation.py
 |
 |-- experiments/
 |   |-- __init__.py
@@ -302,7 +303,7 @@ explicitly.
 
 Post-quantum cryptography and authentication. This module should not import from `qkd/`. Its job is to provide cryptographic tools and interfaces that can be used by experiments or authentication adapters.
 
-Implemented PQC structure through Phase 5:
+Implemented PQC structure through Phase 6:
 
 ```text
 pqc/backends/       = isolated external-provider adapters
@@ -310,7 +311,7 @@ pqc/signatures/     = signature interface and ML-DSA-65 implementation
 pqc/kem/            = KEM interface plus ML-KEM-768 and HQC-3 providers
 pqc/kdf/            = canonical KEM-secret encoding and the cryptography HKDF-SHA-384 adapter
 pqc/profiles.py     = centralized LOW/HIGH QuantumSec profiles
-pqc/protocol/       = identities, trust, messages, transcript, and staged key-schedule orchestration
+pqc/protocol/       = identities, trust, messages, transcript, key schedule, Finished confirmation, and established sessions
 ```
 
 ML-DSA-65 currently provides post-quantum digital identity and authentication primitives through
@@ -349,20 +350,26 @@ Current responsibilities:
 - LOW canonical ML-KEM input and HIGH fixed-order ML-KEM-768/HQC-3 input with algorithm and length boundaries
 - shared Alice/Bob `PQCSessionKeyDeriver` backed by `cryptography` HKDF-SHA-384
 - private, repr-safe, non-serializable `DerivedSessionKeyState` containing the 32-byte transcript-bound session key and requiring explicit live-state export for symmetric-key consumers
+- separate 32-byte `K_CONFIRM` derivation from the same canonical KEM input under the `ConfirmationKey` HKDF domain
+- immutable, JSON-compatible `PQCFinishedMessage` values with explicit session, profile, transcript, algorithm, and sender role
+- role-separated HMAC-SHA-384 Finished inputs; Alice's Finished additionally binds Bob's verified `verify_data`
+- constant-time Finished verification and an ordered Bob-to-Alice-to-Bob state machine
+- `ConfirmedPQCHandshake` proof and role-local `EstablishedPQCSession` handles created only after both Finished values verify
+- release of source KEM secret references after successful confirmation-key derivation, without claiming memory zeroization
 
-The staged flow now covers five phases: (1) ML-DSA identities and explicit trust, (2) Bob's signed
+The staged flow now covers six phases: (1) ML-DSA identities and explicit trust, (2) Bob's signed
 ephemeral KEM offer, (3) Alice's verification and encapsulation, and (4) Alice's signed
 `ClientKeyExchange` followed by Bob's verify-before-decapsulate processing, and (5) canonical
-transcript construction plus HKDF-SHA-384 session-key derivation. Alice and Bob independently derive
-the same 256-bit key without transmitting it. The HIGH key is bound to both independently established
-KEM secrets through QuantumSec's explicit research diversity construction; this is not a
-standardized NIST multi-KEM combiner or a formal robust-combiner claim.
+transcript construction plus HKDF-SHA-384 session-key derivation, and (6) separate confirmation-key
+derivation plus mutual role-bound Finished verification. The HIGH keys are bound to both
+independently established KEM secrets through QuantumSec's explicit research diversity
+construction; this is not a standardized NIST multi-KEM combiner or a formal robust-combiner claim.
 
-The KEM source states expose only a private KDF-input method and remain alive for the distinct Phase
-6 confirmation-key derivation. `K_SESSION` has no transport mapping and is available only through the
-explicit `export_session_key()` operation while its derived state remains open. No Finished message
-or cryptographic key confirmation exists yet, so handshake completion and QKD/PQC composition
-remain later work.
+The KEM source states expose only a private KDF-input method and release their secret references
+after both `K_SESSION` and `K_CONFIRM` have been derived successfully. `K_CONFIRM` is never exported;
+`K_SESSION` has no transport mapping and remains available only through an explicit live-state
+export. A session is established by the Finished state machine, never by direct Alice/Bob key
+comparison. Application-data encryption and QKD/PQC composition remain later work.
 LOW and HIGH are QuantumSec deployment profiles, not NIST categories; HIGH is a diverse dual-KEM
 offer and is not the future QKD + PQC `HYBRID` profile.
 
@@ -475,6 +482,8 @@ authentication belongs in a future upper-layer integration and is intentionally 
 | shared private lifecycle for initiator/responder KEM secrets | `pqc/protocol/_shared_secret_state.py` |
 | `PQCHandshakeTranscript` | `pqc/protocol/transcript.py` |
 | `PQCSessionKeyDeriver`, `DerivedSessionKeyState` | `pqc/protocol/key_schedule.py` |
+| `PQCConfirmationKeyDeriver`, `PQCKeyConfirmation`, `ConfirmedPQCHandshake`, `EstablishedPQCSession` | `pqc/protocol/key_confirmation.py` |
+| `PQCFinishedMessage`, `PQCFinishedRole` | `pqc/protocol/messages.py` |
 | future QKD/PQC composition | upper orchestration layer, never direct `qkd`/`pqc` imports |
 
 ---
@@ -491,7 +500,7 @@ Current development order:
 6. Noise experiments using the CPTP channel models
 7. Optical transmission and loss as a separate physical layer
 8. Advanced postprocessing (parameter estimation, Cascade, confirmation, and Toeplitz extraction complete)
-9. PQC authentication and key establishment: identity/trust, signed ephemeral exchange, Bob-side decapsulation, transcript binding, and HKDF-SHA-384 session-key derivation complete; Finished confirmation and comparative experiments remain
+9. PQC authentication and key establishment: identity/trust, signed ephemeral exchange, Bob-side decapsulation, transcript-bound key derivation, and mutual HMAC-SHA-384 Finished confirmation complete; comparative experiments remain
 
 This order gives you useful tests early and avoids building experiment code before the mathematical foundation is stable.
 
@@ -589,8 +598,9 @@ Protocols should simulate behavior. Experiments should decide what to compare, h
 ## 10. Current Immediate Goal
 
 The mathematical primitives, quantum-channel foundation, complete BB84 post-processing, Web UI,
-and PQC Phases 1-5 are in place. After mutual authentication and KEM establishment, both roles build
-the same canonical signed-message transcript and independently derive matching 256-bit session keys
-with HKDF-SHA-384. Phase 6 must still derive a separate confirmation key and implement Finished
-authentication; QKD/PQC orchestration also remains future work. Until then, simulated QKD workflows
-must not be treated as end-to-end authenticated sessions.
+and all six PQC handshake phases are in place. After mutual authentication and KEM establishment,
+both roles derive transcript-bound session and confirmation keys under separate HKDF domains. Bob's
+Finished is verified before Alice's chained Finished is created; only Bob's successful final
+verification yields confirmed, role-local established-session handles. Tests may compare Alice and
+Bob keys as an oracle, but the protocol never uses direct key comparison for establishment.
+Application-data protection and QKD/PQC orchestration remain future work.

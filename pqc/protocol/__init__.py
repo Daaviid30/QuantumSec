@@ -1,4 +1,4 @@
-"""Staged PQC handshake messages, trust processing, transcript, and key schedule."""
+"""Six-phase authenticated PQC handshake and confirmed session primitives."""
 
 from pqc.protocol.client_exchange import (
     ClientKeyExchangeFactory,
@@ -14,14 +14,25 @@ from pqc.protocol.initiator import (
     ServerKeyOfferProcessor,
     ServerOfferProcessingStatus,
 )
+from pqc.protocol.key_confirmation import (
+    PQC_CONFIRMATION_KEY_LENGTH,
+    ConfirmedPQCHandshake,
+    EstablishedPQCSession,
+    PQCConfirmationKeyDeriver,
+    PQCConfirmationKeyState,
+    PQCKeyConfirmation,
+)
 from pqc.protocol.key_schedule import (
     PQC_SESSION_KEY_LENGTH,
     DerivedSessionKeyState,
     PQCSessionKeyDeriver,
 )
 from pqc.protocol.messages import (
+    PQC_FINISHED_VERIFY_DATA_LENGTH,
     ClientKeyExchange,
     EncapsulationResponse,
+    PQCFinishedMessage,
+    PQCFinishedRole,
     ServerKeyOffer,
     SignedClientKeyExchange,
     SignedServerKeyOffer,
@@ -36,13 +47,22 @@ __all__ = [
     "ClientKeyExchangeFactory",
     "ClientKeyExchangeProcessingStatus",
     "ClientKeyExchangeProcessor",
+    "ConfirmedPQCHandshake",
     "DerivedSessionKeyState",
     "EncapsulationResponse",
+    "EstablishedPQCSession",
     "InitiatorKEMState",
     "MLDSAIdentity",
+    "PQCConfirmationKeyDeriver",
+    "PQCConfirmationKeyState",
+    "PQCFinishedMessage",
+    "PQCFinishedRole",
     "PQCParty",
     "PQCHandshakeTranscript",
+    "PQCKeyConfirmation",
     "PQCSessionKeyDeriver",
+    "PQC_CONFIRMATION_KEY_LENGTH",
+    "PQC_FINISHED_VERIFY_DATA_LENGTH",
     "PQC_SESSION_KEY_LENGTH",
     "ProcessedClientKeyExchange",
     "ProcessedServerOffer",

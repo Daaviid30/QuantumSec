@@ -26,9 +26,13 @@ PQC_SESSION_KEY_LENGTH: Final = 32
 PQC_SESSION_KEY_INFO_DOMAIN: Final = b"QuantumSec/PQCHandshake/v1/SessionKey"
 
 
-def _session_key_info(*, protocol_version: int, profile: PQCProfile) -> bytes:
-    """Build explicit HKDF info for the Phase 5 session-key purpose."""
+def _key_schedule_info(*, domain: bytes, protocol_version: int, profile: PQCProfile) -> bytes:
+    """Build explicit HKDF info shared by purpose-separated handshake keys."""
 
+    if not isinstance(domain, bytes):
+        raise TypeError(f"domain must be bytes. Got {type(domain).__name__}.")
+    if not domain:
+        raise ValueError("domain must not be empty.")
     if isinstance(protocol_version, bool) or not isinstance(protocol_version, int):
         raise TypeError("protocol_version must be an integer.")
     if not 0 <= protocol_version <= 0xFFFF:
@@ -37,10 +41,20 @@ def _session_key_info(*, protocol_version: int, profile: PQCProfile) -> bytes:
         raise TypeError(f"profile must be a PQCProfile. Got {type(profile).__name__}.")
     return b"".join(
         (
-            _length_prefixed(PQC_SESSION_KEY_INFO_DOMAIN),
+            _length_prefixed(domain),
             pack(">H", protocol_version),
             _length_prefixed(profile.value.encode("ascii")),
         )
+    )
+
+
+def _session_key_info(*, protocol_version: int, profile: PQCProfile) -> bytes:
+    """Build explicit HKDF info for the Phase 5 session-key purpose."""
+
+    return _key_schedule_info(
+        domain=PQC_SESSION_KEY_INFO_DOMAIN,
+        protocol_version=protocol_version,
+        profile=profile,
     )
 
 
@@ -48,8 +62,8 @@ def _session_key_info(*, protocol_version: int, profile: PQCProfile) -> bytes:
 class DerivedSessionKeyState:
     """Private transcript-bound 256-bit session-key state.
 
-    Source KEM secret states intentionally remain open after derivation so Phase
-    6 can derive a distinct confirmation key with a separate HKDF context.
+    Source KEM secret states remain open after Phase 5 derivation until Phase 6
+    derives its distinct confirmation key under a separate HKDF context.
     """
 
     session_id: bytes = field(repr=False)
@@ -123,6 +137,49 @@ class DerivedSessionKeyState:
         )
 
 
+def _validated_initiator_secret_state(
+    processed: ProcessedServerOffer,
+    transcript: PQCHandshakeTranscript,
+) -> InitiatorKEMState:
+    """Return Alice's secret state only for the exact authenticated transcript."""
+
+    if not processed.authenticated or processed.initiator_state is None:
+        raise ValueError("Initiator key derivation requires an authenticated Phase 3 result.")
+    if processed.authenticated_offer != transcript.signed_server_offer:
+        raise ValueError("Phase 3 result does not belong to the transcript's signed server offer.")
+    response = processed.public_encapsulation
+    if response is None:
+        raise ValueError("Authenticated Phase 3 result is missing its public encapsulation.")
+    exchange = transcript.signed_client_exchange.exchange
+    if processed.signer != transcript.signed_server_offer.signer:
+        raise ValueError("Phase 3 responder identity does not match the handshake transcript.")
+    if (
+        response.session_id != exchange.session_id
+        or response.profile is not exchange.profile
+        or response.ml_kem_algorithm != exchange.ml_kem_algorithm
+        or response.ml_kem_ciphertext != exchange.ml_kem_ciphertext
+        or response.hqc_algorithm != exchange.hqc_algorithm
+        or response.hqc_ciphertext != exchange.hqc_ciphertext
+    ):
+        raise ValueError("Phase 3 encapsulation does not match the signed client exchange.")
+    return processed.initiator_state
+
+
+def _validated_responder_secret_state(
+    processed: ProcessedClientKeyExchange,
+    transcript: PQCHandshakeTranscript,
+) -> ResponderSharedSecretState:
+    """Return Bob's secret state only for the exact authenticated transcript."""
+
+    if not processed.authenticated or processed.responder_state is None:
+        raise ValueError("Responder key derivation requires an authenticated Phase 4 result.")
+    if processed.authenticated_exchange != transcript.signed_client_exchange:
+        raise ValueError("Phase 4 result does not belong to the transcript's signed client exchange.")
+    if processed.signer != transcript.signed_client_exchange.signer:
+        raise ValueError("Phase 4 initiator identity does not match the handshake transcript.")
+    return processed.responder_state
+
+
 class PQCSessionKeyDeriver:
     """Derive the same key for either role using one shared transcript-bound schedule."""
 
@@ -144,7 +201,7 @@ class PQCSessionKeyDeriver:
             signed_server_offer,
             signed_client_exchange,
         )
-        state = self._validated_initiator_state(processed_server_offer, transcript)
+        state = _validated_initiator_secret_state(processed_server_offer, transcript)
         return self._derive(state, transcript)
 
     def derive_responder(
@@ -165,47 +222,8 @@ class PQCSessionKeyDeriver:
             signed_server_offer,
             signed_client_exchange,
         )
-        state = self._validated_responder_state(processed_client_exchange, transcript)
+        state = _validated_responder_secret_state(processed_client_exchange, transcript)
         return self._derive(state, transcript)
-
-    @staticmethod
-    def _validated_initiator_state(
-        processed: ProcessedServerOffer,
-        transcript: PQCHandshakeTranscript,
-    ) -> InitiatorKEMState:
-        if not processed.authenticated or processed.initiator_state is None:
-            raise ValueError("Initiator key derivation requires an authenticated Phase 3 result.")
-        if processed.authenticated_offer != transcript.signed_server_offer:
-            raise ValueError("Phase 3 result does not belong to the transcript's signed server offer.")
-        response = processed.public_encapsulation
-        if response is None:
-            raise ValueError("Authenticated Phase 3 result is missing its public encapsulation.")
-        exchange = transcript.signed_client_exchange.exchange
-        if processed.signer != transcript.signed_server_offer.signer:
-            raise ValueError("Phase 3 responder identity does not match the handshake transcript.")
-        if (
-            response.session_id != exchange.session_id
-            or response.profile is not exchange.profile
-            or response.ml_kem_algorithm != exchange.ml_kem_algorithm
-            or response.ml_kem_ciphertext != exchange.ml_kem_ciphertext
-            or response.hqc_algorithm != exchange.hqc_algorithm
-            or response.hqc_ciphertext != exchange.hqc_ciphertext
-        ):
-            raise ValueError("Phase 3 encapsulation does not match the signed client exchange.")
-        return processed.initiator_state
-
-    @staticmethod
-    def _validated_responder_state(
-        processed: ProcessedClientKeyExchange,
-        transcript: PQCHandshakeTranscript,
-    ) -> ResponderSharedSecretState:
-        if not processed.authenticated or processed.responder_state is None:
-            raise ValueError("Responder key derivation requires an authenticated Phase 4 result.")
-        if processed.authenticated_exchange != transcript.signed_client_exchange:
-            raise ValueError("Phase 4 result does not belong to the transcript's signed client exchange.")
-        if processed.signer != transcript.signed_client_exchange.signer:
-            raise ValueError("Phase 4 initiator identity does not match the handshake transcript.")
-        return processed.responder_state
 
     @staticmethod
     def _derive(

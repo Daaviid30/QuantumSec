@@ -4,6 +4,7 @@ import base64
 import binascii
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from enum import StrEnum
 from struct import pack
 from typing import Final, Self
 
@@ -23,6 +24,19 @@ CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION: Final = 1
 CLIENT_KEY_EXCHANGE_NONCE_LENGTH: Final = 32
 CLIENT_KEY_EXCHANGE_SERVER_OFFER_HASH_LENGTH: Final = 48
 CLIENT_KEY_EXCHANGE_DOMAIN_SEPARATOR: Final = b"QuantumSec/PQCHandshake/v1/ClientKeyExchange"
+PQC_FINISHED_PROTOCOL_VERSION: Final = SERVER_KEY_OFFER_PROTOCOL_VERSION
+PQC_FINISHED_SESSION_ID_LENGTH: Final = SERVER_KEY_OFFER_SESSION_ID_LENGTH
+PQC_FINISHED_TRANSCRIPT_HASH_LENGTH: Final = CLIENT_KEY_EXCHANGE_SERVER_OFFER_HASH_LENGTH
+PQC_FINISHED_VERIFY_DATA_LENGTH: Final = 48
+PQC_FINISHED_MAC_ALGORITHM: Final = "HMAC-SHA-384"
+PQC_FINISHED_DOMAIN_SEPARATOR: Final = b"QuantumSec/PQCHandshake/v1/FinishedMessage"
+
+
+class PQCFinishedRole(StrEnum):
+    """Unambiguous sender role for a Phase 6 Finished message."""
+
+    INITIATOR = "initiator"
+    RESPONDER = "responder"
 
 
 def _require_bytes(value: object, *, name: str, length: int | None = None) -> bytes:
@@ -600,4 +614,142 @@ class SignedClientKeyExchange:
             f"SignedClientKeyExchange(exchange={self.exchange!r}, signer={self.signer!r}, "
             f"signature_algorithm={self.signature_algorithm!r}, "
             f"signature_length={len(self.signature)})"
+        )
+
+
+@dataclass(frozen=True, slots=True, repr=False)
+class PQCFinishedMessage:
+    """Immutable public transport message carrying one role-bound Finished MAC."""
+
+    protocol_version: int
+    session_id: bytes = field(repr=False)
+    profile: PQCProfile
+    sender_role: PQCFinishedRole
+    mac_algorithm: str
+    transcript_hash: bytes
+    verify_data: bytes = field(repr=False)
+
+    def __post_init__(self) -> None:
+        if (
+            isinstance(self.protocol_version, bool)
+            or not isinstance(self.protocol_version, int)
+            or self.protocol_version != PQC_FINISHED_PROTOCOL_VERSION
+        ):
+            raise ValueError(
+                f"protocol_version must be {PQC_FINISHED_PROTOCOL_VERSION}. Got {self.protocol_version!r}."
+            )
+        object.__setattr__(
+            self,
+            "session_id",
+            _require_bytes(
+                self.session_id,
+                name="session_id",
+                length=PQC_FINISHED_SESSION_ID_LENGTH,
+            ),
+        )
+        if not isinstance(self.profile, PQCProfile):
+            raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
+        if not isinstance(self.sender_role, PQCFinishedRole):
+            raise TypeError(f"sender_role must be a PQCFinishedRole. Got {type(self.sender_role).__name__}.")
+        if self.mac_algorithm != PQC_FINISHED_MAC_ALGORITHM:
+            raise ValueError(f"mac_algorithm must be {PQC_FINISHED_MAC_ALGORITHM!r}.")
+        object.__setattr__(
+            self,
+            "transcript_hash",
+            _require_bytes(
+                self.transcript_hash,
+                name="transcript_hash",
+                length=PQC_FINISHED_TRANSCRIPT_HASH_LENGTH,
+            ),
+        )
+        object.__setattr__(
+            self,
+            "verify_data",
+            _require_bytes(
+                self.verify_data,
+                name="verify_data",
+                length=PQC_FINISHED_VERIFY_DATA_LENGTH,
+            ),
+        )
+
+    def canonical_bytes(self) -> bytes:
+        """Encode the public Finished message using fixed, unambiguous field order."""
+
+        return b"".join(
+            (
+                _length_prefixed(PQC_FINISHED_DOMAIN_SEPARATOR),
+                pack(">H", self.protocol_version),
+                _length_prefixed(self.session_id),
+                _length_prefixed(self.profile.value.encode("ascii")),
+                _length_prefixed(self.sender_role.value.encode("ascii")),
+                _length_prefixed(self.mac_algorithm.encode("ascii")),
+                _length_prefixed(self.transcript_hash),
+                _length_prefixed(self.verify_data),
+            )
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        """Serialize this public Finished message to a JSON-compatible mapping."""
+
+        return {
+            "protocol_version": self.protocol_version,
+            "session_id": base64.b64encode(self.session_id).decode("ascii"),
+            "profile": self.profile.value,
+            "sender_role": self.sender_role.value,
+            "mac_algorithm": self.mac_algorithm,
+            "transcript_hash": base64.b64encode(self.transcript_hash).decode("ascii"),
+            "verify_data": base64.b64encode(self.verify_data).decode("ascii"),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> Self:
+        """Deserialize a public Finished message without authenticating its MAC."""
+
+        if not isinstance(payload, Mapping):
+            raise TypeError(f"payload must be a mapping. Got {type(payload).__name__}.")
+        _require_transport_fields(
+            payload,
+            message_name="PQC Finished message",
+            fields={
+                "protocol_version",
+                "session_id",
+                "profile",
+                "sender_role",
+                "mac_algorithm",
+                "transcript_hash",
+                "verify_data",
+            },
+        )
+        protocol_version = payload["protocol_version"]
+        profile = payload["profile"]
+        sender_role = payload["sender_role"]
+        mac_algorithm = payload["mac_algorithm"]
+        if isinstance(protocol_version, bool) or not isinstance(protocol_version, int):
+            raise TypeError("protocol_version must be an integer.")
+        if not isinstance(profile, str):
+            raise TypeError("profile must be a string.")
+        if not isinstance(sender_role, str):
+            raise TypeError("sender_role must be a string.")
+        if not isinstance(mac_algorithm, str):
+            raise TypeError("mac_algorithm must be a string.")
+        return cls(
+            protocol_version=protocol_version,
+            session_id=_decode_base64_field(payload["session_id"], name="session_id"),
+            profile=PQCProfile(profile),
+            sender_role=PQCFinishedRole(sender_role),
+            mac_algorithm=mac_algorithm,
+            transcript_hash=_decode_base64_field(
+                payload["transcript_hash"],
+                name="transcript_hash",
+            ),
+            verify_data=_decode_base64_field(payload["verify_data"], name="verify_data"),
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f"PQCFinishedMessage(profile={self.profile.value!r}, "
+            f"sender_role={self.sender_role.value!r}, "
+            f"mac_algorithm={self.mac_algorithm!r}, "
+            f"transcript_hash={self.transcript_hash.hex()!r}, "
+            f"verify_data_length={len(self.verify_data)})"
         )

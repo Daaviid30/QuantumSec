@@ -1,6 +1,6 @@
 """Tests for canonical Phase 5 transcripts, KEM combination, and session-key derivation."""
 
-from dataclasses import dataclass, replace
+from dataclasses import replace
 from unittest.mock import patch
 
 import pytest
@@ -9,103 +9,33 @@ from pqc import (
     PQC_SESSION_KEY_LENGTH,
     ClientKeyExchangeFactory,
     ClientKeyExchangeProcessor,
-    DerivedSessionKeyState,
     PQCHandshakeTranscript,
     PQCParty,
     PQCProfile,
     PQCSessionKeyDeriver,
-    ProcessedClientKeyExchange,
-    ProcessedServerOffer,
     ServerKeyOfferFactory,
     ServerKeyOfferProcessor,
-    SignedClientKeyExchange,
-    SignedServerKeyOffer,
 )
 from pqc._encoding import _length_prefixed
 from pqc.kdf import KEM_SECRET_INPUT_DOMAIN, canonical_kem_secret_input, derive_hkdf_sha384
 from pqc.kem import hqc_3_metadata, ml_kem_768_metadata
-from pqc.protocol import InitiatorKEMState, ResponderKEMState, ResponderSharedSecretState
 from pqc.protocol.key_schedule import PQC_SESSION_KEY_INFO_DOMAIN, _session_key_info
 from pqc.protocol.transcript import (
     PQC_HANDSHAKE_TRANSCRIPT_DOMAIN,
     PQC_TRANSCRIPT_HASH_LENGTH,
 )
-
-
-@dataclass(slots=True)
-class _Phase5Flow:
-    alice: PQCParty
-    bob: PQCParty
-    responder_kem_state: ResponderKEMState
-    signed_server_offer: SignedServerKeyOffer
-    processed_server_offer: ProcessedServerOffer
-    signed_client_exchange: SignedClientKeyExchange
-    processed_client_exchange: ProcessedClientKeyExchange
-
-
-def _create_flow(profile: PQCProfile) -> _Phase5Flow:
-    alice = PQCParty.create("Alice")
-    bob = PQCParty.create("Bob")
-    alice.trust_peer(bob.public_identity)
-    bob.trust_peer(alice.public_identity)
-
-    responder_kem_state, signed_server_offer = ServerKeyOfferFactory().create(
-        responder=bob,
-        profile=profile,
-    )
-    processed_server_offer = ServerKeyOfferProcessor().process(
-        initiator=alice,
-        signed_offer=signed_server_offer,
-    )
-    signed_client_exchange = ClientKeyExchangeFactory().create(
-        initiator=alice,
-        signed_server_offer=signed_server_offer,
-        processed_offer=processed_server_offer,
-    )
-    processed_client_exchange = ClientKeyExchangeProcessor().process(
-        responder=bob,
-        responder_state=responder_kem_state,
-        server_offer=signed_server_offer,
-        signed_exchange=signed_client_exchange,
-    )
-    assert processed_server_offer.authenticated
-    assert processed_client_exchange.authenticated
-    return _Phase5Flow(
-        alice=alice,
-        bob=bob,
-        responder_kem_state=responder_kem_state,
-        signed_server_offer=signed_server_offer,
-        processed_server_offer=processed_server_offer,
-        signed_client_exchange=signed_client_exchange,
-        processed_client_exchange=processed_client_exchange,
-    )
-
-
-def _initiator_state(flow: _Phase5Flow) -> InitiatorKEMState:
-    state = flow.processed_server_offer.initiator_state
-    assert state is not None
-    return state
-
-
-def _responder_state(flow: _Phase5Flow) -> ResponderSharedSecretState:
-    state = flow.processed_client_exchange.responder_state
-    assert state is not None
-    return state
-
-
-def _derive_both(flow: _Phase5Flow) -> tuple[DerivedSessionKeyState, DerivedSessionKeyState]:
-    deriver = PQCSessionKeyDeriver()
-    alice_key = deriver.derive_initiator(
-        processed_server_offer=flow.processed_server_offer,
-        signed_server_offer=flow.signed_server_offer,
-        signed_client_exchange=flow.signed_client_exchange,
-    )
-    bob_key = deriver.derive_responder(
-        processed_client_exchange=flow.processed_client_exchange,
-        signed_server_offer=flow.signed_server_offer,
-        signed_client_exchange=flow.signed_client_exchange,
-    )
-    return alice_key, bob_key
+from tests.test_pqc._handshake import (
+    create_phase5_flow as _create_flow,
+)
+from tests.test_pqc._handshake import (
+    derive_session_keys as _derive_both,
+)
+from tests.test_pqc._handshake import (
+    initiator_secret_state as _initiator_state,
+)
+from tests.test_pqc._handshake import (
+    responder_secret_state as _responder_state,
+)
 
 
 def _flipped(value: bytes) -> bytes:
