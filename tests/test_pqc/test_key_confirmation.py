@@ -9,7 +9,9 @@ import pytest
 from pqc import (
     PQC_CONFIRMATION_KEY_LENGTH,
     PQC_FINISHED_VERIFY_DATA_LENGTH,
+    ClientKeyExchangeFactory,
     ClientKeyExchangeProcessingStatus,
+    ClientKeyExchangeProcessor,
     ConfirmedPQCHandshake,
     DerivedSessionKeyState,
     EstablishedPQCSession,
@@ -19,10 +21,16 @@ from pqc import (
     PQCFinishedRole,
     PQCHandshakeTranscript,
     PQCKeyConfirmation,
+    PQCParty,
     PQCProfile,
+    PQCSessionKeyDeriver,
     ProcessedClientKeyExchange,
     ProcessedServerOffer,
+    ServerKeyOfferFactory,
+    ServerKeyOfferProcessor,
     ServerOfferProcessingStatus,
+    SignedClientKeyExchange,
+    SignedServerKeyOffer,
 )
 from pqc._encoding import _length_prefixed
 from pqc.protocol.key_confirmation import (
@@ -103,6 +111,10 @@ def test_phase6_establishes_both_local_sessions_only_through_finished(
     profile: PQCProfile,
 ) -> None:
     states = _derive_confirmation_states(profile)
+    assert not states.alice_confirmation.confirmation_key_retired
+    assert not states.bob_confirmation.confirmation_key_retired
+    assert not states.alice_confirmation.local_finished_processing_complete
+    assert not states.bob_confirmation.local_finished_processing_complete
 
     responder_finished, initiator_finished, confirmed = _exchange_finished(states)
     alice_session = PQCKeyConfirmation.establish_local_session(
@@ -123,8 +135,112 @@ def test_phase6_establishes_both_local_sessions_only_through_finished(
     assert initiator_finished.sender_role is PQCFinishedRole.INITIATOR
     assert confirmed.responder_finished is responder_finished
     assert confirmed.initiator_finished is initiator_finished
+    assert states.alice_confirmation.confirmation_key_retired
+    assert states.bob_confirmation.confirmation_key_retired
+    assert states.alice_confirmation.local_finished_processing_complete
+    assert states.bob_confirmation.local_finished_processing_complete
     assert not alice_session.is_closed
     assert not bob_session.is_closed
+
+
+@pytest.mark.parametrize("profile", [PQCProfile.LOW, PQCProfile.HIGH])
+def test_full_six_phase_handshake_crosses_pure_json_transport(
+    profile: PQCProfile,
+) -> None:
+    alice = PQCParty.create("Alice JSON")
+    bob = PQCParty.create("Bob JSON")
+    alice.trust_peer(bob.public_identity)
+    bob.trust_peer(alice.public_identity)
+
+    responder_kem_state, outbound_server_offer = ServerKeyOfferFactory().create(
+        responder=bob,
+        profile=profile,
+    )
+    inbound_server_offer = SignedServerKeyOffer.from_dict(
+        json.loads(json.dumps(outbound_server_offer.to_dict()))
+    )
+    processed_server_offer = ServerKeyOfferProcessor().process(
+        initiator=alice,
+        signed_offer=inbound_server_offer,
+    )
+    outbound_client_exchange = ClientKeyExchangeFactory().create(
+        initiator=alice,
+        signed_server_offer=inbound_server_offer,
+        processed_offer=processed_server_offer,
+    )
+    inbound_client_exchange = SignedClientKeyExchange.from_dict(
+        json.loads(json.dumps(outbound_client_exchange.to_dict()))
+    )
+    processed_client_exchange = ClientKeyExchangeProcessor().process(
+        responder=bob,
+        responder_state=responder_kem_state,
+        server_offer=inbound_server_offer,
+        signed_exchange=inbound_client_exchange,
+    )
+
+    session_deriver = PQCSessionKeyDeriver()
+    alice_session_key = session_deriver.derive_initiator(
+        processed_server_offer=processed_server_offer,
+        signed_server_offer=inbound_server_offer,
+        signed_client_exchange=inbound_client_exchange,
+    )
+    bob_session_key = session_deriver.derive_responder(
+        processed_client_exchange=processed_client_exchange,
+        signed_server_offer=inbound_server_offer,
+        signed_client_exchange=inbound_client_exchange,
+    )
+    transcript = PQCHandshakeTranscript.from_dict(
+        json.loads(
+            json.dumps(
+                PQCHandshakeTranscript.from_messages(
+                    inbound_server_offer,
+                    inbound_client_exchange,
+                ).to_dict()
+            )
+        )
+    )
+    assert transcript.signed_server_offer == inbound_server_offer
+    assert transcript.signed_client_exchange == inbound_client_exchange
+
+    confirmation_deriver = PQCConfirmationKeyDeriver()
+    alice_confirmation = confirmation_deriver.derive_initiator(
+        processed_server_offer=processed_server_offer,
+        session_key_state=alice_session_key,
+        signed_server_offer=inbound_server_offer,
+        signed_client_exchange=inbound_client_exchange,
+    )
+    bob_confirmation = confirmation_deriver.derive_responder(
+        processed_client_exchange=processed_client_exchange,
+        session_key_state=bob_session_key,
+        signed_server_offer=inbound_server_offer,
+        signed_client_exchange=inbound_client_exchange,
+    )
+    outbound_responder_finished = PQCKeyConfirmation.create_responder_finished(bob_confirmation)
+    inbound_responder_finished = PQCFinishedMessage.from_dict(
+        json.loads(json.dumps(outbound_responder_finished.to_dict()))
+    )
+    outbound_initiator_finished = PQCKeyConfirmation.verify_responder_and_create_initiator(
+        alice_confirmation,
+        inbound_responder_finished,
+    )
+    inbound_initiator_finished = PQCFinishedMessage.from_dict(
+        json.loads(json.dumps(outbound_initiator_finished.to_dict()))
+    )
+    confirmed = PQCKeyConfirmation.verify_initiator_and_confirm(
+        bob_confirmation,
+        inbound_initiator_finished,
+    )
+    bob_established = PQCKeyConfirmation.establish_local_session(
+        confirmed,
+        bob_confirmation,
+    )
+
+    assert processed_server_offer.authenticated
+    assert processed_client_exchange.authenticated
+    assert alice_confirmation.local_finished_processing_complete
+    assert bob_confirmation.local_finished_processing_complete
+    assert confirmed.initiator_finished == inbound_initiator_finished
+    assert bob_established.established
 
 
 @pytest.mark.parametrize("profile", [PQCProfile.LOW, PQCProfile.HIGH])
@@ -636,6 +752,7 @@ def test_established_session_owns_session_key_lifecycle() -> None:
         states.alice_confirmation,
     )
     session_key = established.export_session_key()
+    assert not hasattr(established, "session_key")
 
     with established as managed:
         assert managed is established

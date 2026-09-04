@@ -24,5 +24,6 @@
 - Invariantes de ciclo de vida criptográfico:
   - Fase 4: `ResponderKEMState` se cierra al desencapsular.
   - Fase 6: La derivación de claves de confirmación cierra `InitiatorKEMState` y `ResponderSharedSecretState`.
-  - Fase 6: La verificación de Finished cierra `PQCConfirmationKeyState` liberando `_confirmation_key`.
-  - Finalización: `EstablishedPQCSession` retiene exclusivamente la clave de sesión simétrica de 256 bits (`export_session_key()`).
+  - Fase 6: La verificación de Finished cierra `PQCConfirmationKeyState` liberando `_confirmation_key`; `confirmation_key_retired` y `local_finished_processing_complete` distinguen retiro de secreto y progreso local.
+  - Finalización: `EstablishedPQCSession` retiene exclusivamente la clave de sesión simétrica de 256 bits mediante la operación explícita `export_session_key()`; no existe propiedad implícita `session_key`.
+  - Distribución: un Alice remoto necesita un ACK autenticado adicional para saber que Bob aceptó `Finished_A`; `ConfirmedPQCHandshake` no se serializa ni se fabrica a partir de los dos Finished públicos.

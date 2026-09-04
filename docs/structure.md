@@ -355,6 +355,7 @@ Current responsibilities:
 - role-separated HMAC-SHA-384 Finished inputs; Alice's Finished additionally binds Bob's verified `verify_data`
 - constant-time Finished verification and an ordered Bob-to-Alice-to-Bob state machine
 - `ConfirmedPQCHandshake` proof and role-local `EstablishedPQCSession` handles created only after both Finished values verify
+- explicit `confirmation_key_retired` and `local_finished_processing_complete` lifecycle signals, separate from generic `is_closed`
 - release of source KEM secret references after successful confirmation-key derivation, without claiming memory zeroization
 
 The staged flow now covers six phases: (1) ML-DSA identities and explicit trust, (2) Bob's signed
@@ -370,6 +371,14 @@ after both `K_SESSION` and `K_CONFIRM` have been derived successfully. `K_CONFIR
 `K_SESSION` has no transport mapping and remains available only through an explicit live-state
 export. A session is established by the Finished state machine, never by direct Alice/Bob key
 comparison. Application-data encryption and QKD/PQC composition remain later work.
+
+`export_session_key()` is intentionally the only raw session-key operation; there is no implicit
+property alias. `ConfirmedPQCHandshake` is also intentionally non-serializable: in a distributed
+deployment, Alice cannot infer that Bob accepted `Finished_A` from the two already-known public
+Finished messages. A network adapter must provide an authenticated success acknowledgement, or a
+future protocol revision must add a third authenticated ACK, before Alice treats that remote event
+as globally complete. The current simulator can pass Bob's capability in-process without weakening
+the cryptographic meaning of the established-session type.
 LOW and HIGH are QuantumSec deployment profiles, not NIST categories; HIGH is a diverse dual-KEM
 offer and is not the future QKD + PQC `HYBRID` profile.
 

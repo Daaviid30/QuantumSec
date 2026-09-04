@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788533273.4841566,
-    "seen": 1788533458.3175108,
-    "ast_hash": "9b9e02e05636e8cbf573cf65e4d9a255",
+    "mtime": 1788534508.0215569,
+    "seen": 1788534634.917879,
+    "ast_hash": "5296e91bb4cf55fb94cd78314a9e27ad",
     "semantic_hash": ""
   },
   "core/docs/rng_man.md": {
@@ -282,9 +282,9 @@
     "semantic_hash": "0c566f8b084dbacf2100a8866eccd6f2"
   },
   "docs/structure.md": {
-    "mtime": 1788533274.3169076,
-    "seen": 1788533458.3175147,
-    "ast_hash": "ab36d4aa1ec9baf4730d3fe5cfaf78f0",
+    "mtime": 1788534503.0394876,
+    "seen": 1788534634.9178913,
+    "ast_hash": "729d6bd71732c208fac909058861fa69",
     "semantic_hash": ""
   },
   "docs/tasks.md": {
@@ -876,9 +876,9 @@
     "semantic_hash": "a0f30ecb0b9af038b3dbbd8767b74fed"
   },
   ".serena/memories/core.md": {
-    "mtime": 1788530946.4407084,
-    "seen": 1788531436.6042063,
-    "ast_hash": "7584992290d01b181b8f4892475ac7c1",
+    "mtime": 1788534092.5893312,
+    "seen": 1788534634.9178634,
+    "ast_hash": "c0f903524fbbd7c8285f0342e76a2511",
     "semantic_hash": ""
   },
   ".serena/memories/infrastructure/core.md": {
@@ -912,9 +912,9 @@
     "semantic_hash": ""
   },
   ".serena/memories/task_completion.md": {
-    "mtime": 1788533447.2170205,
-    "seen": 1788533458.3175035,
-    "ast_hash": "0d274c8e82111fce453bbdfcdb248c54",
+    "mtime": 1788534618.658214,
+    "seen": 1788534634.917872,
+    "ast_hash": "d98091140b99d299f450af8a4fc14ac0",
     "semantic_hash": ""
   },
   ".serena/memories/tech_stack.md": {
@@ -1146,9 +1146,9 @@
     "semantic_hash": ""
   },
   ".serena/memories/pqc/core.md": {
-    "mtime": 1788533442.8796344,
-    "seen": 1788533458.317499,
-    "ast_hash": "fb39411491d74090073f3e8d3e089ada",
+    "mtime": 1788534623.585362,
+    "seen": 1788534634.917867,
+    "ast_hash": "991eac70467c86c37f3ae5d4aa4c8207",
     "semantic_hash": ""
   },
   "pqc/_encoding.py": {
@@ -1194,9 +1194,9 @@
     "semantic_hash": ""
   },
   "pqc/protocol/key_confirmation.py": {
-    "mtime": 1788533489.92598,
-    "seen": 1788533533.1073537,
-    "ast_hash": "5b8b2946d1175603d5bd080a3862617b",
+    "mtime": 1788534548.8011017,
+    "seen": 1788534634.9177039,
+    "ast_hash": "e4aa32c79c7e432b1a3b9053ea9f0b9e",
     "semantic_hash": ""
   },
   "tests/test_pqc/_handshake.py": {
@@ -1206,9 +1206,9 @@
     "semantic_hash": ""
   },
   "tests/test_pqc/test_key_confirmation.py": {
-    "mtime": 1788533341.8603766,
-    "seen": 1788533458.3174028,
-    "ast_hash": "3d679f67a3059fdb108868487f0d4cd9",
+    "mtime": 1788534485.498474,
+    "seen": 1788534634.9177728,
+    "ast_hash": "e082706e0156c33c9779cde8e4b9f03d",
     "semantic_hash": ""
   },
   "docs/reviews/review_bb84_quantum_qkd.md": {

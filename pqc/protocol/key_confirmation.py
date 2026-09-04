@@ -199,6 +199,22 @@ class PQCConfirmationKeyState:
 
         return self._closed
 
+    @property
+    def confirmation_key_retired(self) -> bool:
+        """Return whether this state has released its role-local confirmation key."""
+
+        return self._closed
+
+    @property
+    def local_finished_processing_complete(self) -> bool:
+        """Return whether this role completed its local send/verify Finished work."""
+
+        return (
+            self.confirmation_key_retired
+            and self._local_finished is not None
+            and self._peer_finished is not None
+        )
+
     def close(self) -> None:
         """Release the confirmation-key reference without closing the session key."""
 
@@ -295,7 +311,8 @@ class PQCConfirmationKeyState:
         return (
             f"PQCConfirmationKeyState(profile={self.profile.value!r}, "
             f"role={self.role.value!r}, transcript_hash={self.transcript_hash.hex()!r}, "
-            f"closed={self._closed!r})"
+            f"confirmation_key_retired={self.confirmation_key_retired!r}, "
+            f"local_finished_processing_complete={self.local_finished_processing_complete!r})"
         )
 
 
@@ -642,8 +659,12 @@ class PQCKeyConfirmation:
                 f"Got {type(confirmation_state).__name__}."
             )
         state = confirmation_state
-        if not state.is_closed or state._local_finished is None or state._peer_finished is None:
+        if not state.local_finished_processing_complete:
             raise RuntimeError("Local Finished exchange is incomplete.")
+        local_finished = state._local_finished
+        peer_finished = state._peer_finished
+        if local_finished is None or peer_finished is None:
+            raise RuntimeError("Local Finished state is inconsistent.")
         if state._session_established:
             raise RuntimeError("Local PQC session is already established.")
         if state.role is PQCFinishedRole.INITIATOR:
@@ -653,11 +674,11 @@ class PQCKeyConfirmation:
             expected_local = confirmation.responder_finished
             expected_peer = confirmation.initiator_finished
         local_matches = hmac.compare_digest(
-            state._local_finished.canonical_bytes(),
+            local_finished.canonical_bytes(),
             expected_local.canonical_bytes(),
         )
         peer_matches = hmac.compare_digest(
-            state._peer_finished.canonical_bytes(),
+            peer_finished.canonical_bytes(),
             expected_peer.canonical_bytes(),
         )
         if not local_matches or not peer_matches:

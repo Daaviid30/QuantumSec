@@ -104,6 +104,13 @@ confirmation-key derivation succeeds. The established session retains controlled
 role-local `K_SESSION` through `export_session_key()` and explicit `close()`/`with` ownership.
 No application-data encryption or QKD/PQC composition is implemented yet.
 
+The raw session key intentionally has no implicit `.session_key` property: exporting cryptographic
+material remains an explicit operation. In an in-process simulation, Bob's final confirmation
+capability can materialize both role-local handles. Across separate processes, Alice must wait for
+an authenticated transport acknowledgement that Bob accepted `Finished_A`; merely serializing or
+echoing the two public Finished messages would not prove that event. Such a third protocol ACK is
+outside the current six-phase handshake and is not fabricated by this API.
+
 The complete session flow is:
 
 ```text
