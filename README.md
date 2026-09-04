@@ -5,9 +5,9 @@ research, and post-quantum authentication mechanisms.
 
 The current release includes a functional BB84 engine and a dark-first web laboratory for composing
 logical-qubit channels, running seeded simulations, and inspecting genuine simulation output. It
-also includes a four-phase PQC exchange backed by liboqs: ML-DSA-65 identities and pre-provisioned
-trust, authenticated ephemeral KEM offers, Alice-side ML-KEM-768 plus optional HQC-3 encapsulation,
-and an authenticated client response that Bob verifies before decapsulation.
+also includes a five-phase PQC exchange backed by liboqs and `cryptography`: ML-DSA-65 identities
+and pre-provisioned trust, authenticated ephemeral KEM establishment, mutual signed messages, and
+transcript-bound HKDF-SHA-384 derivation of a 256-bit session key.
 
 ## 📌 Overview
 
@@ -54,7 +54,8 @@ an upper orchestration layer.
   Logical implementation of QKD protocols with clear phase separation.
 
 - **Authentication Module**  
-  ML-DSA-65 identities, explicit trust, ephemeral KEM material, and authenticated server offers.
+  ML-DSA-65 identities, explicit trust, ephemeral KEM material, authenticated messages, and a
+  transcript-bound PQC key schedule.
 
 - **Mathematical Layer**  
   Lightweight abstractions for modeling quantum-like behavior.
@@ -84,12 +85,17 @@ those existing ciphertexts to the exact offer using SHA-384, and signs the canon
 `ClientKeyExchange`. Bob checks his local session, the offer binding, Alice's provisioned identity,
 and her signature before any decapsulation.
 
-After this mutually authenticated exchange, Alice and Bob possess matching KEM shared-secret
-material. In HIGH, the ML-KEM and HQC secrets remain independent. Bob's one-shot ephemeral private
-KEM state is released only after both required decapsulations succeed, and both parties' shared
-secrets stay in private, non-serializable state objects. These private states support managed
-lifetimes with `with` as well as idempotent explicit closure. No final session key has been derived
-and no key confirmation has occurred yet.
+After this mutually authenticated exchange, Alice and Bob independently derive the same 32-byte
+`K_SESSION`. The KDF salt is SHA-384 over a canonical transcript containing both exact signed
+messages, while HKDF `info` binds the QuantumSec session-key domain, protocol version, and profile.
+LOW encodes its ML-KEM-768 secret with explicit algorithm and length fields. HIGH canonically encodes
+ML-KEM-768 first and HQC-3 second before HKDF-SHA-384. HIGH is a QuantumSec research diversity
+construction, not a standardized NIST multi-KEM combiner.
+
+Raw KEM secrets and `K_SESSION` remain in private, non-serializable, repr-safe states. Source KEM
+states deliberately remain alive after Phase 5 so Phase 6 can derive a distinct confirmation key
+under another HKDF domain; lifecycle ownership remains explicit through `close()` and `with`.
+Cryptographic key confirmation has not occurred yet, so the handshake is not finished.
 
 The complete session flow is:
 
@@ -113,8 +119,8 @@ without future handshake completion and composition, the simulator must not be i
 end-to-end secure QKD.
 
 Optical loss, experiment sweeps, physical transmission timing/secret bits per second, production
-LDPC reconciliation, KEM secret combination, handshake KDFs, Finished/key-confirmation messages,
-QKD/PQC integration, and QKDN functionality are not implemented yet.
+LDPC reconciliation, Finished/key-confirmation messages, traffic-key/AES protection, QKD/PQC
+integration, and QKDN functionality are not implemented yet.
 
 ## 🖥️ Web UI V1
 

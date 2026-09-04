@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from types import TracebackType
 from typing import Self
 
+from pqc.kdf.combiner import canonical_kem_secret_input
 from pqc.kem import hqc_3_metadata, ml_kem_768_metadata
 from pqc.profiles import PQCProfile, profile_definition
 from pqc.protocol.messages import SERVER_KEY_OFFER_SESSION_ID_LENGTH, _require_bytes
@@ -61,6 +62,17 @@ class _KEMSharedSecretStateBase:
         self._ml_kem_shared_secret = None
         self._hqc_shared_secret = None
         self._closed = True
+
+    def _build_kdf_input(self) -> bytes:
+        """Build the canonical KDF input without exposing individual raw-secret accessors."""
+
+        if self._closed or self._ml_kem_shared_secret is None:
+            raise RuntimeError("KEM shared-secret state is closed.")
+        return canonical_kem_secret_input(
+            profile=self.profile,
+            ml_kem_shared_secret=self._ml_kem_shared_secret,
+            hqc_shared_secret=self._hqc_shared_secret,
+        )
 
     def __enter__(self) -> Self:
         """Enter a managed lifetime for this private state."""

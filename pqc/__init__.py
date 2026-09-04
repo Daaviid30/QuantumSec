@@ -1,15 +1,19 @@
-"""Post-quantum identity and authentication primitives."""
+"""Post-quantum identity, authentication, KEM, and key-establishment primitives."""
 
 from pqc.kem import HQC3, MLKEM768, KEMProvider
 from pqc.profiles import PQCProfile
 from pqc.protocol import (
+    PQC_SESSION_KEY_LENGTH,
     ClientKeyExchange,
     ClientKeyExchangeFactory,
     ClientKeyExchangeProcessingStatus,
     ClientKeyExchangeProcessor,
+    DerivedSessionKeyState,
     EncapsulationResponse,
     MLDSAIdentity,
+    PQCHandshakeTranscript,
     PQCParty,
+    PQCSessionKeyDeriver,
     ProcessedClientKeyExchange,
     ProcessedServerOffer,
     PublicIdentity,
@@ -27,12 +31,16 @@ __all__ = [
     "ClientKeyExchangeFactory",
     "ClientKeyExchangeProcessingStatus",
     "ClientKeyExchangeProcessor",
+    "DerivedSessionKeyState",
     "EncapsulationResponse",
     "HQC3",
     "KEMProvider",
     "MLDSAIdentity",
     "MLKEM768",
     "PQCParty",
+    "PQCHandshakeTranscript",
+    "PQCSessionKeyDeriver",
+    "PQC_SESSION_KEY_LENGTH",
     "PQCProfile",
     "ProcessedClientKeyExchange",
     "ProcessedServerOffer",

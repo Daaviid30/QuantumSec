@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from struct import pack
 from typing import Final, Self
 
+from pqc._encoding import _length_prefixed
 from pqc.kem import (
     hqc_3_metadata,
     ml_kem_768_metadata,
@@ -33,13 +34,6 @@ def _require_bytes(value: object, *, name: str, length: int | None = None) -> by
     if not value:
         raise ValueError(f"{name} must not be empty.")
     return bytes(value)
-
-
-def _length_prefixed(value: bytes) -> bytes:
-    """Prefix byte data with a 4-byte big-endian length header for canonical unambiguous serialization."""
-    if len(value) > 0xFFFFFFFF:
-        raise ValueError("Canonical field exceeds the 32-bit length prefix.")
-    return pack(">I", len(value)) + value
 
 
 def _decode_base64_field(value: object, *, name: str) -> bytes:

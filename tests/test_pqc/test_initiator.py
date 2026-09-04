@@ -68,6 +68,7 @@ def test_valid_low_offer_authenticates_before_ml_kem_encapsulation(
 
     assert result.signer == "Bob"
     assert result.profile is PQCProfile.LOW
+    assert result.authenticated_offer == low_offer
     assert state.session_id == low_offer.offer.session_id == public.session_id
     assert state.profile is public.profile is PQCProfile.LOW
     assert len(ml_secret) == ml_kem_768_metadata().shared_secret_length
@@ -115,6 +116,7 @@ def test_untrusted_bob_aborts_without_encapsulation(
     assert result.status is ServerOfferProcessingStatus.UNTRUSTED_SIGNER
     assert result.initiator_state is None
     assert result.public_encapsulation is None
+    assert result.authenticated_offer is None
     assert result.failure_reason is not None and "trust store" in result.failure_reason
     ml_encapsulate.assert_not_called()
     hqc_encapsulate.assert_not_called()

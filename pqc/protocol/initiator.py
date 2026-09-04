@@ -43,6 +43,7 @@ class ProcessedServerOffer:
     status: ServerOfferProcessingStatus
     signer: str
     profile: PQCProfile
+    authenticated_offer: SignedServerKeyOffer | None = field(default=None, repr=False)
     initiator_state: InitiatorKEMState | None = field(default=None, repr=False)
     public_encapsulation: EncapsulationResponse | None = field(default=None, repr=False)
     failure_reason: str | None = None
@@ -57,21 +58,31 @@ class ProcessedServerOffer:
             raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
 
         if self.status is ServerOfferProcessingStatus.AUTHENTICATED:
-            if not isinstance(self.initiator_state, InitiatorKEMState) or not isinstance(
-                self.public_encapsulation,
-                EncapsulationResponse,
+            if (
+                not isinstance(self.authenticated_offer, SignedServerKeyOffer)
+                or not isinstance(self.initiator_state, InitiatorKEMState)
+                or not isinstance(self.public_encapsulation, EncapsulationResponse)
             ):
-                raise ValueError("Authenticated processing must contain private and public KEM outputs.")
+                raise ValueError(
+                    "Authenticated processing must contain its exact offer and private/public KEM outputs."
+                )
             if self.failure_reason is not None:
                 raise ValueError("Authenticated processing must not contain a failure reason.")
             if (
-                self.initiator_state.profile is not self.profile
+                self.authenticated_offer.signer != self.signer
+                or self.authenticated_offer.offer.profile is not self.profile
+                or self.authenticated_offer.offer.session_id != self.initiator_state.session_id
+                or self.initiator_state.profile is not self.profile
                 or self.public_encapsulation.profile is not self.profile
                 or self.initiator_state.session_id != self.public_encapsulation.session_id
             ):
                 raise ValueError("Authenticated KEM outputs must preserve the same profile and session.")
         else:
-            if self.initiator_state is not None or self.public_encapsulation is not None:
+            if (
+                self.authenticated_offer is not None
+                or self.initiator_state is not None
+                or self.public_encapsulation is not None
+            ):
                 raise ValueError("Rejected processing must not contain KEM outputs.")
             if not isinstance(self.failure_reason, str) or not self.failure_reason.strip():
                 raise ValueError("Rejected processing must contain a failure reason.")
@@ -196,6 +207,7 @@ class ServerKeyOfferProcessor:
             status=ServerOfferProcessingStatus.AUTHENTICATED,
             signer=signed_offer.signer,
             profile=offer.profile,
+            authenticated_offer=signed_offer,
             initiator_state=initiator_state,
             public_encapsulation=public_encapsulation,
         )

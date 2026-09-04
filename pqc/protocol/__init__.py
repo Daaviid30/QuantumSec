@@ -1,4 +1,4 @@
-"""Identity, trust, and party models for PQC authentication."""
+"""Staged PQC handshake messages, trust processing, transcript, and key schedule."""
 
 from pqc.protocol.client_exchange import (
     ClientKeyExchangeFactory,
@@ -14,6 +14,11 @@ from pqc.protocol.initiator import (
     ServerKeyOfferProcessor,
     ServerOfferProcessingStatus,
 )
+from pqc.protocol.key_schedule import (
+    PQC_SESSION_KEY_LENGTH,
+    DerivedSessionKeyState,
+    PQCSessionKeyDeriver,
+)
 from pqc.protocol.messages import (
     ClientKeyExchange,
     EncapsulationResponse,
@@ -23,6 +28,7 @@ from pqc.protocol.messages import (
 )
 from pqc.protocol.party import PQCParty
 from pqc.protocol.server_offer import ResponderKEMState, ServerKeyOfferFactory
+from pqc.protocol.transcript import PQCHandshakeTranscript
 from pqc.protocol.trust import TrustedIdentityStore
 
 __all__ = [
@@ -30,10 +36,14 @@ __all__ = [
     "ClientKeyExchangeFactory",
     "ClientKeyExchangeProcessingStatus",
     "ClientKeyExchangeProcessor",
+    "DerivedSessionKeyState",
     "EncapsulationResponse",
     "InitiatorKEMState",
     "MLDSAIdentity",
     "PQCParty",
+    "PQCHandshakeTranscript",
+    "PQCSessionKeyDeriver",
+    "PQC_SESSION_KEY_LENGTH",
     "ProcessedClientKeyExchange",
     "ProcessedServerOffer",
     "PublicIdentity",

@@ -54,6 +54,7 @@ class ProcessedClientKeyExchange:
     status: ClientKeyExchangeProcessingStatus
     signer: str
     profile: PQCProfile
+    authenticated_exchange: SignedClientKeyExchange | None = field(default=None, repr=False)
     responder_state: ResponderSharedSecretState | None = field(default=None, repr=False)
     failure_reason: str | None = None
 
@@ -67,14 +68,24 @@ class ProcessedClientKeyExchange:
             raise TypeError(f"profile must be a PQCProfile. Got {type(self.profile).__name__}.")
 
         if self.status is ClientKeyExchangeProcessingStatus.AUTHENTICATED_AND_DECAPSULATED:
-            if not isinstance(self.responder_state, ResponderSharedSecretState):
-                raise ValueError("Successful processing must contain Bob's private shared-secret state.")
+            if not isinstance(self.authenticated_exchange, SignedClientKeyExchange) or not isinstance(
+                self.responder_state,
+                ResponderSharedSecretState,
+            ):
+                raise ValueError(
+                    "Successful processing must contain its exact exchange and Bob's private state."
+                )
             if self.failure_reason is not None:
                 raise ValueError("Successful processing must not contain a failure reason.")
-            if self.responder_state.profile is not self.profile:
+            if (
+                self.authenticated_exchange.signer != self.signer
+                or self.authenticated_exchange.exchange.profile is not self.profile
+                or self.authenticated_exchange.exchange.session_id != self.responder_state.session_id
+                or self.responder_state.profile is not self.profile
+            ):
                 raise ValueError("Successful processing must preserve the negotiated profile.")
         else:
-            if self.responder_state is not None:
+            if self.authenticated_exchange is not None or self.responder_state is not None:
                 raise ValueError("Rejected processing must not contain shared-secret state.")
             if not isinstance(self.failure_reason, str) or not self.failure_reason.strip():
                 raise ValueError("Rejected processing must contain a failure reason.")
@@ -124,6 +135,8 @@ class ClientKeyExchangeFactory:
 
         offer = signed_server_offer.offer
         response = processed_offer.public_encapsulation
+        if processed_offer.authenticated_offer != signed_server_offer:
+            raise ValueError("Processed Phase 3 result does not belong to this signed server offer.")
         if processed_offer.signer != signed_server_offer.signer:
             raise ValueError("Processed responder identity does not match the signed server offer.")
         if (
@@ -282,6 +295,7 @@ class ClientKeyExchangeProcessor:
             status=ClientKeyExchangeProcessingStatus.AUTHENTICATED_AND_DECAPSULATED,
             signer=signed_exchange.signer,
             profile=exchange.profile,
+            authenticated_exchange=signed_exchange,
             responder_state=shared_secret_state,
         )
 

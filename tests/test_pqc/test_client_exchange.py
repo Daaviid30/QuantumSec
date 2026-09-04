@@ -109,6 +109,7 @@ def test_valid_phase4_flow_recovers_matching_independent_kem_secrets(profile: PQ
     assert result.status is ClientKeyExchangeProcessingStatus.AUTHENTICATED_AND_DECAPSULATED
     assert result.failure_reason is None
     assert result.responder_state is not None
+    assert result.authenticated_exchange == flow.signed_exchange
     assert result.signer == "Alice"
     assert flow.responder_kem_state.is_closed
 
@@ -185,6 +186,7 @@ def test_untrusted_alice_is_rejected_before_decapsulation() -> None:
 
     assert result.status is ClientKeyExchangeProcessingStatus.UNTRUSTED_SIGNER
     assert result.responder_state is None
+    assert result.authenticated_exchange is None
     assert result.failure_reason is not None
     assert not flow.responder_kem_state.is_closed
     ml_decapsulate.assert_not_called()
