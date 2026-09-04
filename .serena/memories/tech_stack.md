@@ -2,7 +2,7 @@
 
 - Backend Python `>=3.14`; código y herramientas apuntan a Python 3.14.
 - Gestión reproducible con uv: `pyproject.toml` + `uv.lock` + entorno `.venv`.
-- Runtime Python: NumPy `>=2.5`, Matplotlib `>=3.11`, Rich `>=15`, SymPy `>=1.14`, tqdm `>=4.68.3`, FastAPI `>=0.115`, Pydantic `>=2.10`, Uvicorn `>=0.34`, liboqs-python (backend PQC).
+- Runtime Python: NumPy `>=2.5`, Matplotlib `>=3.11`, Rich `>=15`, SymPy `>=1.14`, tqdm `>=4.68.3`, FastAPI `>=0.115`, Pydantic `>=2.10`, Uvicorn `>=0.34`, liboqs-python (backend PQC), cryptography (HKDF/hashes).
 - Frontend: Node.js, React 19, TypeScript 5.8, Vite 6, Tailwind CSS 4, Lucide React, Recharts.
 - Qiskit es un extra opcional (`qiskit`); el código actual no lo importa.
 - Desarrollo Python: pytest `>=9.1.1`, Ruff `>=0.15.20`, Pyright `>=1.1.411`, httpx `>=0.28`.
