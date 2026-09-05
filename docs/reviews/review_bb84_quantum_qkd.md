@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulos `quantum` y `qkd` (BB84)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 1 de Septiembre de 2026  
 **Alcance**: Módulos `quantum/`, `qkd/`, integración con `core/rng.py` y suites de prueba asociadas (`tests/test_quantum/`, `tests/test_qkd/`).  
 **Rol**: Revisor de código independiente.  

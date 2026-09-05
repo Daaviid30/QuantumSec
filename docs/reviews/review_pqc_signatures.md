@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulo `pqc` (Firmas Digitales y Autenticación Post-Cuántica)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 1 de Septiembre de 2026  
 **Alcance**: Módulo `pqc/` (`backends/`, `signatures/`, `protocol/`), integración con `liboqs-python` y suite de pruebas `tests/test_pqc/`.  
 **Rol**: Revisor de código independiente.  

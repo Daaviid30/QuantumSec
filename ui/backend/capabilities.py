@@ -62,19 +62,19 @@ def get_capabilities() -> CapabilitiesResponse:
                 id="b92",
                 name="B92",
                 implemented=False,
-                description="Planned non-orthogonal-state protocol.",
+                description="Future non-orthogonal-state protocol; outside the current TFM scope.",
             ),
             ProtocolCapability(
                 id="e91",
                 name="E91",
                 implemented=False,
-                description="Planned entanglement-based protocol.",
+                description="Future entanglement-based protocol; outside the current TFM scope.",
             ),
             ProtocolCapability(
                 id="bbm92",
                 name="BBM92",
                 implemented=False,
-                description="Planned entanglement-based BB84 variant.",
+                description="Future entanglement-based BB84 variant; outside the current TFM scope.",
             ),
         ],
         channels=[
@@ -176,9 +176,12 @@ def get_capabilities() -> CapabilitiesResponse:
             ),
             FeatureCapability(
                 id="pqc_authentication",
-                name="PQC authentication",
+                name="PQC session integration",
                 implemented=False,
-                description="PQC authentication has not been connected to QKD sessions.",
+                description=(
+                    "The standalone PQC handshake exists, but it has no Web API and is not connected "
+                    "to QKD session orchestration."
+                ),
             ),
             FeatureCapability(
                 id="experiments",
@@ -190,7 +193,7 @@ def get_capabilities() -> CapabilitiesResponse:
                 id="qkdn",
                 name="QKD networks",
                 implemented=False,
-                description="QKDN topology and routing are planned.",
+                description="QKDN topology and routing are future work outside the current TFM scope.",
             ),
         ],
         limits={

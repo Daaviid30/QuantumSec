@@ -14,7 +14,7 @@ HQC_3_ALGORITHM: Final = "HQC-3"
 
 @cache
 def hqc_3_metadata() -> KEMMetadata:
-    """Retrieve and cache standardized HQC-3 (NIST Round 4) metadata validated against liboqs."""
+    """Retrieve HQC-3 metadata for the NIST Round 4 selection exposed by liboqs."""
 
     details = OQSKEMBackend().details(HQC_3_ALGORITHM)
     if details.name != HQC_3_ALGORITHM or details.claimed_nist_level != 3:

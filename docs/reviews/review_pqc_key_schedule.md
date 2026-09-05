@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulo `pqc` (Fase 5: Derivación de Claves de Sesión con KDF y Transcript Canónico)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 4 de Septiembre de 2026  
 **Alcance**: Módulo `pqc/kdf/` (`combiner.py`, `hkdf.py`), `pqc/_encoding.py`, `pqc/protocol/transcript.py`, `pqc/protocol/key_schedule.py`, `pqc/protocol/_shared_secret_state.py`, y suite de pruebas `tests/test_pqc/test_key_schedule.py`.  
 **Rol**: Revisor de código independiente.  

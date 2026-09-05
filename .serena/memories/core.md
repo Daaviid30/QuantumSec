@@ -1,18 +1,29 @@
 # QuantumSec
 
-- Framework de investigación y educación para simulaciones reproducibles de QKD y autenticación poscuántica; no es criptografía de producción.
-- Dependencias por capas: `ui (backend/frontend) -> experiments -> qkd/pqc -> quantum -> core -> librerías externas`. Nunca invertir esta dirección ni acoplar directamente `qkd` con `pqc`.
-- Invariantes transversales: RNG inyectado para QKD/física, CSPRNG de liboqs/SO para PQC, resultados reproducibles desde semilla/configuración, validación física explícita, inmutabilidad y pruebas de comportamiento analítico.
-- Guía para agentes y matriz de herramientas: `AGENTS.md`.
-- Infraestructura y límites de `core/`: `mem:infrastructure/core`.
-- Matemática cuántica general y sus convenciones: `mem:quantum/core`.
-- Dominio QKD, canales, BB84, filtrado, reconciliación y métricas: `mem:qkd/core`.
-- Dominio PQC, firmas ML-DSA-65, KEMs ML-KEM-768/HQC-3, KDF/HKDF, confirmación de claves y protocolo de handshake completo: `mem:pqc/core`.
-- Capa de interfaz de usuario y APIs Web: `mem:ui/core`.
-- Stack, versiones y herramientas: `mem:tech_stack`.
-- Comandos reproducibles para Windows/uv: `mem:suggested_commands`.
-- Estilo, validación, tipos y pruebas: `mem:conventions`.
-- Puertas de calidad obligatorias antes de terminar una tarea: `mem:task_completion`.
-- `pqc/` cubre las 6 fases del handshake completo: (1) ML-DSA-65 y confianza explícita, (2) oferta efímera de Bob firmada, (3) autenticación de Bob por Alice y encapsulamiento KEM, (4) respuesta firmada de Alice (`ClientKeyExchange` con `client_nonce` y `server_offer_hash` SHA-384) y desencapsulamiento en Bob, (5) transcript canónico autenticado (`PQCHandshakeTranscript`), combinación KEM y derivación de clave de sesión simétrica de 256 bits (`PQCSessionKeyDeriver`, `DerivedSessionKeyState`) mediante HKDF-SHA-384, y (6) confirmación mutua de claves mediante mensajes Finished encadenados con HMAC-SHA-384 (`PQCConfirmationKeyDeriver`, `PQCKeyConfirmation`, `ConfirmedPQCHandshake`, `EstablishedPQCSession`).
-- `docs/structure.md` es la fuente de verdad arquitectónica; `README.md` conserva parte de una visión objetivo antigua y puede mencionar directorios aún no implementados.
-- `graphify-out/` contiene el mapa de relaciones. Tras cambios arquitectónicos o de símbolos, actualizar Graphify con `graphify update .`.
+- Identidad del TFM: laboratorio modular y reproducible para diseñar, ejecutar, visualizar y
+  comparar establecimiento de sesiones quantum-safe mediante QKD, PQC y composición híbrida
+  QKD–PQC.
+- Estado actual: BB84 completo sobre canales lógicos; handshake PQC autónomo completo para
+  `LOW`/`HIGH`; Web UI funcional solo para BB84.
+- Trabajo TFM pendiente: orquestación híbrida, demo AES-256-GCM, contratos/ejecución de
+  experimentos, ampliación del laboratorio web y campaña experimental.
+- Fuera de alcance: protocolos QKD adicionales, QKDN, hardware, nuevas primitivas/pruebas formales,
+  agentes LLM y optimización de producción.
+- Dependencias actuales: `ui/frontend -> ui/backend -> qkd -> quantum -> core`; `pqc` es un
+  dominio hermano independiente. `qkd` y `pqc` nunca se importan mutuamente.
+- Arquitectura objetivo: `ui/experiments -> orchestration -> qkd,pqc,data_protection`. La
+  composición ocurre solo en una capa superior todavía no implementada.
+- RNG inyectado para QKD/física; CSPRNG de liboqs/SO para PQC. Reproducibilidad no significa forzar
+  claves o firmas criptográficas deterministas.
+- QKD asume canal clásico autenticado; el estimador BB84 es asintótico, no una prueba finite-key
+  componible; el tiempo NumPy no representa hardware QKD.
+- PQC actual: ML-KEM-768, ML-DSA-65 y HQC-3; `K_SESSION` y `K_CONFIRM` son 32 bytes y usan
+  dominios HKDF-SHA-384 separados; Finished usa HMAC-SHA-384.
+- `LOW` = PQC y `HIGH` = PQC diversificado. `HIGH` no es el futuro perfil híbrido QKD–PQC ni
+  un combiner multi-KEM estandarizado.
+- Fuentes de verdad: código/tests, `README.md`, `docs/structure.md` y `TFM_GOAL.md`.
+- Memorias de detalle: `mem:infrastructure/core`, `mem:quantum/core`, `mem:qkd/core`,
+  `mem:pqc/core`, `mem:ui/core`, `mem:tech_stack`, `mem:conventions`,
+  `mem:suggested_commands`, `mem:task_completion`.
+- Tras cambios de código: pruebas, Ruff, Pyright, frontend tests/typecheck/build y
+  `graphify update .`.

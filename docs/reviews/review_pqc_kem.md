@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulo `pqc` (KEM y Handshake PQC)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 2 de Septiembre de 2026  
 **Alcance**: Módulo `pqc/kem/` (`base.py`, `_oqs_provider.py`, `ml_kem.py`, `hqc.py`), `pqc/backends/oqs_kem_backend.py`, `pqc/profiles.py`, mensajes de protocolo (`pqc/protocol/messages.py`, `server_offer.py`) y suite de pruebas (`tests/test_pqc/test_kem/`, `test_profiles.py`, `test_server_offer.py`).  
 **Rol**: Revisor de código independiente.  

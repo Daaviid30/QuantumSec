@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulo `pqc` (Autenticación del Iniciador y Encapsulamiento KEM)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 3 de Septiembre de 2026  
 **Alcance**: Módulo `pqc/protocol/initiator.py`, integración con `pqc/protocol/messages.py`, `server_offer.py`, `party.py` y suite de pruebas `tests/test_pqc/test_initiator.py`.  
 **Rol**: Revisor de código independiente.  

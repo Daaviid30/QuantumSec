@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulo `pqc` (Fase 6: Confirmación de Claves, Mensajes Finished y Establecimiento de Sesión)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 4 de Septiembre de 2026  
 **Alcance**: Módulo `pqc/protocol/key_confirmation.py`, mensajes Finished (`pqc/protocol/messages.py`), actualizaciones en `key_schedule.py`, `transcript.py` y suite de pruebas `tests/test_pqc/test_key_confirmation.py`.  
 **Rol**: Revisor de código independiente.  

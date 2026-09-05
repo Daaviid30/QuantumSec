@@ -1,5 +1,8 @@
 # Informe de Revisión de Código Independiente: Módulo `pqc` (Intercambio de Clave del Cliente y Desencapsulamiento en el Servidor)
 
+> **Historical review snapshot.** Findings are dated and may have been resolved by later phases.
+> Use code/tests, README.md, docs/structure.md, and TFM_GOAL.md for current status.
+
 **Fecha**: 3 de Septiembre de 2026  
 **Alcance**: Módulo `pqc/protocol/client_exchange.py`, `pqc/protocol/messages.py` (`ClientKeyExchange`, `SignedClientKeyExchange`), métodos de desencapsulamiento en `pqc/protocol/server_offer.py`, y suite de pruebas `tests/test_pqc/test_client_exchange.py`.  
 **Rol**: Revisor de código independiente.  
