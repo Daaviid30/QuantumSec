@@ -83,6 +83,9 @@ export interface SimulationMetrics {
   n_sifted: number
   sifting_efficiency: number
   qber: number | null
+  qber_z: number | null
+  qber_x: number | null
+  qber_aggregated: number | null
 }
 
 export interface PostprocessingSummary {
@@ -90,6 +93,10 @@ export interface PostprocessingSummary {
   abort_reason: string | null
   n_disclosed: number
   estimated_qber: number | null
+  estimated_qber_z: number | null
+  estimated_qber_x: number | null
+  estimated_qber_aggregated: number | null
+  phase_error_bound: number | null
   n_candidate: number
   leak_ec: number
   corrected_errors: number

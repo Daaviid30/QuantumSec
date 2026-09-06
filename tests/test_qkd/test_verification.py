@@ -32,3 +32,12 @@ def test_verification_seed_and_tags_reproduce_with_equal_rng_state():
 
     assert_array_equal(first.public_seed, second.public_seed)
     assert_array_equal(first.alice_tag, second.alice_tag)
+
+
+def test_verification_default_tag_tracks_32_bits_of_public_leakage():
+    key = np.arange(64, dtype=np.uint8) % 2
+
+    result = verify_reconciled_keys(key, key, SeededRNG(23))
+
+    assert result.verified
+    assert result.tag_length == result.leakage == 32

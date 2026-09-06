@@ -166,8 +166,16 @@ def test_ideal_bb84_session_completes_full_postprocessing_pipeline():
 
     assert session.status is BB84SessionStatus.COMPLETED
     assert session.estimated_qber == 0.0
+    assert session.estimated_qber_z == 0.0
+    assert session.estimated_qber_x == 0.0
+    assert session.estimated_qber_aggregated == 0.0
+    assert session.phase_error_bound == 0.0
     assert session.diagnostic_full_sifted_qber == 0.0
+    assert session.diagnostic_qber_z == 0.0
+    assert session.diagnostic_qber_x == 0.0
+    assert session.diagnostic_qber_aggregated == 0.0
     assert session.verification is not None and session.verification.verified
+    assert session.verification_leakage == 32
     assert session.alice_final_key is not None and session.bob_final_key is not None
     assert_array_equal(session.alice_final_key, session.bob_final_key)
     assert 0 < session.n_final < session.n_raw
@@ -194,8 +202,8 @@ def test_complete_bb84_session_is_reproducible():
 
 
 def test_moderate_noise_runs_parameter_estimation_and_reconciliation_deterministically():
-    session = BB84Protocol(BitFlipChannel(0.04), SeededRNG(123)).run_session(512)
-    repeated = BB84Protocol(BitFlipChannel(0.04), SeededRNG(123)).run_session(512)
+    session = BB84Protocol(BitFlipChannel(0.04), SeededRNG(123)).run_session(4_000)
+    repeated = BB84Protocol(BitFlipChannel(0.04), SeededRNG(123)).run_session(4_000)
 
     assert session.parameter_estimation is not None
     assert session.reconciliation is not None
@@ -212,9 +220,31 @@ def test_excessive_sampled_qber_aborts_before_reconciliation():
 
     assert session.status is BB84SessionStatus.ABORTED
     assert session.estimated_qber is not None
-    assert session.estimated_qber > session.config.qber_abort_threshold
+    assert session.phase_error_bound is not None
+    assert session.phase_error_bound > session.config.phase_error_abort_threshold
     assert session.reconciliation is None
     assert session.privacy_amplification is None
+
+
+def test_symmetric_channel_can_complete_with_matching_per_basis_estimates():
+    session = BB84Protocol(DepolarizingChannel(0.04), SeededRNG(91)).run_session(4_000)
+
+    assert session.status is BB84SessionStatus.COMPLETED
+    assert session.estimated_qber_z is not None and session.estimated_qber_x is not None
+    assert abs(session.estimated_qber_z - session.estimated_qber_x) < 0.04
+    assert session.phase_error_bound == max(session.estimated_qber_z, session.estimated_qber_x)
+    assert session.n_final > 0
+
+
+def test_session_fails_closed_when_one_basis_has_no_estimation_sample():
+    qrng = QRNGSimulator(SeededRNG(18), bias_prob=1.0, correlation=0.4)
+    session = BB84Protocol(IdentityChannel(), qrng).run_session(64)
+
+    assert session.status is BB84SessionStatus.ABORTED
+    assert session.parameter_estimation is None
+    assert session.phase_error_bound is None
+    assert session.abort_reason is not None
+    assert "each BB84 basis" in session.abort_reason
 
 
 def test_non_positive_security_length_aborts_without_final_key():

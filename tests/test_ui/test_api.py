@@ -60,7 +60,14 @@ def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
     assert first_body["bob_outcome_counts"] == second_body["bob_outcome_counts"]
     assert first_body["transmissions"] == second_body["transmissions"]
     assert first_body["metrics"]["n_raw"] == 128
+    assert {"qber_z", "qber_x", "qber_aggregated"} <= first_body["metrics"].keys()
     assert first_body["postprocessing"]["n_disclosed"] > 0
+    assert {
+        "estimated_qber_z",
+        "estimated_qber_x",
+        "estimated_qber_aggregated",
+        "phase_error_bound",
+    } <= first_body["postprocessing"].keys()
     assert "n_final" in first_body["postprocessing"]
     assert first_body["channels"] == [
         {"type": "depolarizing", "name": "Depolarizing", "parameters": {"p": 0.12}}

@@ -128,7 +128,7 @@ This layer owns numerical state validation, pure/density-state conversion, linea
 information measures, projectors, and projective measurement. It knows nothing about Alice, Bob,
 BB84, QBER, authentication, KEMs, or session profiles.
 
-### 5.3 `qkd/` — CURRENT execution, PARTIAL security-decision path
+### 5.3 `qkd/` — CURRENT execution and asymptotic security-decision path
 
 Implemented flow:
 
@@ -137,8 +137,8 @@ BB84 preparation
     -> ordered logical-qubit CPTP channels
     -> Bob measurement
     -> basis sifting
-    -> sampled aggregate QBER and disclosure removal
-    -> aggregate-QBER threshold
+    -> basis-stratified Z/X QBER estimation and disclosure removal
+    -> explicit mixed-basis phase-error bound and threshold
     -> Cascade reconciliation
     -> universal-hash reconciled-key verification
     -> asymptotic secret-length estimate
@@ -149,21 +149,21 @@ BB84 preparation
 Implemented channels are Identity, Depolarizing, Bit Flip, Phase Flip, Pauli mixture, and Amplitude
 Damping. They are logical-qubit models. Amplitude damping is relaxation, not photon loss.
 
-The session exposes raw/sifted counts, sifting efficiency, diagnostic full-sifted aggregate QBER,
-sampled aggregate QBER, disclosed positions, candidate size, Cascade leakage/corrections,
-verification result/leakage, reconciled/final sizes, and final simulated material.
+The session exposes raw/sifted counts, sifting efficiency, estimated and diagnostic Z/X/aggregate
+QBER, the phase-error bound, disclosed positions and bases, candidate size, Cascade
+leakage/corrections, verification result/leakage, reconciled/final sizes, and final simulated
+material.
 
-The following security limitations are architectural blockers:
+The estimator no longer assumes basis symmetry. X observations bound phase errors for retained Z
+positions and Z observations bound phase errors for retained X positions. Because the current
+candidate mixes both subsets, `max(e_Z, e_X)` is their documented common upper bound. Aggregate
+QBER remains descriptive and sizes Cascade; it cannot authorize privacy amplification as a phase
+estimate. Missing per-basis data fails closed. `docs/SECURITY_MODEL.md` records the derivation.
 
-- `e_Z` and `e_X` are not calculated or exposed.
-- the QBER threshold and `asymptotic_bb84_secret_length()` use sampled aggregate QBER;
-- the estimator assumes symmetric phase error, but asymmetric supported channels can violate it;
-- no intercept-resend adversary exists;
-- the classical transcript is assumed authenticated, not authenticated by code.
-
-Consequently, `QKD-ASSUMED` is **PARTIAL** as a security profile even though the BB84 pipeline is
-executable. Correction requires a theoretically justified phase-error model or conservative abort
-outside the model's domain—not an undocumented `max(e_Z, e_X)` substitution.
+`QKD-ASSUMED` remains **PARTIAL** as a complete security profile because no intercept-resend
+adversary exists and the classical transcript is assumed authenticated rather than authenticated by
+code. Its implemented secret-length decision is explicitly asymptotic, not a composable finite-key
+proof.
 
 #### Verification is not authentication
 
@@ -282,16 +282,17 @@ The design must define which classical messages or canonical transcript are sign
 verification occurs. A decorative signature over a final summary is not equivalent to
 authenticating all security-relevant exchanges.
 
-## 8. Planned adversary and corrected estimator
+## 8. Planned adversary and current corrected estimator
 
 The intercept-resend component receives an interception fraction `f`. For intercepted signals Eve
 chooses a basis, measures, prepares the measured state, and resends it to Bob. Its trace records
 whether Eve acted and the relevant modeled event without leaking final secret material.
 
-Per-basis estimation must preserve enough basis/position information to expose `e_Z`, `e_X`, and
-aggregate QBER. The security policy must identify which observed quantity bounds phase error under
-the implemented BB84 model and what happens when no justified bound is available. The validation
-suite must cover analytical channel predictions and the `QBER ~= 0.25 f` ideal adversary case.
+Per-basis estimation preserves disclosed and candidate basis labels and exposes `e_Z`, `e_X`, and
+aggregate QBER. The current mixed-basis policy uses the larger per-basis estimate as a common
+asymptotic phase-error bound and aborts when that bound is unavailable. Deterministic tests cover
+the analytical predictions for all implemented channels. The `QBER ~= 0.25 f` ideal adversary case
+remains planned with intercept-resend.
 
 ## 9. Planned hybrid orchestration
 

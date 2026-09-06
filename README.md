@@ -23,8 +23,8 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | Area | Status | What exists |
 |---|---|---|
 | Core and quantum mathematics | **CURRENT** | Injected RNGs, immutable values, validation, linear algebra, information measures, and projective measurements |
-| BB84 execution | **CURRENT** | Seeded logical-qubit simulation, channel pipeline, sifting, sampled aggregate QBER, Cascade, reconciled-key verification, asymptotic length estimation, Toeplitz privacy amplification, and explicit aborts |
-| BB84 security estimator | **PARTIAL** | The current path uses aggregate sampled QBER under a symmetry assumption; it does not expose per-basis `e_Z/e_X` or protect asymmetric-channel scenarios |
+| BB84 execution | **CURRENT** | Seeded logical-qubit simulation, channel pipeline, sifting, basis-stratified parameter estimation, Cascade, reconciled-key verification, asymptotic length estimation, Toeplitz privacy amplification, and explicit aborts |
+| BB84 security estimator | **CURRENT, ASYMPTOTIC** | Per-basis `e_Z/e_X`, diagnostic aggregate QBER, an explicit mixed-basis phase-error bound, and conservative aborts; no composable finite-key claim |
 | QKD classical-channel authentication | **PARTIAL** | Authentication is assumed, not executed; the existing universal-hash verification is not channel authentication |
 | PQC establishment | **CURRENT** | Mutually authenticated `PQC-BASE`/`PQC-DIVERSE` handshakes using ML-KEM-768, optional HQC-3, ML-DSA-65, structured KEM input, HKDF-SHA-384, and bilateral Finished |
 | Intercept-resend Eve | **PLANNED** | Configurable experimental adversary with analytical `QBER ~= 0.25 f` validation |
@@ -103,8 +103,8 @@ prepare BB84 signals
     -> ordered logical-qubit channel pipeline
     -> Bob measurement
     -> basis sifting
-    -> sampled aggregate QBER and disclosure removal
-    -> threshold decision
+    -> basis-stratified Z/X QBER estimation and disclosure removal
+    -> explicit phase-error bound and threshold decision
     -> Cascade reconciliation
     -> universal-hash reconciled-key verification
     -> asymptotic secret-length estimate
@@ -115,10 +115,11 @@ prepare BB84 signals
 The implemented channels are Identity, Depolarizing, Bit Flip, Phase Flip, general Pauli mixture,
 and Amplitude Damping. Amplitude damping is qubit relaxation, not optical fiber loss.
 
-The existing verification tag checks agreement after reconciliation. It does not authenticate the
-classical BB84 transcript. The security-decision path is **PARTIAL** because aggregate QBER can hide
-basis asymmetry. Per-basis estimation and a justified phase-error policy are required before that
-path can be considered complete.
+The verification tag checks agreement after reconciliation. It does not authenticate the classical
+BB84 transcript. Aggregate QBER remains a diagnostic and Cascade bit-error estimate; it is never
+substituted automatically for phase error. The mixed-basis asymptotic policy uses the justified
+common bound `max(e_Z, e_X)` and fails closed without observations from both bases. See
+[`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md) for its assumptions and limitations.
 
 ## Current PQC path
 

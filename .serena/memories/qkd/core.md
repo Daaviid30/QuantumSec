@@ -10,14 +10,16 @@
   ejecuta postprocesado/abortos.
 - `postprocessing/sifting.py` conserva bases iguales; `metrics/qber.py` calcula discrepancias
   agregadas sobre claves alineadas no vacías.
-- Estado de seguridad PARTIAL: resultado y muestra exponen QBER agregado, no `e_Z`/`e_X`; la
-  decisión y longitud asintótica asumen simetría que PhaseFlip, Pauli o AmplitudeDamping pueden
-  violar.
-- La verificación universal tras Cascade comprueba igualdad de claves; no autentica el canal
-  clásico. Actualmente `QKD-ASSUMED` asume esa autenticación.
+- Parameter estimation muestrea de forma estratificada por Z/X, conserva bases reveladas y
+  candidatas, y expone QBER estimado y diagnóstico por base y agregado.
+- El candidato mezcla bits Z/X. La reducción BB84/CSS usa `e_X` para acotar fase en Z y `e_Z` para
+  acotar fase en X; `max(e_Z, e_X)` es la cota común conservadora que consume el estimador.
+  El agregado solo dimensiona Cascade y no sustituye la cota de fase.
+- La verificación universal tras Cascade usa por defecto un tag de 32 bits, comprueba igualdad de
+  claves y no autentica el canal clásico. Actualmente `QKD-ASSUMED` asume esa autenticación.
+- El estimador sigue siendo asintótico y no componible de clave finita; si falta una base, la cota
+  no es válida o la longitud no es positiva, la sesión aborta sin material final.
 - Eve intercept-resend y `QKD-CLASSICAL-AUTH`/`QKD-PQC-AUTH` están PLANNED.
-- La corrección debe usar una cota de error de fase teóricamente justificada o abortar fuera del
-  dominio válido; no adoptar `max(e_Z, e_X)` sin justificación.
 - Resultados y estados almacenados se copian/protegen; no exponer arrays internos mutables.
 - En canal ideal, BB84 debe dar QBER 0; la longitud filtrada es aleatoria y no se prueba como
   exactamente la mitad.

@@ -65,7 +65,7 @@ def verify_reconciled_keys(
     bob_key: npt.ArrayLike,
     rng: BaseRNG,
     *,
-    tag_length: int = 16,
+    tag_length: int = 32,
 ) -> VerificationResult:
     """Verify reconciled-key agreement using public Toeplitz-universal hash tags.
 

@@ -133,6 +133,9 @@ class SimulationMetrics(StrictModel):
     n_sifted: int
     sifting_efficiency: float
     qber: float | None
+    qber_z: float | None
+    qber_x: float | None
+    qber_aggregated: float | None
 
 
 class PostprocessingSummary(StrictModel):
@@ -142,6 +145,10 @@ class PostprocessingSummary(StrictModel):
     abort_reason: str | None
     n_disclosed: int
     estimated_qber: float | None
+    estimated_qber_z: float | None
+    estimated_qber_x: float | None
+    estimated_qber_aggregated: float | None
+    phase_error_bound: float | None
     n_candidate: int
     leak_ec: int
     corrected_errors: int

@@ -149,11 +149,11 @@ def _parity(key: npt.NDArray[np.uint8], indices: npt.NDArray[np.intp]) -> int:
     return int(np.bitwise_xor.reduce(key[indices], initial=np.uint8(0)))
 
 
-def _initial_block_size(n_bits: int, estimated_qber: float, config: CascadeConfig) -> int:
-    if estimated_qber == 0.0:
+def _initial_block_size(n_bits: int, bit_error_rate: float, config: CascadeConfig) -> int:
+    if bit_error_rate == 0.0:
         size = n_bits
     else:
-        size = max(1, int(round(config.initial_block_factor / estimated_qber)))
+        size = max(1, int(round(config.initial_block_factor / bit_error_rate)))
     if config.maximum_initial_block_size is not None:
         size = min(size, config.maximum_initial_block_size)
     return min(size, n_bits)
@@ -162,13 +162,15 @@ def _initial_block_size(n_bits: int, estimated_qber: float, config: CascadeConfi
 def reconcile_cascade(
     alice_key: npt.ArrayLike,
     bob_key: npt.ArrayLike,
-    estimated_qber: float,
+    bit_error_rate: float,
     rng: BaseRNG,
     *,
     config: CascadeConfig | None = None,
 ) -> ReconciliationResult:
     """Correct Bob through disclosed block parities, binary searches, and look-back.
 
+    ``bit_error_rate`` sizes Cascade's blocks. It is the sampled classical
+    disagreement rate, not a phase-error estimate for privacy amplification.
     No mismatch-position oracle is used by the reconciliation decisions. Exact
     residual mismatches are counted only after the public-protocol simulation as
     a diagnostic that cannot affect correction or verification.
@@ -177,20 +179,20 @@ def reconcile_cascade(
     alice, initial_bob = validate_aligned_keys(alice_key, bob_key)
     if not isinstance(rng, BaseRNG):
         raise TypeError(f"rng must implement BaseRNG. Got {type(rng).__name__}.")
-    if isinstance(estimated_qber, (bool, np.bool_)) or not isinstance(
-        estimated_qber, (float, int, np.floating, np.integer)
+    if isinstance(bit_error_rate, (bool, np.bool_)) or not isinstance(
+        bit_error_rate, (float, int, np.floating, np.integer)
     ):
-        raise ValueError(f"estimated_qber must be a finite probability. Got {estimated_qber!r}.")
-    qber = float(estimated_qber)
-    if not np.isfinite(qber) or not 0.0 <= qber <= 1.0:
-        raise ValueError(f"estimated_qber must lie in [0, 1]. Got {qber}.")
+        raise ValueError(f"bit_error_rate must be a finite probability. Got {bit_error_rate!r}.")
+    clean_bit_error_rate = float(bit_error_rate)
+    if not np.isfinite(clean_bit_error_rate) or not 0.0 <= clean_bit_error_rate <= 1.0:
+        raise ValueError(f"bit_error_rate must lie in [0, 1]. Got {clean_bit_error_rate}.")
     clean_config = CascadeConfig() if config is None else config
     if not isinstance(clean_config, CascadeConfig):
         raise TypeError(f"config must be a CascadeConfig. Got {type(clean_config).__name__}.")
 
     bob = np.array(initial_bob, dtype=np.uint8, copy=True)
     n_bits = int(alice.size)
-    first_block_size = _initial_block_size(n_bits, qber, clean_config)
+    first_block_size = _initial_block_size(n_bits, clean_bit_error_rate, clean_config)
     layouts: list[_PassLayout] = []
     statistics: list[CascadePassStatistics] = []
 

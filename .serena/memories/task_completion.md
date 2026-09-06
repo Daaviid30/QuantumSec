@@ -14,4 +14,4 @@
 7. Informar resultados exactos, incluidas pruebas omitidas o bloqueos; no declarar éxito basándose solo en una edición.
 8. No añadir dependencias obligatorias sin uso real; actualizar `pyproject.toml` y `uv.lock` (o `package.json` y `package-lock.json`) juntos cuando corresponda.
 
-Puertas de calidad verificadas tras la revisión de PQC Fase 6: 547 tests Python pasando, Ruff limpio, formato limpio y Pyright sin errores. La suite PQC suma 149 tests. La interfaz no cambió en esta fase; su última validación registrada mantiene 6 tests Vitest pasando.
+Puertas de calidad verificadas tras QKD Fase 1: 574 tests Python pasando, Ruff limpio, formato limpio y Pyright sin errores. La interfaz mantiene 6 tests Vitest pasando y TypeScript limpio; solo se amplió el contrato de resultados, sin UI nueva.

@@ -10,7 +10,8 @@ import numpy.typing as npt
 from core.rng import BaseRNG, random_basis, random_bit
 from qkd._validation import copy_binary_vector
 from qkd.channel.base import QuantumChannel
-from qkd.metrics.qber import qber as calculate_qber
+from qkd.metrics.qber import QBERByBasis
+from qkd.metrics.qber import qber_by_basis as calculate_qber_by_basis
 from qkd.metrics.security import asymptotic_bb84_secret_length
 from qkd.postprocessing.parameter_estimation import (
     ParameterEstimationResult,
@@ -155,6 +156,12 @@ class BB84Result:
         return self.sifting.bob_sifted_key
 
     @property
+    def sifted_bases(self) -> tuple[Basis, ...]:
+        """Return Alice's BB84 bases aligned with the sifted key."""
+
+        return tuple(self.alice_bases[int(index)] for index in self.matching_indices)
+
+    @property
     def n_raw(self) -> int:
         """Return the number of quantum signals sent by Alice."""
 
@@ -174,7 +181,7 @@ class BB84Result:
 
     @property
     def qber(self) -> float:
-        """Return simulator-diagnostic QBER over the complete sifted key.
+        """Return aggregate simulator-diagnostic QBER over the complete sifted key.
 
         This value is retained for backwards compatibility and inspection. A
         secure session never uses it for a protocol decision: ``run_session``
@@ -186,7 +193,29 @@ class BB84Result:
             If no positions survived sifting and QBER is therefore undefined.
         """
 
-        return calculate_qber(self.alice_sifted_key, self.bob_sifted_key)
+        return self.qber_by_basis.qber_aggregated
+
+    @property
+    def qber_by_basis(self) -> QBERByBasis:
+        """Return simulator-only Z, X, and aggregate full-sifted QBER."""
+
+        return calculate_qber_by_basis(
+            self.alice_sifted_key,
+            self.bob_sifted_key,
+            self.sifted_bases,
+        )
+
+    @property
+    def qber_z(self) -> float | None:
+        return self.qber_by_basis.qber_z
+
+    @property
+    def qber_x(self) -> float | None:
+        return self.qber_by_basis.qber_x
+
+    @property
+    def qber_aggregated(self) -> float:
+        return self.qber_by_basis.qber_aggregated
 
 
 class BB84SessionStatus(StrEnum):
@@ -200,15 +229,16 @@ class BB84SessionStatus(StrEnum):
 class BB84PostprocessingConfig:
     """Configuration for BB84 post-processing under assumed channel authentication.
 
-    The default 11% abort boundary is the familiar ideal/asymptotic BB84
-    threshold under this simulator's assumptions, not a universal practical
+    The legacy-named ``qber_abort_threshold`` is applied to the explicit common
+    phase-error bound. Its 11% default is the familiar ideal/asymptotic BB84
+    boundary under this simulator's assumptions, not a universal practical
     finite-key threshold.
     """
 
     sample_fraction: float = 0.2
     qber_abort_threshold: float = 0.11
     cascade: CascadeConfig = field(default_factory=CascadeConfig)
-    verification_tag_length: int = 16
+    verification_tag_length: int = 32
     security_margin_bits: int = 0
 
     def __post_init__(self) -> None:
@@ -237,6 +267,12 @@ class BB84PostprocessingConfig:
                 raise ValueError("security_margin_bits must be non-negative.")
             object.__setattr__(self, name, clean)
 
+    @property
+    def phase_error_abort_threshold(self) -> float:
+        """Return the phase-error threshold stored under the legacy QBER name."""
+
+        return self.qber_abort_threshold
+
 
 @dataclass(frozen=True, slots=True, eq=False)
 class BB84SessionResult:
@@ -259,8 +295,16 @@ class BB84SessionResult:
         if not isinstance(self.status, BB84SessionStatus):
             raise TypeError(f"status must be a BB84SessionStatus. Got {type(self.status).__name__}.")
         if self.status is BB84SessionStatus.COMPLETED:
-            if self.abort_reason is not None or self.privacy_amplification is None:
-                raise ValueError("A completed session requires privacy amplification and no abort reason.")
+            stages = (
+                self.parameter_estimation,
+                self.reconciliation,
+                self.verification,
+                self.privacy_amplification,
+            )
+            if self.abort_reason is not None or any(stage is None for stage in stages):
+                raise ValueError(
+                    "A completed session requires every post-processing stage and no abort reason."
+                )
         elif not self.abort_reason:
             raise ValueError("An aborted session requires a non-empty abort reason.")
 
@@ -274,9 +318,21 @@ class BB84SessionResult:
 
     @property
     def diagnostic_full_sifted_qber(self) -> float | None:
-        """Return full-key QBER as simulator-only information."""
+        """Return aggregate full-key QBER as a backwards-compatible alias."""
 
-        return self.raw.qber if self.raw.n_sifted > 0 else None
+        return self.diagnostic_qber_aggregated
+
+    @property
+    def diagnostic_qber_z(self) -> float | None:
+        return self.raw.qber_z if self.raw.n_sifted > 0 else None
+
+    @property
+    def diagnostic_qber_x(self) -> float | None:
+        return self.raw.qber_x if self.raw.n_sifted > 0 else None
+
+    @property
+    def diagnostic_qber_aggregated(self) -> float | None:
+        return self.raw.qber_aggregated if self.raw.n_sifted > 0 else None
 
     @property
     def n_disclosed(self) -> int:
@@ -284,7 +340,29 @@ class BB84SessionResult:
 
     @property
     def estimated_qber(self) -> float | None:
-        return self.parameter_estimation.estimated_qber if self.parameter_estimation is not None else None
+        """Return aggregate sampled QBER as a backwards-compatible alias."""
+
+        return self.estimated_qber_aggregated
+
+    @property
+    def estimated_qber_z(self) -> float | None:
+        return self.parameter_estimation.estimated_qber_z if self.parameter_estimation is not None else None
+
+    @property
+    def estimated_qber_x(self) -> float | None:
+        return self.parameter_estimation.estimated_qber_x if self.parameter_estimation is not None else None
+
+    @property
+    def estimated_qber_aggregated(self) -> float | None:
+        return (
+            self.parameter_estimation.estimated_qber_aggregated
+            if self.parameter_estimation is not None
+            else None
+        )
+
+    @property
+    def phase_error_bound(self) -> float | None:
+        return self.parameter_estimation.phase_error_bound if self.parameter_estimation is not None else None
 
     @property
     def n_candidate(self) -> int:
@@ -410,36 +488,64 @@ class BB84Protocol:
         if not isinstance(clean_config, BB84PostprocessingConfig):
             raise TypeError(f"config must be a BB84PostprocessingConfig. Got {type(clean_config).__name__}.")
         raw = self.run(n_signals)
-        if raw.n_sifted < 2:
+        if raw.n_sifted < 4:
             return BB84SessionResult(
                 raw=raw,
                 config=clean_config,
                 status=BB84SessionStatus.ABORTED,
-                abort_reason="Insufficient sifted material for parameter estimation.",
+                abort_reason="Insufficient sifted material for basis-aware parameter estimation.",
             )
-        planned_sample_size = int(np.ceil(raw.n_sifted * clean_config.sample_fraction))
-        if planned_sample_size >= raw.n_sifted:
-            return BB84SessionResult(
-                raw=raw,
-                config=clean_config,
-                status=BB84SessionStatus.ABORTED,
-                abort_reason="Parameter-estimation disclosure would leave no candidate material.",
-            )
-
-        estimation = estimate_qber_from_sample(
-            raw.alice_sifted_key,
-            raw.bob_sifted_key,
-            self.rng,
-            sample_fraction=clean_config.sample_fraction,
-        )
-        if estimation.estimated_qber > clean_config.qber_abort_threshold:
+        sifted_bases = raw.sifted_bases
+        basis_counts = {basis: sifted_bases.count(basis) for basis in (Basis.Z, Basis.X)}
+        if any(count < 2 for count in basis_counts.values()):
             return BB84SessionResult(
                 raw=raw,
                 config=clean_config,
                 status=BB84SessionStatus.ABORTED,
                 abort_reason=(
-                    f"Estimated QBER {estimation.estimated_qber:.6f} exceeds the configured "
-                    f"threshold {clean_config.qber_abort_threshold:.6f}."
+                    "Basis-aware parameter estimation requires at least two sifted positions "
+                    "from each BB84 basis."
+                ),
+            )
+        if any(
+            int(np.ceil(count * clean_config.sample_fraction)) >= count for count in basis_counts.values()
+        ):
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason="Parameter estimation would leave a BB84 basis without candidate material.",
+            )
+
+        estimation = estimate_qber_from_sample(
+            raw.alice_sifted_key,
+            raw.bob_sifted_key,
+            sifted_bases,
+            self.rng,
+            sample_fraction=clean_config.sample_fraction,
+        )
+        if estimation.phase_error_bound > 0.5:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason=(
+                    f"Phase-error bound {estimation.phase_error_bound:.6f} lies outside the "
+                    "asymptotic entropy estimator's domain [0, 0.5]."
+                ),
+                parameter_estimation=estimation,
+            )
+        if estimation.phase_error_bound > clean_config.phase_error_abort_threshold:
+            return BB84SessionResult(
+                raw=raw,
+                config=clean_config,
+                status=BB84SessionStatus.ABORTED,
+                abort_reason=(
+                    f"Per-basis errors Z={estimation.estimated_qber_z:.6f}, "
+                    f"X={estimation.estimated_qber_x:.6f} give phase-error bound "
+                    f"{estimation.phase_error_bound:.6f}, above the configured asymptotic "
+                    f"threshold {clean_config.phase_error_abort_threshold:.6f}; aggregate QBER "
+                    f"{estimation.estimated_qber_aggregated:.6f} is not the phase-error bound."
                 ),
                 parameter_estimation=estimation,
             )
@@ -455,7 +561,7 @@ class BB84Protocol:
         reconciliation = reconcile_cascade(
             estimation.alice_candidate_key,
             estimation.bob_candidate_key,
-            estimation.estimated_qber,
+            estimation.bit_error_rate,
             self.rng,
             config=clean_config.cascade,
         )
@@ -478,9 +584,9 @@ class BB84Protocol:
 
         target_length = asymptotic_bb84_secret_length(
             estimation.n_candidate,
-            estimation.estimated_qber,
-            reconciliation.leak_ec,
-            verification.leakage,
+            phase_error_bound=estimation.phase_error_bound,
+            reconciliation_leakage=reconciliation.leak_ec,
+            verification_leakage=verification.leakage,
             security_margin_bits=clean_config.security_margin_bits,
         )
         if target_length <= 0:

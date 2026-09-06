@@ -71,8 +71,8 @@ Original Spanish formulation:
   the structured combiner, HKDF, or key confirmation.
 - **H2:** Under the planned ideal intercept-resend model, induced QBER will be approximately
   proportional to `0.25 f`, where `f` is the intercepted fraction.
-- **H3:** Aggregated QBER is not a conservative phase-error estimate for every asymmetric channel
-  supported by QuantumSec.
+- **H3 (validated in the Phase 1 regression):** Aggregated QBER is not a conservative phase-error
+  estimate for every asymmetric channel supported by QuantumSec.
 - **H4:** The marginal computational cost of structured combination, HKDF, and confirmation will be
   small relative to the KEM and signature primitives composing the session.
 - **H5:** Executing authentication of the QKD classical channel will add measurable overhead while
@@ -91,8 +91,8 @@ quantum-safe session establishment using BB84, real PQC primitives, and explicit
 1. Validate BB84 against analytical channel predictions using aggregated and per-basis QBER.
 2. Implement and evaluate an explicit intercept-resend adversary with a configurable interception
    fraction.
-3. Replace the current symmetric-error assumption with a theoretically justified phase-error
-   model or fail conservatively outside its domain of validity.
+3. Maintain the implemented basis-aware asymptotic phase-error model and fail conservatively
+   outside its declared domain of validity.
 4. Execute at least one real authentication mechanism for the QKD classical transcript and expose
    its trust and key-consumption assumptions.
 5. Evaluate the implemented mutually authenticated PQC handshakes under stable public profile
@@ -144,15 +144,20 @@ authenticated, the identity or pre-shared-key provisioning model, key separation
 generation and verification, failure behavior, and authentication-material consumption where
 applicable. A Toeplitz hash alone is not a Wegman–Carter MAC.
 
-### QBER and secret-length limitation
+### QBER and secret-length model
 
-The current BB84 result exposes aggregated QBER only. Parameter estimation and
-`asymptotic_bb84_secret_length()` use the sampled aggregate under a symmetric phase-error
-assumption. Supported asymmetric channels can violate that assumption—for example, phase flip can
-produce approximately `e_Z = 0`, `e_X = p`, while the aggregate is near `p/2`. The current
-secret-length/security-decision path is therefore **PARTIAL** until it exposes `e_Z` and `e_X` and
-uses a theoretically justified phase-error estimate, or explicitly aborts outside the justified
-model. `max(e_Z, e_X)` must not be adopted without that justification.
+The BB84 result and backend expose estimated and simulator-diagnostic `e_Z`, `e_X`, and aggregate
+QBER separately. Parameter estimation samples within each basis and removes every disclosed bit.
+The candidate key still mixes retained Z and X positions. Under the implemented asymptotic BB84/CSS
+model, X bit errors bound phase errors for the Z subset and Z bit errors bound phase errors for the
+X subset. Therefore `max(e_Z, e_X)` is a justified common upper bound for the mixed candidate, not a
+symmetry assumption. The aggregate is used only as the bit-error estimate for Cascade.
+
+The secret-length estimator consumes the explicit phase-error bound and measured public leakage.
+The session aborts when either basis lacks sufficient data, the common bound exceeds the configured
+asymptotic threshold, or the resulting secret length is non-positive. This remains an asymptotic
+point-estimate model, not a composable finite-key proof. The full boundary is documented in
+`docs/SECURITY_MODEL.md`.
 
 ### Adversary boundary
 

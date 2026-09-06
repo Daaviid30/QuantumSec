@@ -129,7 +129,7 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
             )
         )
 
-    qber = result.qber if result.n_sifted > 0 else None
+    diagnostic_qber = result.qber_by_basis if result.n_sifted > 0 else None
     summaries = [_channel_summary(configuration) for configuration in request.channels]
 
     return BB84SimulationResponse(
@@ -146,13 +146,20 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
             n_raw=result.n_raw,
             n_sifted=result.n_sifted,
             sifting_efficiency=result.sifting_efficiency,
-            qber=qber,
+            qber=(diagnostic_qber.qber_aggregated if diagnostic_qber is not None else None),
+            qber_z=(diagnostic_qber.qber_z if diagnostic_qber is not None else None),
+            qber_x=(diagnostic_qber.qber_x if diagnostic_qber is not None else None),
+            qber_aggregated=(diagnostic_qber.qber_aggregated if diagnostic_qber is not None else None),
         ),
         postprocessing=PostprocessingSummary(
             status=session.status.value,
             abort_reason=session.abort_reason,
             n_disclosed=session.n_disclosed,
             estimated_qber=session.estimated_qber,
+            estimated_qber_z=session.estimated_qber_z,
+            estimated_qber_x=session.estimated_qber_x,
+            estimated_qber_aggregated=session.estimated_qber_aggregated,
+            phase_error_bound=session.phase_error_bound,
             n_candidate=session.n_candidate,
             leak_ec=session.leak_ec,
             corrected_errors=(

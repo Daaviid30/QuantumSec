@@ -36,26 +36,26 @@ Exit condition: E3 can generate QBER and abort-probability curves against the an
 
 ### 2. Per-basis QBER and validation fixtures
 
-- [ ] Preserve basis labels through parameter-estimation sampling.
-- [ ] Add `e_Z`, `e_X`, sample sizes by basis, and aggregate QBER to immutable domain results.
-- [ ] Define behavior when a basis has insufficient or zero disclosed observations.
-- [ ] Expose the new metrics through the backend without changing their meaning.
-- [ ] Add deterministic tests for Identity, Depolarizing, Bit Flip, Phase Flip, Pauli, and Amplitude
+- [x] Preserve basis labels through parameter-estimation sampling.
+- [x] Add `e_Z`, `e_X`, sample sizes by basis, and aggregate QBER to immutable domain results.
+- [x] Define behavior when a basis has insufficient or zero disclosed observations.
+- [x] Expose the new metrics through the backend without changing their meaning.
+- [x] Add deterministic tests for Identity, Depolarizing, Bit Flip, Phase Flip, Pauli, and Amplitude
   Damping predictions.
-- [ ] Reproduce and record the asymmetric Phase Flip discrepancy as a validation fixture.
+- [x] Reproduce and record the asymmetric Phase Flip discrepancy as a validation fixture.
 
 Exit condition: E2 can observe the quantity that the security model requires instead of only an
 aggregate.
 
 ### 3. Correct the BB84 security-decision model
 
-- [ ] Identify and cite the phase-error relation for the exact implemented BB84 sampling/model.
-- [ ] Specify which per-basis observation or justified bound feeds abort and secret-length logic.
-- [ ] Fail conservatively when observations cannot support the bound or the channel/configuration
+- [x] Identify and cite the phase-error relation for the exact implemented BB84 sampling/model.
+- [x] Specify which per-basis observation or justified bound feeds abort and secret-length logic.
+- [x] Fail conservatively when observations cannot support the bound or the channel/configuration
   is outside the model's declared validity.
-- [ ] Do not substitute `max(e_Z, e_X)` without a theoretical argument.
-- [ ] Add regression tests proving that the former asymmetric over-extraction cannot recur.
-- [ ] Revalidate E2 fixtures after the correction and document before/cause/after.
+- [x] Do not substitute `max(e_Z, e_X)` without a theoretical argument.
+- [x] Add regression tests proving that the former asymmetric over-extraction cannot recur.
+- [x] Revalidate E2 fixtures after the correction and document before/cause/after.
 
 Exit condition: Definition of Done item 2 is satisfied and `QKD-ASSUMED` is no longer partial for
 the estimator reason.

@@ -33,27 +33,33 @@ def binary_entropy(p: float) -> float:
 
 
 def asymptotic_bb84_secret_length(
-    n_candidate: int,
-    estimated_qber: float,
-    leak_ec: int,
-    leak_verification: int,
+    candidate_length: int,
     *,
+    phase_error_bound: float,
+    reconciliation_leakage: int,
+    verification_leakage: int,
     security_margin_bits: int = 0,
 ) -> int:
-    """Estimate extractable bits under the simulator's asymptotic BB84 model.
+    """Estimate extractable bits from an explicit asymptotic phase-error bound.
 
-    The current implementation uses sampled aggregate QBER as a phase-error
-    estimate and is valid only under its symmetric-error assumption. Supported
-    asymmetric channels can violate that assumption, so callers must not treat
-    this function as a general BB84 bound. Actual simulated reconciliation
-    leakage replaces an ideal ``n*h2(Q)`` term and is therefore subtracted
-    exactly once. This is not a composable finite-key proof.
+    The modeled length is ``floor(n * (1 - h2(e_phase)) - leak_ec -
+    leak_verification - margin)``. Actual simulated reconciliation leakage
+    replaces an ideal bit-error entropy term and is subtracted exactly once.
+    ``phase_error_bound`` must be justified by the calling protocol; aggregate
+    QBER is not automatically such a bound. This is not a composable finite-key
+    proof.
     """
 
-    n = _non_negative_int(n_candidate, name="n_candidate")
-    qber = _probability(estimated_qber, name="estimated_qber")
-    reconciliation_leakage = _non_negative_int(leak_ec, name="leak_ec")
-    verification_leakage = _non_negative_int(leak_verification, name="leak_verification")
+    n = _non_negative_int(candidate_length, name="candidate_length")
+    phase_error = _probability(phase_error_bound, name="phase_error_bound")
+    if phase_error > 0.5:
+        raise ValueError(
+            f"phase_error_bound must lie in [0, 0.5] for the asymptotic entropy model. Got {phase_error}."
+        )
+    reconciliation = _non_negative_int(reconciliation_leakage, name="reconciliation_leakage")
+    verification = _non_negative_int(verification_leakage, name="verification_leakage")
     margin = _non_negative_int(security_margin_bits, name="security_margin_bits")
-    length = floor(n * (1.0 - binary_entropy(qber)) - reconciliation_leakage - verification_leakage - margin)
-    return max(0, min(n, length))
+    length = floor(n * (1.0 - binary_entropy(phase_error)) - reconciliation - verification - margin)
+    if length <= 0:
+        return 0
+    return length
