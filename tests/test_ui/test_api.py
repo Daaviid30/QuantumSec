@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from ui.backend.main import app
@@ -20,6 +21,7 @@ def test_capabilities_expose_real_and_planned_features_distinctly():
     body = response.json()
     protocols = {protocol["id"]: protocol for protocol in body["protocols"]}
     channels = {channel["id"]: channel for channel in body["channels"]}
+    adversaries = {adversary["id"]: adversary for adversary in body["adversaries"]}
     features = {feature["id"]: feature for feature in body["features"]}
 
     assert protocols["bb84"]["implemented"] is True
@@ -32,11 +34,14 @@ def test_capabilities_expose_real_and_planned_features_distinctly():
         "amplitude_damping",
         "pauli",
     }
+    assert set(adversaries) == {"intercept_resend"}
+    assert adversaries["intercept_resend"]["implemented"] is True
     assert features["sifting"]["implemented"] is True
     assert features["parameter_estimation"]["implemented"] is True
     assert features["reconciliation"]["implemented"] is True
     assert features["verification"]["implemented"] is True
     assert features["privacy_amplification"]["implemented"] is True
+    assert features["intercept_resend"]["implemented"] is True
 
 
 def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
@@ -70,8 +75,14 @@ def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
     } <= first_body["postprocessing"].keys()
     assert "n_final" in first_body["postprocessing"]
     assert first_body["channels"] == [
-        {"type": "depolarizing", "name": "Depolarizing", "parameters": {"p": 0.12}}
+        {
+            "stage_kind": "channel",
+            "type": "depolarizing",
+            "name": "Depolarizing",
+            "parameters": {"p": 0.12},
+        }
     ]
+    assert first_body["attack_diagnostics"] == []
 
 
 def test_completed_bb84_response_exposes_the_exact_final_simulator_key():
@@ -123,6 +134,21 @@ def test_channel_probability_validation_rejects_invalid_values():
     assert response.status_code == 422
 
 
+@pytest.mark.parametrize("intercept_fraction", [-0.01, 1.01])
+def test_intercept_resend_configuration_rejects_invalid_fraction(intercept_fraction):
+    response = client.post(
+        "/api/simulations/bb84",
+        json={
+            "protocol": "bb84",
+            "n_signals": 16,
+            "seed": 4,
+            "channels": [{"type": "intercept_resend", "intercept_fraction": intercept_fraction}],
+        },
+    )
+
+    assert response.status_code == 422
+
+
 def test_pauli_configuration_rejects_probability_sum_above_one():
     response = client.post(
         "/api/simulations/bb84",
@@ -153,3 +179,71 @@ def test_channel_pipeline_order_is_preserved_in_response():
 
     assert response.status_code == 200
     assert [channel["type"] for channel in response.json()["channels"]] == ["bit_flip", "phase_flip"]
+
+
+def test_intercept_resend_api_is_seeded_and_exposes_isolated_diagnostics():
+    payload = {
+        "protocol": "bb84",
+        "n_signals": 512,
+        "seed": 823,
+        "channels": [{"type": "intercept_resend", "intercept_fraction": 0.6}],
+    }
+
+    first = client.post("/api/simulations/bb84", json=payload)
+    second = client.post("/api/simulations/bb84", json=payload)
+
+    assert first.status_code == second.status_code == 200
+    first_body = first.json()
+    second_body = second.json()
+    assert first_body["metrics"] == second_body["metrics"]
+    assert first_body["postprocessing"] == second_body["postprocessing"]
+    assert first_body["transmissions"] == second_body["transmissions"]
+    assert first_body["attack_diagnostics"] == second_body["attack_diagnostics"]
+    assert first_body["channels"] == [
+        {
+            "stage_kind": "adversary",
+            "type": "intercept_resend",
+            "name": "Eve: intercept-resend",
+            "parameters": {"intercept_fraction": 0.6},
+        }
+    ]
+    diagnostics = first_body["attack_diagnostics"][0]
+    assert diagnostics["stage_index"] == 0
+    assert diagnostics["attack_type"] == "intercept_resend"
+    assert diagnostics["intercept_fraction"] == 0.6
+    assert diagnostics["n_signals_seen"] == 512
+    assert 0 < diagnostics["n_intercepted"] < 512
+    assert (
+        diagnostics["eve_z_measurements"] + diagnostics["eve_x_measurements"] == diagnostics["n_intercepted"]
+    )
+    assert diagnostics["eve_zero_outcomes"] + diagnostics["eve_one_outcomes"] == diagnostics["n_intercepted"]
+
+
+def test_attack_and_noise_order_is_preserved_in_response_and_diagnostics():
+    response = client.post(
+        "/api/simulations/bb84",
+        json={
+            "protocol": "bb84",
+            "n_signals": 64,
+            "seed": 19,
+            "channels": [
+                {"type": "depolarizing", "p": 0.08},
+                {"type": "intercept_resend", "intercept_fraction": 0.4},
+                {"type": "phase_flip", "p": 0.05},
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert [stage["type"] for stage in body["channels"]] == [
+        "depolarizing",
+        "intercept_resend",
+        "phase_flip",
+    ]
+    assert [stage["stage_kind"] for stage in body["channels"]] == [
+        "channel",
+        "adversary",
+        "channel",
+    ]
+    assert body["attack_diagnostics"][0]["stage_index"] == 1

@@ -134,7 +134,7 @@ Implemented flow:
 
 ```text
 BB84 preparation
-    -> ordered logical-qubit CPTP channels
+    -> ordered logical-qubit channel/adversary stages
     -> Bob measurement
     -> basis sifting
     -> basis-stratified Z/X QBER estimation and disclosure removal
@@ -146,8 +146,10 @@ BB84 preparation
     -> final material or explicit abort
 ```
 
-Implemented channels are Identity, Depolarizing, Bit Flip, Phase Flip, Pauli mixture, and Amplitude
-Damping. They are logical-qubit models. Amplitude damping is relaxation, not photon loss.
+Implemented physical channels are Identity, Depolarizing, Bit Flip, Phase Flip, Pauli mixture, and
+Amplitude Damping. `qkd/channel/attacks/` contains the seeded Intercept-Resend stage. Both satisfy
+the same `QuantumChannel` contract and compose in one ordered `ChannelPipeline`. They are
+logical-qubit models. Amplitude damping is relaxation, not photon loss.
 
 The session exposes raw/sifted counts, sifting efficiency, estimated and diagnostic Z/X/aggregate
 QBER, the phase-error bound, disclosed positions and bases, candidate size, Cascade
@@ -160,10 +162,10 @@ candidate mixes both subsets, `max(e_Z, e_X)` is their documented common upper b
 QBER remains descriptive and sizes Cascade; it cannot authorize privacy amplification as a phase
 estimate. Missing per-basis data fails closed. `docs/SECURITY_MODEL.md` records the derivation.
 
-`QKD-ASSUMED` remains **PARTIAL** as a complete security profile because no intercept-resend
-adversary exists and the classical transcript is assumed authenticated rather than authenticated by
-code. Its implemented secret-length decision is explicitly asymptotic, not a composable finite-key
-proof.
+`QKD-ASSUMED` remains **PARTIAL** as a complete security profile because the classical transcript
+is assumed authenticated rather than authenticated by code. Its implemented secret-length decision
+is explicitly asymptotic, not a composable finite-key proof. Intercept-resend is executable but is
+only one bounded adversary model.
 
 #### Verification is not authentication
 
@@ -227,12 +229,14 @@ GET  /api/capabilities
 POST /api/simulations/bb84
 ```
 
-The current request supports `n_signals`, a seed, and up to 12 ordered implemented channels.
-Responses adapt real domain results and contain a UUID, software duration, outcome, summary,
-post-processing details, distributions, and a bounded raw-transmission sample.
+The current request supports `n_signals`, a seed, and up to 12 ordered physical or adversarial
+stages. Responses adapt real domain results and contain a UUID, software duration, ordered stage
+metadata, bounded attack diagnostics, outcome, post-processing details, distributions, and a
+bounded raw-transmission sample.
 
-There are no PQC, QKD-authentication, Eve, hybrid, experiment, compare, or AES-GCM routes. The
-frontend provides a BB84 builder and result workspace only.
+There are no PQC, QKD-authentication, hybrid, experiment, compare, or AES-GCM routes. Eve is
+available through the existing BB84 simulation route, but this phase adds no Eve UI. The frontend
+provides a BB84 builder and result workspace only.
 
 ### 5.6 `benchmarks/` — CURRENT, not the experiment engine
 
@@ -282,17 +286,20 @@ The design must define which classical messages or canonical transcript are sign
 verification occurs. A decorative signature over a final summary is not equivalent to
 authenticating all security-relevant exchanges.
 
-## 8. Planned adversary and current corrected estimator
+## 8. Current intercept-resend adversary and corrected estimator
 
 The intercept-resend component receives an interception fraction `f`. For intercepted signals Eve
-chooses a basis, measures, prepares the measured state, and resends it to Bob. Its trace records
-whether Eve acted and the relevant modeled event without leaking final secret material.
+chooses Z/X uniformly, measures the input density matrix, prepares the state implied by her own
+outcome, and resends it to Bob. It is a stochastic `QuantumChannel` with an injected RNG and no
+access to Alice/Bob protocol context. The API records its ordered stage metadata and aggregate
+counts without serializing per-signal Eve events or secret material.
 
 Per-basis estimation preserves disclosed and candidate basis labels and exposes `e_Z`, `e_X`, and
 aggregate QBER. The current mixed-basis policy uses the larger per-basis estimate as a common
 asymptotic phase-error bound and aborts when that bound is unavailable. Deterministic tests cover
-the analytical predictions for all implemented channels. The `QBER ~= 0.25 f` ideal adversary case
-remains planned with intercept-resend.
+the analytical predictions for all implemented channels. Seeded tests now validate the ideal
+`QBER ~= 0.25 f` adversary baseline and symmetric Z/X disturbance. The multi-seed E3 experiment
+campaign remains planned.
 
 ## 9. Planned hybrid orchestration
 

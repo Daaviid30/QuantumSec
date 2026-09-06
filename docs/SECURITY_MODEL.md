@@ -21,6 +21,33 @@ The protocol transcript exposes:
 Only estimated values available from public disclosure affect protocol decisions. Full-sifted
 diagnostics are never used to authorize secret extraction.
 
+## Intercept-resend threat model
+
+QuantumSec implements one explicit adversary model: seeded intercept-resend on logical BB84
+qubits. It is an ordered `QuantumChannel` stage, not a branch inside `BB84Protocol`. For each
+signal, Eve independently intercepts with configured probability `f`. If she intercepts, she
+chooses Z or X uniformly, measures the received density matrix, prepares a fresh BB84 state from
+her own basis and outcome, and resends that state. She receives neither Alice's bit/basis nor Bob's
+future basis.
+
+In an otherwise ideal BB84 run, a sifted bit is disturbed only when Eve intercepts, chooses the
+opposite basis (probability `1/2`), and Bob obtains the opposite bit after measuring in Alice's
+basis (probability `1/2`). Therefore
+
+```text
+expected induced QBER = f * 1/2 * 1/2 = f/4
+```
+
+The simulator never inserts this formula into a run. Errors emerge from preparation, Eve's sampled
+measurement and resend, Bob's sampled measurement, and sifting. The same existing per-basis
+parameter estimation and phase-error policy decides whether to abort. Eve diagnostics are
+external observations and are not passed into any security decision.
+
+The stage shares the run's injected `BaseRNG`, so equal configuration and seed reproduce the full
+run. At `f=0` it returns an independent copy without consuming randomness; at `f=1` it avoids an
+unnecessary interception-decision draw. It can be placed before or after physical channel stages,
+and `ChannelPipeline` preserves that configured order.
+
 ## Phase-error relation
 
 The implemented asymptotic model follows the BB84/CSS separation of bit and phase errors described
@@ -97,6 +124,11 @@ rates.
 - There is no optical loss model, vacuum outcome, detector dark counts, decoy states, multi-photon
   source model, or photon-number-splitting analysis.
 - Amplitude damping is logical-qubit relaxation, not fiber loss.
+- Intercept-resend is one pedagogical individual attack, not a general QKD adversary. It does not
+  model optimal individual, collective, coherent, entangling-probe, photon-number-splitting,
+  detector-blinding, source, or other implementation attacks.
+- Eve acts on one logical qubit at a time; there is no optical hardware, loss, multi-photon source,
+  quantum memory, side channel, or classical man-in-the-middle model.
 - The simulator makes no physical secret-key-rate, distance, throughput, or hardware-latency claim.
 
 ## Reference

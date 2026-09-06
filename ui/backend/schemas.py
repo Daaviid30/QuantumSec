@@ -43,6 +43,14 @@ class ChannelCapability(StrictModel):
     parameters: list[ParameterCapability]
 
 
+class AdversaryCapability(StrictModel):
+    id: str
+    name: str
+    implemented: bool
+    description: str
+    parameters: list[ParameterCapability]
+
+
 class FeatureCapability(StrictModel):
     id: str
     name: str
@@ -54,6 +62,7 @@ class CapabilitiesResponse(StrictModel):
     version: str
     protocols: list[ProtocolCapability]
     channels: list[ChannelCapability]
+    adversaries: list[AdversaryCapability]
     features: list[FeatureCapability]
     limits: dict[str, int]
 
@@ -95,13 +104,19 @@ class PauliChannelConfiguration(StrictModel):
         return self
 
 
+class InterceptResendConfiguration(StrictModel):
+    type: Literal["intercept_resend"]
+    intercept_fraction: float = Field(ge=0.0, le=1.0)
+
+
 ChannelConfiguration = Annotated[
     IdentityChannelConfiguration
     | DepolarizingChannelConfiguration
     | BitFlipChannelConfiguration
     | PhaseFlipChannelConfiguration
     | AmplitudeDampingChannelConfiguration
-    | PauliChannelConfiguration,
+    | PauliChannelConfiguration
+    | InterceptResendConfiguration,
     Field(discriminator="type"),
 ]
 
@@ -114,9 +129,22 @@ class BB84SimulationRequest(StrictModel):
 
 
 class ChannelSummary(StrictModel):
+    stage_kind: Literal["channel", "adversary"]
     type: str
     name: str
     parameters: dict[str, float]
+
+
+class AttackDiagnosticsSummary(StrictModel):
+    stage_index: int
+    attack_type: Literal["intercept_resend"]
+    intercept_fraction: float
+    n_signals_seen: int
+    n_intercepted: int
+    eve_z_measurements: int
+    eve_x_measurements: int
+    eve_zero_outcomes: int
+    eve_one_outcomes: int
 
 
 class SimulationMetadata(StrictModel):
@@ -184,6 +212,7 @@ class TransmissionRecord(StrictModel):
 class BB84SimulationResponse(StrictModel):
     metadata: SimulationMetadata
     channels: list[ChannelSummary]
+    attack_diagnostics: list[AttackDiagnosticsSummary]
     metrics: SimulationMetrics
     postprocessing: PostprocessingSummary
     alice_basis_counts: BasisCounts

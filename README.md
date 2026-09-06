@@ -27,7 +27,7 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | BB84 security estimator | **CURRENT, ASYMPTOTIC** | Per-basis `e_Z/e_X`, diagnostic aggregate QBER, an explicit mixed-basis phase-error bound, and conservative aborts; no composable finite-key claim |
 | QKD classical-channel authentication | **PARTIAL** | Authentication is assumed, not executed; the existing universal-hash verification is not channel authentication |
 | PQC establishment | **CURRENT** | Mutually authenticated `PQC-BASE`/`PQC-DIVERSE` handshakes using ML-KEM-768, optional HQC-3, ML-DSA-65, structured KEM input, HKDF-SHA-384, and bilateral Finished |
-| Intercept-resend Eve | **PLANNED** | Configurable experimental adversary with analytical `QBER ~= 0.25 f` validation |
+| Intercept-resend Eve | **CURRENT** | Seeded, configurable adversary stage with diagnostics and analytical `QBER ~= 0.25 f` validation |
 | Hybrid QKD–PQC | **PLANNED** | Upper-layer composition with provenance, canonical encoding, and explicit authentication policy |
 | AES-256-GCM data protection | **PLANNED** | Functional protected-payload closure from the established 256-bit `K_SESSION` |
 | Experiment engine | **PLANNED** | Versioned config/run/record/export contracts and E1–E5 campaign |
@@ -100,7 +100,7 @@ and HKDF context. Renaming the presentation does not alter derived keys or wire 
 
 ```text
 prepare BB84 signals
-    -> ordered logical-qubit channel pipeline
+    -> ordered logical-qubit channel/adversary pipeline
     -> Bob measurement
     -> basis sifting
     -> basis-stratified Z/X QBER estimation and disclosure removal
@@ -113,7 +113,8 @@ prepare BB84 signals
 ```
 
 The implemented channels are Identity, Depolarizing, Bit Flip, Phase Flip, general Pauli mixture,
-and Amplitude Damping. Amplitude damping is qubit relaxation, not optical fiber loss.
+and Amplitude Damping. The same pipeline also accepts the seeded Intercept-Resend adversary at any
+configured position. Amplitude damping is qubit relaxation, not optical fiber loss.
 
 The verification tag checks agreement after reconciliation. It does not authenticate the classical
 BB84 transcript. Aggregate QBER remains a diagnostic and Cascade bit-error estimate; it is never

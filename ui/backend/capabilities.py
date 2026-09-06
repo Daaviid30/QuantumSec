@@ -3,6 +3,7 @@
 from importlib.metadata import PackageNotFoundError, version
 
 from ui.backend.schemas import (
+    AdversaryCapability,
     CapabilitiesResponse,
     ChannelCapability,
     FeatureCapability,
@@ -126,6 +127,26 @@ def get_capabilities() -> CapabilitiesResponse:
                 ],
             ),
         ],
+        adversaries=[
+            AdversaryCapability(
+                id="intercept_resend",
+                name="Eve: intercept-resend",
+                implemented=True,
+                description=(
+                    "Eve independently intercepts a configured fraction of qubits, measures each "
+                    "in a uniformly random Z/X basis, and resends the state implied by her outcome."
+                ),
+                parameters=[
+                    _probability(
+                        "intercept_fraction",
+                        "Intercept fraction",
+                        "f",
+                        1.0,
+                        "Independent probability that Eve intercepts each signal",
+                    )
+                ],
+            )
+        ],
         features=[
             FeatureCapability(
                 id="seeded_rng",
@@ -147,20 +168,28 @@ def get_capabilities() -> CapabilitiesResponse:
             ),
             FeatureCapability(
                 id="qber",
-                name="Aggregate QBER",
+                name="Per-basis QBER",
                 implemented=True,
                 description=(
-                    "Diagnostic error fraction over complete sifted material; per-basis e_Z/e_X "
-                    "are not implemented yet."
+                    "Diagnostic error fractions e_Z, e_X, and their aggregate over complete sifted material."
                 ),
             ),
             FeatureCapability(
                 id="parameter_estimation",
-                name="Aggregate parameter estimation",
+                name="Stratified parameter estimation",
                 implemented=True,
                 description=(
-                    "Seeded sampling estimates aggregate QBER and removes every disclosed "
-                    "position; the current security estimator assumes basis symmetry."
+                    "Seeded per-basis sampling estimates e_Z and e_X and removes every disclosed "
+                    "position before reconciliation."
+                ),
+            ),
+            FeatureCapability(
+                id="intercept_resend",
+                name="Intercept-resend adversary",
+                implemented=True,
+                description=(
+                    "A seeded stochastic pipeline stage models Eve without exposing Alice's or "
+                    "Bob's private protocol choices."
                 ),
             ),
             FeatureCapability(

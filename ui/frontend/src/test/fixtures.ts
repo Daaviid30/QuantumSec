@@ -26,6 +26,26 @@ export const capabilitiesFixture: CapabilitiesResponse = {
       ],
     },
   ],
+  adversaries: [
+    {
+      id: 'intercept_resend',
+      name: 'Eve: intercept-resend',
+      implemented: true,
+      description: 'Seeded adversary stage',
+      parameters: [
+        {
+          key: 'intercept_fraction',
+          label: 'Intercept fraction',
+          symbol: 'f',
+          minimum: 0,
+          maximum: 1,
+          step: 0.01,
+          default: 1,
+          description: 'Interception probability',
+        },
+      ],
+    },
+  ],
   features: [],
   limits: { max_signals: 100_000, max_channels: 12, inspector_records: 64 },
 }
@@ -40,6 +60,7 @@ export const resultFixture: BB84SimulationResponse = {
     inspector_truncated: false,
   },
   channels: [],
+  attack_diagnostics: [],
   metrics: {
     n_raw: 64,
     n_sifted: 32,

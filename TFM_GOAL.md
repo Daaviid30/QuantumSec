@@ -69,8 +69,9 @@ Original Spanish formulation:
 
 - **H1:** `PQC-DIVERSE` overhead relative to `PQC-BASE` will be dominated by HQC-3 rather than by
   the structured combiner, HKDF, or key confirmation.
-- **H2:** Under the planned ideal intercept-resend model, induced QBER will be approximately
-  proportional to `0.25 f`, where `f` is the intercepted fraction.
+- **H2:** Under the implemented ideal intercept-resend model, induced QBER will be approximately
+  proportional to `0.25 f`, where `f` is the intercepted fraction. Deterministic implementation
+  tests validate this baseline; E3 will evaluate it across repeated experiment records.
 - **H3 (validated in the Phase 1 regression):** Aggregated QBER is not a conservative phase-error
   estimate for every asymmetric channel supported by QuantumSec.
 - **H4:** The marginal computational cost of structured combination, HKDF, and confirmation will be
@@ -161,10 +162,12 @@ point-estimate model, not a composable finite-key proof. The full boundary is do
 
 ### Adversary boundary
 
-Intercept-resend Eve is **PLANNED**. Eve will intercept a fraction `f`, choose a basis, measure,
-prepare, and resend. Under the ideal assumptions used by the experiment, the expected induced QBER
-is approximately `0.25 f`. This is one concrete experimental model for validating a central BB84
-property, not a complete QKD adversary model.
+Intercept-resend Eve is **CURRENT** as a seeded `ChannelPipeline` stage. Eve intercepts a fraction
+`f`, chooses Z/X uniformly, measures, prepares a fresh state from her own outcome, and resends it
+without receiving Alice's or Bob's private choices. Under the ideal assumptions used by the
+experiment, the expected induced QBER is approximately `0.25 f`. This is one concrete experimental
+model for validating a central BB84 property, not a complete QKD adversary model. The E3 campaign
+runner and statistical result set remain planned.
 
 ### PQC and hybrid boundary
 

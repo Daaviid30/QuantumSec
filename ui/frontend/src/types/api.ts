@@ -30,6 +30,8 @@ export interface ChannelCapability {
   parameters: ParameterCapability[]
 }
 
+export type AdversaryCapability = ChannelCapability
+
 export interface FeatureCapability {
   id: string
   name: string
@@ -41,6 +43,7 @@ export interface CapabilitiesResponse {
   version: string
   protocols: ProtocolCapability[]
   channels: ChannelCapability[]
+  adversaries: AdversaryCapability[]
   features: FeatureCapability[]
   limits: Record<string, number>
 }
@@ -64,6 +67,7 @@ export interface BB84SimulationRequest {
 }
 
 export interface ChannelSummary {
+  stage_kind: 'channel' | 'adversary'
   type: string
   name: string
   parameters: Record<string, number>
@@ -86,6 +90,18 @@ export interface SimulationMetrics {
   qber_z: number | null
   qber_x: number | null
   qber_aggregated: number | null
+}
+
+export interface AttackDiagnosticsSummary {
+  stage_index: number
+  attack_type: 'intercept_resend'
+  intercept_fraction: number
+  n_signals_seen: number
+  n_intercepted: number
+  eve_z_measurements: number
+  eve_x_measurements: number
+  eve_zero_outcomes: number
+  eve_one_outcomes: number
 }
 
 export interface PostprocessingSummary {
@@ -132,6 +148,7 @@ export interface TransmissionRecord {
 export interface BB84SimulationResponse {
   metadata: SimulationMetadata
   channels: ChannelSummary[]
+  attack_diagnostics: AttackDiagnosticsSummary[]
   metrics: SimulationMetrics
   postprocessing: PostprocessingSummary
   alice_basis_counts: BasisCounts

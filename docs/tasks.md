@@ -15,22 +15,22 @@ behavior from an earlier unfinished phase.
 - [x] ML-DSA-65 identities/trust, authenticated transcript, structured KEM input,
   HKDF-SHA-384, separate `K_SESSION`/`K_CONFIRM`, and bilateral Finished.
 - [x] Current BB84 FastAPI adapter and React workspace.
+- [x] Seeded Intercept-Resend stage, ordered pipeline configuration, and bounded diagnostics.
 
-The existing QKD session is **PARTIAL** as a security profile: it assumes classical-channel
-authentication and its aggregate-QBER estimator is not valid for every supported asymmetric
-channel.
+The existing QKD session is **PARTIAL** as a security profile because it assumes classical-channel
+authentication. Its basis-aware estimator handles the currently supported asymmetric channels.
 
 ## Exact implementation order
 
 ### 1. Intercept-resend Eve
 
-- [ ] Implement Eve above or within the QKD channel boundary without coupling `qkd` to `pqc`.
-- [ ] Inject all Eve basis choices, interception decisions, measurements, and resends through
+- [x] Implement Eve above or within the QKD channel boundary without coupling `qkd` to `pqc`.
+- [x] Inject all Eve basis choices, interception decisions, measurements, and resends through
   `BaseRNG`.
-- [ ] Support an interception fraction `f` and explicit disabled/`f=0` behavior.
-- [ ] Trace Eve without exposing secret material.
-- [ ] Validate `QBER ~= 0.25 f` under the stated ideal model across seeded repetitions.
-- [ ] Expose Eve configuration and results through the BB84 API only after the domain path exists.
+- [x] Support an interception fraction `f` and explicit disabled/`f=0` behavior.
+- [x] Expose ordered Eve stage metadata and bounded diagnostics without secret material.
+- [x] Validate `QBER ~= 0.25 f` under the stated ideal model with deterministic statistical tests.
+- [x] Expose Eve configuration and results through the BB84 API only after the domain path exists.
 
 Exit condition: E3 can generate QBER and abort-probability curves against the analytical baseline.
 

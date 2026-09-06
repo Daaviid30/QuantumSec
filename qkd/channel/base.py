@@ -10,7 +10,11 @@ from quantum.types import ArrayLike, ComplexArray
 
 
 class QuantumChannel(ABC):
-    """Interface for deterministic channels acting on density matrices."""
+    """Interface for composable channel stages acting on density matrices.
+
+    A stage may be deterministic or may own an explicitly injected random
+    source. The call contract intentionally exposes no Alice/Bob protocol data.
+    """
 
     @abstractmethod
     def apply(

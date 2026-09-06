@@ -8,13 +8,14 @@ from uuid import uuid4
 import numpy as np
 import numpy.typing as npt
 
-from core.rng import SeededRNG
+from core.rng import BaseRNG, SeededRNG
 from qkd.channel import (
     AmplitudeDampingChannel,
     BitFlipChannel,
     ChannelPipeline,
     DepolarizingChannel,
     IdentityChannel,
+    InterceptResendAttack,
     PauliChannel,
     PhaseFlipChannel,
     QuantumChannel,
@@ -24,6 +25,7 @@ from qkd.protocols import BB84Protocol
 from ui.backend.capabilities import INSPECTOR_LIMIT
 from ui.backend.schemas import (
     AmplitudeDampingChannelConfiguration,
+    AttackDiagnosticsSummary,
     BasisCounts,
     BB84SimulationRequest,
     BB84SimulationResponse,
@@ -32,6 +34,7 @@ from ui.backend.schemas import (
     ChannelSummary,
     DepolarizingChannelConfiguration,
     IdentityChannelConfiguration,
+    InterceptResendConfiguration,
     OutcomeCounts,
     PauliChannelConfiguration,
     PhaseFlipChannelConfiguration,
@@ -52,7 +55,7 @@ def _bb84_basis_value(basis: Basis) -> Literal["Z", "X"]:
     raise ValueError(f"BB84 returned an unsupported basis: {basis.value}")
 
 
-def build_channel(configuration: ChannelConfiguration) -> QuantumChannel:
+def build_channel(configuration: ChannelConfiguration, *, rng: BaseRNG) -> QuantumChannel:
     """Map one validated API channel configuration to the public channel API."""
 
     match configuration:
@@ -68,6 +71,8 @@ def build_channel(configuration: ChannelConfiguration) -> QuantumChannel:
             return AmplitudeDampingChannel(gamma=gamma)
         case PauliChannelConfiguration(px=px, py=py, pz=pz):
             return PauliChannel(px=px, py=py, pz=pz)
+        case InterceptResendConfiguration(intercept_fraction=intercept_fraction):
+            return InterceptResendAttack(intercept_fraction=intercept_fraction, rng=rng)
 
     raise TypeError(f"Unsupported channel configuration: {type(configuration).__name__}")
 
@@ -80,10 +85,16 @@ def _channel_summary(configuration: ChannelConfiguration) -> ChannelSummary:
         "phase_flip": "Phase flip",
         "amplitude_damping": "Amplitude damping",
         "pauli": "Pauli mixture",
+        "intercept_resend": "Eve: intercept-resend",
     }
     data = configuration.model_dump()
     channel_type = str(data.pop("type"))
-    return ChannelSummary(type=channel_type, name=names[channel_type], parameters=data)
+    return ChannelSummary(
+        stage_kind="adversary" if channel_type == "intercept_resend" else "channel",
+        type=channel_type,
+        name=names[channel_type],
+        parameters=data,
+    )
 
 
 def _final_key_string(session_key: npt.NDArray[np.uint8] | None) -> str | None:
@@ -97,9 +108,9 @@ def _final_key_string(session_key: npt.NDArray[np.uint8] | None) -> str | None:
 def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     """Execute BB84 with the engine's seeded RNG and adapt its immutable result."""
 
-    channels = tuple(build_channel(configuration) for configuration in request.channels)
-    pipeline = ChannelPipeline(channels)
     rng = SeededRNG(request.seed)
+    channels = tuple(build_channel(configuration, rng=rng) for configuration in request.channels)
+    pipeline = ChannelPipeline(channels)
 
     started = perf_counter()
     session = BB84Protocol(channel=pipeline, rng=rng).run_session(request.n_signals)
@@ -131,6 +142,23 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
 
     diagnostic_qber = result.qber_by_basis if result.n_sifted > 0 else None
     summaries = [_channel_summary(configuration) for configuration in request.channels]
+    attack_diagnostics: list[AttackDiagnosticsSummary] = []
+    for stage_index, channel in enumerate(channels):
+        if isinstance(channel, InterceptResendAttack):
+            diagnostics = channel.diagnostics
+            attack_diagnostics.append(
+                AttackDiagnosticsSummary(
+                    stage_index=stage_index,
+                    attack_type=diagnostics.attack_type,
+                    intercept_fraction=diagnostics.intercept_fraction,
+                    n_signals_seen=diagnostics.n_signals_seen,
+                    n_intercepted=diagnostics.n_intercepted,
+                    eve_z_measurements=diagnostics.eve_z_measurements,
+                    eve_x_measurements=diagnostics.eve_x_measurements,
+                    eve_zero_outcomes=diagnostics.eve_zero_outcomes,
+                    eve_one_outcomes=diagnostics.eve_one_outcomes,
+                )
+            )
 
     return BB84SimulationResponse(
         metadata=SimulationMetadata(
@@ -142,6 +170,7 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
             inspector_truncated=result.n_raw > INSPECTOR_LIMIT,
         ),
         channels=summaries,
+        attack_diagnostics=attack_diagnostics,
         metrics=SimulationMetrics(
             n_raw=result.n_raw,
             n_sifted=result.n_sifted,
