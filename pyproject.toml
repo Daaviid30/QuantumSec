@@ -1,7 +1,7 @@
 [project]
 name = "quantumsec"
 version = "0.1.0"
-description = "Reproducible laboratory for QKD, PQC, and hybrid quantum-safe session establishment"
+description = "Experimental laboratory for the cost and security assumptions of quantum-safe sessions"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

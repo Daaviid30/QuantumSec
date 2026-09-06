@@ -1,65 +1,58 @@
-# QuantumSec Web Laboratory
+# QuantumSec Web Laboratory V1
 
-The Web UI is the presentation and interaction layer of the QuantumSec experimental laboratory.
-Its current release is a functional BB84 workspace; PQC, hybrid, experiment-comparison, and
-protected-message workspaces are TFM targets and are not exposed as implemented features.
+The web application is the interface to the QuantumSec experimental laboratory. It is not the
+scientific contribution by itself and it does not implement cryptographic or quantum logic.
 
-## Status summary
+The current release is a working BB84 configuration/results workspace. The definitive V1 target is
+limited to **Builder**, **Run**, and **Compare**. There is no separate Quantum-Safe Explorer.
 
-| Module | Status |
+## Status
+
+| Capability | Status |
 |---|---|
-| BB84 Session Builder | CURRENT |
-| Ordered logical-qubit channel editor | CURRENT |
-| BB84 flow and results visualization | CURRENT |
-| Raw transmission inspector | CURRENT |
-| PQC handshake builder/visualizer | PLANNED |
-| Hybrid profile builder/visualizer | PLANNED |
-| Experiment runs and comparison | PLANNED |
-| AES-256-GCM Protected Message Demo | PLANNED |
-| Sourced Quantum-Safe Explorer | OPTIONAL TFM / FUTURE |
+| BB84 signal/seed/channel builder | **CURRENT** |
+| BB84 execution, abort/result, charts, and raw inspector | **CURRENT** |
+| Per-basis `e_Z/e_X` and corrected estimator | **PLANNED** |
+| Eve interception fraction and adversary timeline | **PLANNED** |
+| `QKD-ASSUMED` explicit authentication state | **PLANNED UI**; underlying assumption is current |
+| Executed QKD classical/PQC authentication | **PLANNED** |
+| `PQC-BASE`/`PQC-DIVERSE` domain handshakes | **CURRENT domain**, **PLANNED UI/API** |
+| `HYBRID`/`HYBRID-DIVERSE` | **PLANNED** |
+| Experiment records and two-run comparison | **PLANNED** |
+| AES-256-GCM protected-message strip | **PLANNED** |
 
 ## Architecture
 
 ```text
-React / TypeScript frontend
+React / TypeScript
     -> JSON / HTTP
-FastAPI schemas, routes, capabilities, and adapters
-    -> current direct adapter
-BB84Protocol + ChannelPipeline + SeededRNG
-    ->
-qkd -> quantum -> core
+FastAPI capabilities, schemas, routes, adapters
+    -> current direct BB84 adapter
+    -> planned orchestration / experiment services
+        -> qkd
+        -> pqc
+        -> data protection
 ```
 
-The UI does not implement measurement, channel, RNG, sifting, QBER, KEM, signature, KDF, or
-encryption logic. Planned QKD–PQC composition belongs in an upper session-orchestration layer that
-the backend will call; it must not be recreated in React or hidden inside route handlers.
+The frontend renders backend-reported capabilities, traces, metrics, assumptions, and outcomes. It
+does not calculate QBER, simulate Eve, sign transcripts, combine secrets, derive keys, or encrypt
+payloads. Controls remain disabled until the corresponding backend capability is executable.
 
-## Current BB84 workspace
+## Current application
 
-The current interface supports:
+The BB84 request supports:
 
-- BB84 with `n_signals` from 1 to 100,000;
-- a reproducible integer seed from 0 to 2^32−1;
+- `n_signals` from 1 to 100,000;
+- an integer seed from 0 to 2^32−1;
 - up to 12 ordered Identity, Depolarizing, Bit Flip, Phase Flip, Pauli, or Amplitude Damping
-  channels;
-- real engine execution and explicit `completed`/`aborted` outcomes;
-- raw/sifted counts, sifting efficiency, and diagnostic full-sifted QBER;
-- sampled parameter estimation, candidate size, Cascade corrections/leakage, universal-hash
-  verification/leakage, asymptotic extraction size, compression ratio, and final secret fraction;
-- basis and measurement distributions;
-- raw-to-final key-material shrinkage and educational inspection of a completed simulated key;
-- the first 64 transmission positions from the actual domain result;
-- capability discovery that disables unsupported protocols.
+  channels; and
+- real engine execution through `BB84Protocol`.
 
-The current request does not expose the post-processing configuration: sample fraction, QBER abort
-threshold, Cascade configuration, verification tag length, and security margin use domain defaults.
-Amplitude damping is presented as qubit relaxation, not photon loss. Adapter-measured duration is
-software simulation time and must not be labeled physical QKD latency or secret-key rate.
+The response contains a request UUID, seed, software duration, channel/config snapshot, terminal
+status, aggregate QBER, stage sizes, post-processing details, distributions, and at most 64 raw
+transmission records. Post-processing parameters currently use domain defaults.
 
-The displayed final key is simulator output for research/education. It is not application traffic
-protection, and the classical QKD transcript is assumed authenticated.
-
-## Current API
+Current routes:
 
 ```text
 GET  /api/health
@@ -67,81 +60,139 @@ GET  /api/capabilities
 POST /api/simulations/bb84
 ```
 
-The BB84 request uses a discriminated channel union. Pydantic rejects unknown fields, invalid
-probabilities, and Pauli configurations where `px + py + pz > 1`. Responses are JSON-safe DTOs;
-NumPy arrays do not cross the HTTP boundary.
+There are no API routes for per-basis QBER, Eve, executed QKD authentication, PQC sessions, hybrid
+sessions, experiments, comparison, or AES-256-GCM.
 
-There are currently no HTTP routes for PQC handshakes, QKD–PQC hybrid sessions, experiment runs,
-comparison, or AES-256-GCM payload protection.
+The displayed final BB84 material is simulated research output, not an application encryption key.
+The existing reconciled-key verification tag is not authentication of the classical channel.
 
-## Target TFM modules
+## Screen 1 — Builder
 
-### Session Builder
+Builder configures one run using a backend-reported profile.
 
-The builder will select a backend-reported security profile and expose only implemented parameters.
-The target profile vocabulary is QKD Experimental, PQC (`LOW`), PQC Diversified (`HIGH`), Hybrid
-QKD–PQC, and Hybrid Diversified. A profile remains disabled until its orchestration path exists.
+Target profile selector:
 
-Current QKD inputs that can be reused are BB84, raw signal count, seed, ordered channel model, and
-implemented noise parameters. Future PQC controls must reflect the exact supported variants:
-ML-KEM-768, ML-DSA-65, optional HQC-3 through `HIGH`, HKDF-SHA-384, and the implemented profile
-contract. The UI must not offer arbitrary algorithms the backend cannot execute.
+| Public profile | UI composition | Status |
+|---|---|---|
+| `QKD-ASSUMED` | BB84; classical authentication assumed | **PARTIAL** |
+| `QKD-CLASSICAL-AUTH` | BB84 plus executed classical/ITS authentication | **PLANNED** |
+| `QKD-PQC-AUTH` | BB84 plus ML-DSA-65 transcript authentication | **PLANNED** |
+| `PQC-BASE` | ML-KEM-768 + ML-DSA-65 | **CURRENT domain**, **PLANNED UI/API** |
+| `PQC-DIVERSE` | ML-KEM-768 + HQC-3 + ML-DSA-65 | **CURRENT domain**, **PLANNED UI/API** |
+| `HYBRID` | BB84 + ML-KEM-768 + explicit authentication policy | **PLANNED** |
+| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 + explicit authentication policy | **PLANNED** |
 
-### Protocol / Handshake Visualizer
+The UI never exposes internal `LOW/HIGH` names. The backend may preserve
+`PQCProfile.LOW/PQCProfile.HIGH` in existing transcripts and HKDF contexts.
 
-The visualizer will render ordered events emitted by real runs.
+QKD controls:
 
-For BB84: preparation, channel application, measurement, sifting, sampled QBER, reconciliation,
-verification, privacy amplification, and completion/abort.
+- signal count;
+- seed;
+- ordered channel and valid channel parameters; and
+- Eve interception fraction once the adversary exists.
 
-For PQC: identity/trust, ephemeral key generation, signed `ServerKeyOffer`, verification,
-encapsulation, signed `ClientKeyExchange`, verification, decapsulation, transcript construction,
-canonical secret input, HKDF, `Finished_B`, `Finished_A`, and session establishment.
+PQC algorithms are derived from the selected profile. Builder must not offer an arbitrary algorithm
+picker that can generate unsupported combinations.
 
-For hybrid profiles, the QKD and PQC branches may converge only when the hybrid orchestration and
-combiner exist. The visualizer will not invent messages or imply that QKD alone authenticated the
-classical channel.
+### Contextual cards
 
-### Results / Metrics
+Cards are small, contextual, static/versioned, dated, sourced, and shown only when relevant. They
+answer what the component is, its role, its security assumption, what it adds to the profile, and
+its normative status.
 
-The results workspace will evolve from the current BB84 output to a versioned run record containing
-only available measurements: status/abort, profile, phase/total software timings, byte counts,
-algorithm dimensions, derived-key length, component provenance, QKD stage sizes and QBER, seed,
-backend versions, and configuration snapshot. Comparison will operate on two or more stored run
-records instead of rerunning logic inside chart components.
-
-Secrets, private keys, KEM shared secrets, `K_SESSION`, and `K_CONFIRM` are not metrics and must not
-be logged or serialized in experiment records.
-
-### Protected Message Demo
-
-After an established session exists, this workspace will show:
+Examples:
 
 ```text
-KEY-ESTABLISHMENT PLANE
-QKD / PQC / hybrid -> confirmed 256-bit K_SESSION
+ML-KEM-768
+KEM · key establishment
+FIPS 203 · STANDARDIZED
 
-DATA-PROTECTION PLANE
-plaintext -> AES-256-GCM -> nonce + ciphertext + tag
-          -> Bob authenticated decrypt -> plaintext or tamper failure
+ML-DSA-65
+Signature · authentication
+FIPS 204 · STANDARDIZED
+
+HQC-3
+Code-based KEM · diversification
+liboqs 0.16.0 name
+SELECTED FOR STANDARDIZATION
+
+BB84
+QKD · quantum key distribution
+Requires an authenticated classical channel
 ```
 
-Nonce generation/reuse controls and optional AAD binding to session/profile/transcript metadata
-belong in backend domain code, not frontend JavaScript.
+Every standards claim includes a source and status-as-of date. As of 2026-09-05, HQC is selected
+for standardization and is not presented as a published NIST standard.
 
-### Quantum-Safe Explorer
+## Screen 2 — Run
 
-If included, the explorer will consume a structured, versioned catalog for BB84, QKD, ML-KEM,
-ML-DSA, HQC, HKDF-SHA-384, AES-256-GCM, hybrid establishment, and combiners. Every standards claim
-must include a source and “status as of” date. As of 2026-09-05, ML-KEM and ML-DSA are standardized
-in NIST FIPS 203/204; HQC is selected for standardization, not described as a final FIPS standard.
+Run visualizes events emitted by the actual execution:
+
+- Alice/Bob timeline and quantum transmission;
+- Eve interception/measurement/resend when enabled;
+- sifting, per-basis/aggregate QBER, security decision, and final material for QKD;
+- authentication mechanism, coverage, verification, and failure;
+- KEM generation/encapsulation/decapsulation for applicable profiles;
+- structured combination, HKDF, Finished, and session outcome; and
+- a protected-message strip when an established `K_SESSION` exists.
+
+For `QKD-ASSUMED`, the screen displays:
+
+```text
+CLASSICAL AUTHENTICATION
+ASSUMED — NOT EXECUTED
+```
+
+Executed profiles display the real mechanism and authenticated transcript/messages. A final
+decorative signature must not be visualized as full transcript authentication.
+
+Only profile-appropriate metrics appear. The QKD/PQC measurement-category rule is centralized in
+[`../TFM_GOAL.md §12`](../TFM_GOAL.md#12-experimental-methodology).
+
+## Screen 3 — Compare
+
+Compare accepts exactly two saved run records. It shows:
+
+- configuration differences;
+- components and provenance;
+- authentication and security assumptions;
+- compatible metrics and byte layers;
+- PQC timing distributions when both sides support a valid timing comparison;
+- QKD per-basis QBER, key-material, and abort metrics when applicable;
+- terminal outcomes; and
+- security notes and limitations.
+
+`PQC-BASE` versus `PQC-DIVERSE` supports direct timing comparison on one reference environment.
+QKD versus PQC supports qualitative assumptions and each route's own metrics, never a comparison
+such as “3 seconds versus 16 milliseconds.”
+
+No N-run web dashboard is required. Campaign-scale analysis and figures are produced from exported
+records outside the V1 interface.
+
+## Protected-message strip
+
+When a run produces `K_SESSION`, Run may show:
+
+```text
+ESTABLISHMENT PLANE -> 256-bit K_SESSION
+DATA PLANE          -> AES-256-GCM -> protected payload
+```
+
+The backend owns nonce uniqueness, the full tag, AAD binding, decryption, and authentication
+failure. React never receives or stores raw `K_SESSION`.
+
+## Result and trace rules
+
+- render ordered events returned by the backend; do not invent protocol messages;
+- include explicit assumed/executed authentication state;
+- keep secret values, private keys, KEM shared secrets, `K_SESSION`, and `K_CONFIRM` out of JSON
+  records and browser state;
+- preserve run ID, profile, config, versions, applicable seed, provenance, metrics, and outcome;
+- label software duration as simulator runtime, not physical QKD performance; and
+- never sum or rank incompatible measurements.
 
 ## Development
-
-Prerequisites:
-
-- Python 3.14 and [`uv`](https://docs.astral.sh/uv/);
-- Node.js 20.19+ (or 22.12+) and npm.
 
 From the repository root:
 
@@ -151,21 +202,19 @@ cd ui/frontend
 npm ci
 ```
 
-Start the backend from the repository root and wait for `Application startup complete`:
+Start the backend from the repository root:
 
 ```bash
 uv run uvicorn ui.backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Verify `http://127.0.0.1:8000/api/health`. In a second terminal:
+Then start the frontend from `ui/frontend`:
 
 ```bash
-cd ui/frontend
 npm run dev
 ```
 
-Open `http://localhost:5173`. Vite proxies `/api` to `http://127.0.0.1:8000`; the backend must be
-running on that port.
+Vite serves `http://localhost:5173` and proxies `/api` to `http://127.0.0.1:8000`.
 
 ## Verification
 
@@ -180,13 +229,5 @@ npm run typecheck
 npm run build
 ```
 
-## Extension rules
-
-- implement a domain/orchestration capability before adding its route and frontend control;
-- report implemented/planned status from `/api/capabilities`;
-- preserve typed request/response contracts and explicit adapters;
-- render traces and metrics returned by the backend rather than synthesizing protocol behavior;
-- keep QKD and PQC as sibling domains composed only above them.
-
 See [`../TFM_GOAL.md`](../TFM_GOAL.md) for the academic contract and
-[`../docs/structure.md`](../docs/structure.md) for the complete target architecture.
+[`../docs/structure.md`](../docs/structure.md) for the domain/orchestration boundaries.

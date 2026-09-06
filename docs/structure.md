@@ -1,283 +1,223 @@
-# QuantumSec Project Structure
+# QuantumSec Architecture
 
-> **Identity:** QuantumSec is a modular, reproducible laboratory for quantum-safe session
-> establishment using QKD, PQC, and planned hybrid QKD–PQC strategies.
->
-> **Status date:** 2026-09-05. Source code and tests take precedence over this target architecture.
+This is the canonical architecture document. Source code and tests take precedence over target
+diagrams. Academic scope, hypotheses, methodology, and the definition of done live in
+[`../TFM_GOAL.md`](../TFM_GOAL.md).
 
-## 1. Scope and status model
+## 1. Architectural purpose
 
-This document describes both the repository that exists now and the architecture required to
-finish the TFM. Every capability is classified as:
+QuantumSec is a modular and reproducible laboratory for executing, visualizing, and evaluating
+QKD-, PQC-, and hybrid-based quantum-safe session-establishment strategies. Its architecture must:
 
-- **CURRENT:** implemented and tested.
-- **PLANNED:** part of the TFM definition of done, but absent or incomplete.
-- **FUTURE:** deliberately outside the TFM boundary.
+1. keep QKD and PQC independently testable;
+2. compose them only through an upper orchestration layer;
+3. preserve the provenance, order, labels, lengths, and domains of secret inputs;
+4. expose executed authentication separately from assumed authentication;
+5. produce real configuration, trace, metric, result, and export records;
+6. make implementation status visible to the API and UI; and
+7. prevent incompatible QKD and PQC measurements from being treated as one performance axis.
 
-The TFM integrates and evaluates established techniques. It does not design a new QKD protocol,
-PQC primitive, application cipher, or formally proven cryptographic combiner.
+Status terms are **CURRENT**, **PARTIAL**, **PLANNED**, and **FUTURE**, as defined in
+[`../TFM_GOAL.md`](../TFM_GOAL.md).
 
-## 2. Design philosophy
+## 2. Dependency invariants
 
-1. **Acyclic layers.** Higher layers orchestrate lower layers; domain packages never depend on the
-   UI or on sibling domains.
-2. **Explicit assumptions.** Authentication, trust, numerical models, security estimates, and
-   backend guarantees are documented rather than implied.
-3. **Reproducible science.** Simulation randomness is injected. Experiments will preserve
-   configuration, applicable seed, run identifier, trace, metrics, and backend metadata.
-4. **Immutable boundaries.** Domain values validate defensive copies and protect stored arrays or
-   secret-bearing state where appropriate.
-5. **Real traces and metrics.** The UI and experiment layer expose events produced by actual domain
-   flows, never invented protocol messages or unavailable measurements.
-6. **Separate planes.** Session establishment produces key material; AES-256-GCM will consume an
-   established key in a distinct data-protection plane.
-
-## 3. Architecture
-
-### 3.1 Current dependency graph
+Current dependency flow:
 
 ```text
-ui/frontend -> JSON/HTTP -> ui/backend -> qkd -> quantum -> core
+ui/frontend -> ui/backend -> qkd -> quantum -> core
 
-pqc -> liboqs / cryptography / Python standard library
+                  pqc (independent sibling domain)
 ```
 
-The current UI backend adapts BB84 only. The standalone `pqc` package is complete through mutual
-Finished confirmation but has no HTTP route. `qkd` and `pqc` are siblings and do not import each
-other.
-
-### 3.2 Target TFM dependency graph
+Target dependency flow:
 
 ```text
 ui/frontend
     -> ui/backend
-        -> session orchestration
+        -> orchestration
             -> qkd
             -> pqc
-            -> data protection
-        -> experiment orchestration
-            -> session orchestration
-            -> result/export adapters
-
-qkd -> quantum -> core
-pqc -> external cryptographic backends
+            -> data_protection
+        -> experiments
+            -> orchestration
 ```
 
-The planned session and experiment layers are the only places that may compose QKD and PQC.
-Neither composition nor the data-protection package may create reverse imports into `qkd`, `pqc`,
-`quantum`, or `core`.
-
-### 3.3 Allowed and forbidden imports
-
-Allowed target direction:
+The allowed direction is:
 
 ```text
-ui/backend, experiments -> orchestration -> qkd, pqc
-ui/backend              -> qkd                    # existing BB84 adapter
-qkd                     -> quantum, core
-quantum                 -> core
+core <- quantum <- qkd <- orchestration <- experiments / ui
+
+                 pqc <- orchestration
+data_protection <- orchestration
 ```
 
-Forbidden:
+The invariants are:
 
-```text
-core    -> quantum, qkd, pqc, orchestration, experiments, ui
-quantum -> qkd, pqc, orchestration, experiments, ui
-qkd     -> pqc, orchestration, experiments, ui
-pqc     -> qkd, orchestration, experiments, ui
-```
+- `core` has no domain dependencies.
+- `quantum` may depend on `core`, but knows nothing about QKD or PQC.
+- `qkd` may depend on `quantum` and `core`, but never imports `pqc`.
+- `pqc` is a sibling domain and never imports `qkd`.
+- authentication policy and QKD–PQC composition belong above both domains.
+- `experiments` records and invokes capabilities; it does not implement cryptography.
+- `ui/backend` adapts typed contracts and does not hide domain logic in routes.
+- `ui/frontend` renders backend capabilities, events, metrics, and status; it does not simulate
+  protocol behavior.
 
-## 4. Repository layout
-
-The implemented packages are shown without a status suffix; planned TFM additions are annotated.
+## 3. Current and target tree
 
 ```text
 QuantumSec/
-|-- core/                       # constants and RNG abstractions
-|-- quantum/                    # general quantum mathematics
-|-- qkd/
-|   |-- primitives/
-|   |-- channel/
-|   |   `-- noise/
-|   |-- protocols/              # BB84 only
-|   |-- postprocessing/
-|   `-- metrics/
-|-- pqc/
-|   |-- backends/
-|   |-- kem/
-|   |-- signatures/
-|   |-- kdf/
-|   `-- protocol/
+|-- core/                       # CURRENT: constants, RNG, shared foundations
+|-- quantum/                    # CURRENT: numerical quantum mathematics
+|-- qkd/                        # CURRENT/PARTIAL: BB84 and classical post-processing
+|-- pqc/                        # CURRENT: standalone authenticated PQC handshakes
 |-- ui/
-|   |-- backend/                # current BB84 HTTP adapter
-|   `-- frontend/               # current React BB84 laboratory
-|-- benchmarks/                 # quantum-measurement benchmark only
-|-- tests/
+|   |-- backend/                # CURRENT: BB84 HTTP adapter only
+|   `-- frontend/               # CURRENT/PARTIAL: BB84 laboratory
+|-- tests/                      # CURRENT: Python and UI tests
+|-- benchmarks/                 # CURRENT: narrow projective-measurement benchmark
+|-- reports/                    # HISTORICAL implementation records
 |-- docs/
-|-- experiments/                # PLANNED: run/trace/metrics/result/compare
-|-- orchestration/              # PLANNED: unified session profiles
-|-- data_protection/            # PLANNED: AES-256-GCM demo boundary
-|-- TFM_GOAL.md
-|-- pyproject.toml
-`-- README.md
+|   |-- reviews/                # HISTORICAL independent review snapshots
+|   |-- structure.md            # CURRENT architecture source
+|   `-- tasks.md                # CURRENT ordered implementation plan
+|-- orchestration/              # PLANNED: profiles, session composition, auth policy
+|-- data_protection/            # PLANNED: AES-256-GCM session payloads
+`-- experiments/               # PLANNED: config/run/record/export/analyze
 ```
 
-The exact names of planned packages may change during implementation. Their responsibilities and
-dependency direction may not.
+The names of planned packages may be refined when implementation begins; their dependency
+boundaries may not.
 
-## 5. Current module responsibilities
+## 4. Cross-cutting invariants
+
+### Injected randomness
+
+All modeled randomness is supplied through `BaseRNG`; deterministic simulations and tests use
+`SeededRNG(seed=...)`. Real PQC operations use liboqs and operating-system cryptographic
+randomness and are not made deterministic for experiments.
+
+### Immutable results and defensive validation
+
+Value/result objects use frozen slotted dataclasses where practical. Stored NumPy arrays are copied
+and made read-only. Inputs use `ArrayLike`; outputs use explicit array aliases.
+
+### Explicit status and capability discovery
+
+A planned profile must not appear executable. The backend reports actual capabilities and the UI
+enables controls only for those capabilities. Partial status includes a reason and must not be
+collapsed into current/complete.
+
+### Secret handling
+
+Private keys, shared secrets, `K_SESSION`, and `K_CONFIRM` are not traces or experiment metrics.
+Public messages and derived metadata may be serialized through explicit versioned mappings. Secret
+state remains repr-safe and follows explicit lifecycle rules without claiming memory zeroization.
+
+## 5. Implemented layers
 
 ### 5.1 `core/` — CURRENT
 
-General infrastructure with zero domain dependencies:
-
-- `DEFAULT_ATOL`;
-- `BaseRNG`, `SeededRNG`, `GlobalRNG`, and `QRNGSimulator`;
-- binary and unitary random helpers.
-
-Scientific domain code that needs modeled randomness receives a `BaseRNG`. Deterministic tests use
-`SeededRNG`. Cryptographic key generation in the PQC backend is deliberately excluded from seeded
-simulation randomness.
+`core/rng.py` defines the `BaseRNG` boundary and seeded implementation used by simulations.
+`core/constants.py` provides shared numerical tolerances. This layer must remain domain-neutral.
 
 ### 5.2 `quantum/` — CURRENT
 
-Reusable quantum mathematics with no QKD semantics:
+This layer owns numerical state validation, pure/density-state conversion, linear algebra,
+information measures, projectors, and projective measurement. It knows nothing about Alice, Bob,
+BB84, QBER, authentication, KEMs, or session profiles.
 
-- ket/matrix conversion and linear algebra;
-- state and density-matrix construction;
-- physical validation;
-- immutable projective measurements and sampling;
-- purity, fidelity, trace distance, and von Neumann entropy;
-- shared NumPy input/output types.
+### 5.3 `qkd/` — CURRENT execution, PARTIAL security-decision path
 
-`quantum` does not know about Alice, Bob, BB84, QBER, or authentication.
-
-### 5.3 `qkd/` — CURRENT BB84 domain
-
-The implemented path is:
+Implemented flow:
 
 ```text
-random bits/bases
-    -> BB84 state preparation
-    -> ordered logical-qubit CPTP channel pipeline
-    -> projective measurement
+BB84 preparation
+    -> ordered logical-qubit CPTP channels
+    -> Bob measurement
     -> basis sifting
-    -> sampled parameter estimation
-    -> threshold/size abort checks
+    -> sampled aggregate QBER and disclosure removal
+    -> aggregate-QBER threshold
     -> Cascade reconciliation
-    -> universal-hash verification
+    -> universal-hash reconciled-key verification
     -> asymptotic secret-length estimate
-    -> FFT Toeplitz privacy amplification
+    -> Toeplitz privacy amplification
+    -> final material or explicit abort
 ```
 
-Implemented channels:
+Implemented channels are Identity, Depolarizing, Bit Flip, Phase Flip, Pauli mixture, and Amplitude
+Damping. They are logical-qubit models. Amplitude damping is relaxation, not photon loss.
 
-- Identity;
-- Depolarizing;
-- Bit Flip;
-- Phase Flip;
-- Pauli mixture;
-- Amplitude Damping.
+The session exposes raw/sifted counts, sifting efficiency, diagnostic full-sifted aggregate QBER,
+sampled aggregate QBER, disclosed positions, candidate size, Cascade leakage/corrections,
+verification result/leakage, reconciled/final sizes, and final simulated material.
 
-Amplitude damping is qubit relaxation within the modeled Hilbert space. It is not optical loss,
-vacuum, detector behavior, or fiber attenuation.
+The following security limitations are architectural blockers:
 
-`BB84PostprocessingConfig` currently provides `sample_fraction` (default `0.2`),
-`qber_abort_threshold` (default `0.11` under the documented asymptotic model), Cascade settings,
-`verification_tag_length` (default `16` bits), and `security_margin_bits` (default `0`). The Web UI
-currently uses these defaults; it does not expose them as request fields.
+- `e_Z` and `e_X` are not calculated or exposed.
+- the QBER threshold and `asymptotic_bb84_secret_length()` use sampled aggregate QBER;
+- the estimator assumes symmetric phase error, but asymmetric supported channels can violate it;
+- no intercept-resend adversary exists;
+- the classical transcript is assumed authenticated, not authenticated by code.
 
-Session outcomes are `completed` or `aborted`. Implemented abort paths cover insufficient sifted
-material, disclosure leaving no candidate material, sampled QBER above threshold, insufficient
-verification material, failed reconciled-key verification, and no extractable asymptotic secret
-length.
+Consequently, `QKD-ASSUMED` is **PARTIAL** as a security profile even though the BB84 pipeline is
+executable. Correction requires a theoretically justified phase-error model or conservative abort
+outside the model's domain—not an undocumented `max(e_Z, e_X)` substitution.
 
-The full-sifted QBER is diagnostic. Protocol decisions use the seeded disclosed sample, and those
-positions are removed. Cascade counts public Alice parity disclosures; verification counts the
-public tag. The estimator subtracts reconciliation and verification leakage once from candidate
-material. Public Toeplitz seeds are not treated as secret consumption.
+#### Verification is not authentication
 
-Security boundary:
+`verify_reconciled_keys()` creates a seeded universal-hash comparison tag after Cascade. Its role
+is to detect residual disagreement between Alice's and Bob's reconciled keys. It has no secret
+authentication key, identity binding, authenticated transcript coverage, or channel-authentication
+failure semantics. It must never be labeled a MAC or QKD classical-channel authentication.
 
-- the current model is asymptotic, not a composable finite-key proof;
-- the classical BB84 transcript is assumed authenticated;
-- no implemented component currently connects PQC identity/authentication to this transcript;
-- numerical run time is not physical QKD latency or secret-key rate.
+### 5.4 `pqc/` — CURRENT standalone handshakes
 
-### 5.4 `pqc/` — CURRENT standalone handshake
-
-Implemented algorithms and backend-reported dimensions:
-
-| Algorithm | Role | Standardization status as of 2026-09-05 | Public key | Ciphertext/signature | Shared secret |
-|---|---|---|---:|---:|---:|
-| ML-KEM-768 | KEM | NIST FIPS 203 | 1184 B | 1088 B ciphertext | 32 B |
-| ML-DSA-65 | Signature | NIST FIPS 204 | 1952 B | 3309 B signature | — |
-| HQC-3 | Diverse KEM | Selected by NIST for standardization on 2025-03-11; no final FIPS claimed | 4514 B | 8978 B ciphertext | 32 B |
-
-KEM dimensions are read from the configured liboqs backend and should be recorded with the backend
-version in experiments. HQC is code-based and intentionally mathematically diverse from the
-module-lattice-based ML-KEM. Selection for standardization is not the same as a published standard.
-
-The two code-level profiles are:
+Public-to-internal profile mapping:
 
 ```text
-LOW  = ML-KEM-768 + ML-DSA-65 authentication
-HIGH = ML-KEM-768 + HQC-3 + ML-DSA-65 authentication
+PQC-BASE    -> PQCProfile.LOW
+PQC-DIVERSE -> PQCProfile.HIGH
 ```
 
-`LOW` and `HIGH` are QuantumSec names, not NIST security-category labels. `HIGH` means a diverse
-dual-KEM research profile, not a QKD–PQC hybrid.
+The internal names remain because they are encoded into signed messages, transcript construction,
+and HKDF context.
 
-The implemented message and state flow is:
+Implemented roles:
+
+| Component | Responsibility |
+|---|---|
+| ML-KEM-768 | Key establishment |
+| ML-DSA-65 | Authentication using pre-provisioned trust |
+| HQC-3 | Additional KEM and cryptographic diversification |
+| SHA-384 transcript | Public handshake binding |
+| Structured KEM input | Explicit algorithm order, identifiers, lengths, and boundaries |
+| HKDF-SHA-384 | Separate derivation of 32-byte `K_SESSION` and `K_CONFIRM` |
+| Finished / HMAC-SHA-384 | Bilateral explicit key confirmation |
+
+Implemented message flow:
 
 ```text
-1. Alice and Bob create ML-DSA-65 identities and provision trust explicitly.
-2. Bob creates ephemeral KEM keys and a signed ServerKeyOffer.
-3. Alice validates session/profile/algorithms/trust/signature before encapsulation.
-4. Alice creates a fresh 32-byte client nonce, binds the exact offer with SHA-384,
-   signs ClientKeyExchange, and Bob verifies before decapsulation.
-5. Each side constructs the same canonical public transcript and derives K_SESSION.
-6. Each side derives K_CONFIRM; Bob sends Finished_B, Alice verifies it and sends a
-   role-separated Finished_A chained to Finished_B, then Bob verifies and confirms.
+1. Alice and Bob create ML-DSA-65 identities and provision trust.
+2. Bob creates ephemeral KEM keys and signs ServerKeyOffer.
+3. Alice resolves and verifies Bob before encapsulation.
+4. Alice encapsulates ML-KEM-768 and, for PQC-DIVERSE, HQC-3.
+5. Alice binds the exact offer, signs ClientKeyExchange, and Bob verifies before decapsulation.
+6. Both build the canonical transcript and structured KEM-secret input.
+7. HKDF-SHA-384 derives K_SESSION and a domain-separated K_CONFIRM.
+8. Finished_B and Finished_A confirm possession with role and transcript binding.
 ```
 
-Public wire messages have validated JSON/Base64 mappings. Secret states are repr-safe and not
-serializable. Secret references are released through explicit state lifecycles without claiming
-memory zeroization.
+`canonical_kem_secret_input()` uses a fixed ML-KEM-then-HQC order, component count, identifiers,
+and lengths. The transcript hash is the HKDF salt; `info` binds purpose, version, and internal
+profile. This is a research diversity construction, not a standardized multi-KEM combiner or a
+formal robust-combiner proof.
 
-#### Current KEM-secret input and key schedule
+The implementation uses the parameter set exposed by liboqs 0.16.0 as `HQC-3`. Its documented
+status as of 2026-09-05 is selected for standardization, not a final NIST standard.
 
-`canonical_kem_secret_input()` provides:
-
-- domain `QuantumSec/PQCHandshake/v1/KEMSecretInput`;
-- explicit component count;
-- fixed order: ML-KEM-768, then HQC-3 for `HIGH`;
-- length-prefixed algorithm identifiers and secret values;
-- validation against backend-reported 32-byte shared-secret lengths.
-
-The SHA-384 hash of the canonical signed-message transcript is the HKDF salt. HKDF `info` includes
-a length-prefixed purpose domain, protocol version, and profile. Separate purpose domains derive:
-
-```text
-K_SESSION = 32 bytes under .../SessionKey
-K_CONFIRM = 32 bytes under .../ConfirmationKey
-```
-
-Finished values are 48-byte HMAC-SHA-384 outputs. Inputs bind the session identifier, profile,
-role, MAC algorithm, and transcript hash; Alice's Finished additionally binds Bob's verified
-Finished value. Verification uses constant-time comparisons.
-
-This is a structured research diversity construction, not a standardized multi-KEM combiner and
-not a formal claim that one uncompromised input automatically guarantees `K_SESSION`.
-
-#### Distributed-session limitation
-
-In process, Bob's confirmed capability can establish both role-local session handles. Across a
-network, Alice cannot infer that Bob accepted `Finished_A` from the two public Finished messages
-alone. A transport-level authenticated acknowledgement or a later protocol revision is required
-before Alice treats that remote event as complete.
-
-### 5.5 `ui/` — CURRENT BB84 laboratory, PLANNED expansion
+### 5.5 `ui/` — CURRENT BB84 interface, PARTIAL TFM laboratory
 
 Current backend routes:
 
@@ -287,163 +227,166 @@ GET  /api/capabilities
 POST /api/simulations/bb84
 ```
 
-The BB84 request supports `n_signals` from 1 to 100,000, a seed from 0 to 2^32−1, and up to 12
-ordered implemented channels. Responses contain real engine output, measured adapter duration, a
-UUID request identifier, summary metrics, post-processing status, distributions, and at most 64
-raw transmission records.
+The current request supports `n_signals`, a seed, and up to 12 ordered implemented channels.
+Responses adapt real domain results and contain a UUID, software duration, outcome, summary,
+post-processing details, distributions, and a bounded raw-transmission sample.
 
-The React application currently implements BB84 configuration, a channel pipeline editor, an
-educational quantum-flow view, results/charts, and raw inspection. Unsupported protocols are
-disabled from capability discovery. No PQC, hybrid, AES, experiment, or comparison route exists.
+There are no PQC, QKD-authentication, Eve, hybrid, experiment, compare, or AES-GCM routes. The
+frontend provides a BB84 builder and result workspace only.
 
-### 5.6 `benchmarks/` — CURRENT, narrow scope
+### 5.6 `benchmarks/` — CURRENT, not the experiment engine
 
-The existing benchmark measures quantum projective-measurement paths. It is not the TFM experiment
-engine and does not supply PQC or hybrid comparative results.
+The existing benchmark measures projective sampling paths. It does not implement E1–E5 and must
+not be presented as the TFM experimental framework.
 
-## 6. Security profiles
+## 6. Definitive profile architecture
 
-| Profile | Components | Purpose | Repository status |
+| Public profile | Establishment source | Authentication policy | Status |
 |---|---|---|---|
-| QKD Experimental | BB84 final material; authenticated classical channel modeled as an assumption | QKD behavior and post-processing study | CURRENT standalone path; PLANNED unified profile |
-| PQC | ML-KEM-768 + ML-DSA-65 | Authenticated PQC session establishment | CURRENT as `LOW` |
-| PQC Diversified | ML-KEM-768 + HQC-3 + ML-DSA-65 | Diverse KEM integration and overhead | CURRENT as `HIGH` |
-| Hybrid QKD–PQC | BB84 material + ML-KEM-768 + explicit authentication policy | Combined QKD/PQC establishment | PLANNED |
-| Hybrid Diversified | BB84 material + ML-KEM-768 + HQC-3 + explicit authentication policy | Combined path with diverse PQC input | PLANNED |
+| `QKD-ASSUMED` | BB84 | Assumed authenticated classical channel | **PARTIAL** |
+| `QKD-CLASSICAL-AUTH` | BB84 | Executed universal-hash/Wegman–Carter-style authentication | **PLANNED** |
+| `QKD-PQC-AUTH` | BB84 | Executed ML-DSA-65 transcript authentication | **PLANNED** |
+| `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | **CURRENT** |
+| `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | **CURRENT** |
+| `HYBRID` | BB84 + ML-KEM-768 | Explicit policy recorded in the profile/result | **PLANNED** |
+| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit policy recorded in the profile/result | **PLANNED** |
 
-The unified profile model must record component and authentication provenance. It must not silently
-present the BB84 simulation's assumed authenticated channel as a mechanism that was executed.
+The profile contract must make these independent dimensions explicit:
 
-## 7. Planned hybrid session architecture
+- source and provenance of each establishment component;
+- QKD authentication mechanism and whether it was assumed or executed;
+- algorithms and exact internal PQC profile;
+- transcript/encoding version;
+- terminal outcome and reason;
+- applicable metrics only.
 
-The hybrid layer will consume successful domain results rather than reach into domain internals:
+## 7. Planned QKD authentication
+
+### `QKD-CLASSICAL-AUTH`
+
+This profile requires a complete construction, not merely the existing Toeplitz helper:
+
+- pre-shared secret authentication material;
+- separation between hash-selection and one-time/tag-protection material as required;
+- canonical authenticated messages/transcript;
+- tag generation and verification;
+- explicit failure path; and
+- accounting for consumed authentication material where applicable.
+
+It remains **PLANNED** until all properties are executable and tested.
+
+### `QKD-PQC-AUTH`
+
+This profile reuses ML-DSA-65 identities and explicit pre-provisioned trust above `qkd` and `pqc`.
+The design must define which classical messages or canonical transcript are signed and when
+verification occurs. A decorative signature over a final summary is not equivalent to
+authenticating all security-relevant exchanges.
+
+## 8. Planned adversary and corrected estimator
+
+The intercept-resend component receives an interception fraction `f`. For intercepted signals Eve
+chooses a basis, measures, prepares the measured state, and resends it to Bob. Its trace records
+whether Eve acted and the relevant modeled event without leaking final secret material.
+
+Per-basis estimation must preserve enough basis/position information to expose `e_Z`, `e_X`, and
+aggregate QBER. The security policy must identify which observed quantity bounds phase error under
+the implemented BB84 model and what happens when no justified bound is available. The validation
+suite must cover analytical channel predictions and the `QBER ~= 0.25 f` ideal adversary case.
+
+## 9. Planned hybrid orchestration
 
 ```text
-K_QKD                 [successful BB84 final material]
-SS_ML_KEM             [authenticated PQC establishment]
-SS_HQC optional       [HIGH/diversified profile only]
-    -> canonical component encoding
-    -> labels, lengths, profile and provenance
-    -> hybrid-specific domain separation
-    -> HKDF-SHA-384
-    -> 32-byte K_SESSION
-    -> confirmation appropriate to the final protocol design
+K_QKD
+SS_ML_KEM       -> canonical hybrid component encoding
+SS_HQC optional -> hybrid domain separation
+                -> transcript/ciphertext binding where specified
+                -> HKDF-SHA-384
+                -> 32-byte K_SESSION
+                -> explicit provenance and confirmation
 ```
 
-The existing PQC-only `canonical_kem_secret_input()` must not be relabeled as hybrid. The new
-encoding needs a separate domain and tests for order, boundaries, component/profile mismatch,
-transcript binding, and sensitivity. The thesis evaluates integration and diversification; it does
-not claim a new robust-combiner proof.
+The hybrid encoding is distinct from the current PQC-only `canonical_kem_secret_input()`. It must
+specify canonical encoding, labels, lengths, deterministic order, profile, domain separation,
+provenance, and binding inputs. Boundary, order, profile-mismatch, omission, duplication, and
+sensitivity tests are mandatory.
 
-## 8. Planned data-protection plane
+The security description is limited to the construction and assumptions actually implemented. A
+computational KDF output is not automatically information-theoretically secure because one input
+came from QKD.
 
-The final session demo will keep key establishment and payload protection distinct:
+## 10. Planned data-protection plane
 
 ```text
-established session -> 256-bit K_SESSION
-                    -> AES-256-GCM
-                    -> nonce + ciphertext + authentication tag
-                    -> authenticated decrypt or explicit failure
+ESTABLISHMENT PLANE -> 256-bit K_SESSION
+DATA PLANE          -> AES-256-GCM
+                    -> nonce + ciphertext + 128-bit tag
+                    -> plaintext or explicit authentication failure
 ```
 
-Requirements include secure nonce generation, no nonce reuse under one key, optional AAD binding
-for session/transcript metadata, successful round-trip, and tamper rejection. This demonstrates a
-usable session; it does not design a new cipher. No such feature exists today.
+The implementation requires a 96-bit nonce, uniqueness under each key, full authentication tag,
+appropriate session metadata as AAD, successful valid decryption, rejection of modified
+ciphertext/tag/AAD, and no partial plaintext on failure.
 
-## 9. Planned experiment architecture
-
-`experiments/` is central to the TFM and follows one contract:
+## 11. Experiment architecture
 
 ```text
-CONFIG -> RUN -> TRACE -> METRICS -> RESULT -> COMPARE
+ExperimentConfig
+    -> Runner
+        -> SessionResult + ordered Trace
+            -> MetricRecord
+                -> versioned JSON/CSV export
+                    -> analysis and figures
 ```
 
-Each record should include:
+The five required experiments and D1 are specified in
+[`../TFM_GOAL.md §13`](../TFM_GOAL.md#13-experiments). The measurement-category rule and statistical
+requirements are centralized in
+[`../TFM_GOAL.md §12`](../TFM_GOAL.md#12-experimental-methodology).
 
-- run ID and timestamps;
-- security profile and normalized configuration snapshot;
-- deterministic seed for modeled randomness;
-- algorithm, library, and backend versions;
-- ordered protocol events and terminal status/abort reason;
-- available timings and byte counts;
-- QKD sizes, QBER, leakage, and final material size where applicable;
-- session-key length and component provenance, never secret values;
-- serialization/export version.
+The experiment layer records environment, versions, profile, config, applicable seed, randomized
+condition order, trace, public byte sizes, applicable timings, QKD metrics, and outcome. It never
+serializes secret values.
 
-Planned TFM experiments:
+## 12. Web Laboratory V1
 
-1. **PQC profile comparison:** `LOW` versus `HIGH`; measure key generation, encapsulation,
-   decapsulation, signing, verification, total handshake duration, public/ciphertext/signature
-   sizes, and bytes exchanged.
-2. **BB84 channel behavior:** vary implemented channel parameters; analyze sampled QBER, sifted and
-   final material, efficiency, and abort behavior. NumPy timings remain simulator timings.
-3. **Hybrid establishment:** after implementation, compare QKD + ML-KEM-768 with the diversified
-   variant; verify integration, provenance, reproducibility, and overhead.
-4. **End-to-end session:** derive `K_SESSION`, protect a payload with AES-256-GCM, verify decryption,
-   reject tampering, and retain session/profile metadata.
+The target is limited to three screens:
 
-## 10. Target web laboratory
+1. **Builder** — supported profile selector; QKD signal count, seed, channel/parameters, and Eve
+   fraction; profile-derived PQC components; small contextual/versioned cards.
+2. **Run** — real Alice/Bob/Eve timeline; explicit authentication state; KEM, combiner, HKDF,
+   Finished, compatible metrics, outcome, and protected-message strip when `K_SESSION` exists.
+3. **Compare** — exactly two run records; configuration diff, components, assumptions, compatible
+   metrics, bytes, outcome, and security notes.
 
-The current BB84 UI evolves into these modules without presenting unavailable controls:
+For `QKD-ASSUMED`, Run must display:
 
-- **Session Builder:** expose only profiles and parameters reported as implemented by the backend.
-- **Protocol/Handshake Visualizer:** show actual BB84 events and actual PQC messages; converge the
-  QKD/PQC branches only after hybrid orchestration exists.
-- **Results/Metrics:** show available status, trace, timings, byte sizes, QKD metrics, profile,
-  seed, and configuration snapshot; later compare multiple run records.
-- **Protected Message Demo:** make the key-establishment/data-protection boundary visible.
-- **Quantum-Safe Explorer:** use a structured, versioned, cited catalog with a “status as of” date
-  for standards claims.
+```text
+CLASSICAL AUTHENTICATION
+ASSUMED — NOT EXECUTED
+```
 
-The UI never reimplements quantum or cryptographic domain logic.
+There is no separate Quantum-Safe Explorer. Small contextual cards answer what a component is, its
+role, security assumption, profile contribution, and dated normative status, with a reference.
 
-## 11. Milestones
+## 13. Quality and maintenance
 
-### Completed/current
+Before completion of any implementation refactor:
 
-1. Core and quantum foundations.
-2. BB84 and logical-qubit channel/noise framework.
-3. Sifting, QBER, parameter estimation, Cascade, verification, and privacy amplification.
-4. ML-DSA-65 identity and explicit trust.
-5. ML-KEM-768 and HQC-3 KEM establishment in `LOW`/`HIGH`.
-6. Authenticated transcript, structured KEM input, HKDF-SHA-384, and `K_SESSION`.
-7. Separate `K_CONFIRM` and mutual role-bound Finished confirmation.
-8. BB84 Web UI V1.
+```text
+uv run pytest
+uv run ruff check .
+uv run pyright
 
-### Remaining TFM work
+cd ui/frontend
+npm test
+npm run typecheck
+npm run build
+```
 
-9. QKD–PQC hybrid session orchestration.
-10. AES-256-GCM protected-message demonstration.
-11. Experiment contracts, metrics, serialization, export, and comparisons.
-12. Web support for PQC, hybrid, experiments, and protected messages.
-13. Experimental campaign and thesis analysis.
+After code changes, run `graphify update .`. Documentation reviews must also search the live
+documents and UI capability text for obsolete profile names, unsupported performance claims,
+authentication ambiguity, HQC overclaims, and stale planned/current status.
 
-### Future work
-
-14. Additional QKD protocols, QKDN, routing/repeaters, hardware integration, additional PQC
-    algorithms, richer combiners, formal verification, larger benchmarks, and deployment research.
-
-## 12. TFM boundary
-
-The TFM is complete when the BB84, PQC, and hybrid paths are demonstrable; a 256-bit `K_SESSION`
-drives an authenticated AES-256-GCM payload demo; the principal scenarios can be run and visualized
-through the web laboratory; reproducible experiments produce comparable results; and the evidence
-answers the research question in [`../TFM_GOAL.md`](../TFM_GOAL.md).
-
-B92, E91, BBM92, QKDN, quantum repeaters, production hardware, new PQC algorithms, LLM agents, a
-new formal combiner proof, production optimization, and full device-level physics are not required.
-
-## 13. Testing and maintenance
-
-- Simulation tests use `SeededRNG`; PQC tests assert invariants under secure backend randomness.
-- Hybrid tests must validate boundaries, profile mismatch, provenance, and transcript/context
-  separation.
-- AES-GCM tests must cover unique nonce handling and modified ciphertext/tag rejection.
-- Experiment tests must reproduce modeled runs and serialize configuration/result records.
-- UI tests must ensure disabled capability states cannot produce fabricated runs.
-- After code changes, run Python tests, Ruff, Pyright, frontend tests/typecheck/build, and
-  `graphify update .`.
-
-Standards references: [NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final),
+Normative status references: [NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final),
 [NIST FIPS 204](https://csrc.nist.gov/pubs/fips/204/final), and
 [NIST HQC selection](https://www.nist.gov/news-events/news/2025/03/nist-selects-hqc-fifth-algorithm-post-quantum-encryption).

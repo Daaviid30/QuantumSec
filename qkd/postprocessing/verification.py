@@ -1,4 +1,4 @@
-"""Universal-hash key confirmation after information reconciliation."""
+"""Universal-hash verification of key agreement after information reconciliation."""
 
 from dataclasses import dataclass, field
 
@@ -12,7 +12,7 @@ from qkd.postprocessing.universal_hashing import generate_toeplitz_seed, toeplit
 
 @dataclass(frozen=True, slots=True, eq=False)
 class VerificationResult:
-    """Immutable public verification transcript and protocol decision."""
+    """Immutable public key-agreement verification data and protocol decision."""
 
     verified: bool
     tag_length: int
@@ -67,10 +67,11 @@ def verify_reconciled_keys(
     *,
     tag_length: int = 16,
 ) -> VerificationResult:
-    """Confirm keys by comparing reproducible Toeplitz-universal hash tags.
+    """Verify reconciled-key agreement using public Toeplitz-universal hash tags.
 
     The exact mismatch count is retained only as a simulator diagnostic. The
     protocol decision is exclusively the comparison of the two public tags.
+    This step does not authenticate the classical channel.
     """
 
     alice, bob = validate_aligned_keys(alice_key, bob_key)

@@ -198,7 +198,7 @@ class BB84SessionStatus(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class BB84PostprocessingConfig:
-    """Configuration for BB84's authenticated classical post-processing.
+    """Configuration for BB84 post-processing under assumed channel authentication.
 
     The default 11% abort boundary is the familiar ideal/asymptotic BB84
     threshold under this simulator's assumptions, not a universal practical
@@ -399,7 +399,7 @@ class BB84Protocol:
         n_signals: int,
         config: BB84PostprocessingConfig | None = None,
     ) -> BB84SessionResult:
-        """Run BB84 through estimation, Cascade, confirmation, and extraction.
+        """Run BB84 through estimation, Cascade, verification, and extraction.
 
         Legitimate security aborts are represented in the returned session.
         Invalid inputs and invalid configurations still raise validation errors.

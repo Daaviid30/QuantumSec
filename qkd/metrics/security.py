@@ -42,9 +42,12 @@ def asymptotic_bb84_secret_length(
 ) -> int:
     """Estimate extractable bits under the simulator's asymptotic BB84 model.
 
-    The symmetric-channel phase-error estimate is the sampled QBER. Actual
-    simulated reconciliation leakage replaces an ideal ``n*h2(Q)`` term and is
-    therefore subtracted exactly once. This is not a composable finite-key proof.
+    The current implementation uses sampled aggregate QBER as a phase-error
+    estimate and is valid only under its symmetric-error assumption. Supported
+    asymmetric channels can violate that assumption, so callers must not treat
+    this function as a general BB84 bound. Actual simulated reconciliation
+    leakage replaces an ideal ``n*h2(Q)`` term and is therefore subtracted
+    exactly once. This is not a composable finite-key proof.
     """
 
     n = _non_negative_int(n_candidate, name="n_candidate")

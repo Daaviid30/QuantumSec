@@ -55,7 +55,8 @@ def get_capabilities() -> CapabilitiesResponse:
                 implemented=True,
                 description=(
                     "Prepare-and-measure BB84 with sampled parameter estimation, Cascade, "
-                    "key confirmation, and Toeplitz privacy amplification."
+                    "reconciled-key verification, Toeplitz privacy amplification, and an "
+                    "explicitly assumed authenticated classical channel."
                 ),
             ),
             ProtocolCapability(
@@ -146,15 +147,21 @@ def get_capabilities() -> CapabilitiesResponse:
             ),
             FeatureCapability(
                 id="qber",
-                name="QBER",
+                name="Aggregate QBER",
                 implemented=True,
-                description="Error fraction over the complete sifted material.",
+                description=(
+                    "Diagnostic error fraction over complete sifted material; per-basis e_Z/e_X "
+                    "are not implemented yet."
+                ),
             ),
             FeatureCapability(
                 id="parameter_estimation",
-                name="Parameter estimation",
+                name="Aggregate parameter estimation",
                 implemented=True,
-                description="Seeded sampling estimates QBER and removes every disclosed position.",
+                description=(
+                    "Seeded sampling estimates aggregate QBER and removes every disclosed "
+                    "position; the current security estimator assumes basis symmetry."
+                ),
             ),
             FeatureCapability(
                 id="reconciliation",
@@ -164,9 +171,12 @@ def get_capabilities() -> CapabilitiesResponse:
             ),
             FeatureCapability(
                 id="verification",
-                name="Key confirmation",
+                name="Reconciled-key verification",
                 implemented=True,
-                description="Universal-hash tags confirm reconciliation and record tag leakage.",
+                description=(
+                    "Universal-hash tags detect residual disagreement and record leakage; they do "
+                    "not authenticate the classical channel."
+                ),
             ),
             FeatureCapability(
                 id="privacy_amplification",

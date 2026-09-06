@@ -1,203 +1,351 @@
 # QuantumSec TFM Goal
 
+This document is the definitive academic and technical contract for the Master's thesis. Code and
+tests remain the source of truth for implementation status. The status vocabulary is strict:
+
+- **CURRENT** — implemented and tested.
+- **PARTIAL** — an executable part exists, but a required guarantee or capability is incomplete.
+- **PLANNED** — required for the TFM, but not implemented.
+- **FUTURE** — explicitly outside the TFM definition of done.
+
 ## 1. Thesis in One Sentence
 
-QuantumSec designs and evaluates a reproducible laboratory that integrates QKD, PQC, and hybrid
-QKD–PQC session-establishment strategies while making their security assumptions, behavior, and
-operational overhead directly comparable.
+QuantumSec is a modular and reproducible laboratory for executing, visualizing, and evaluating
+quantum-safe session-establishment strategies based on QKD, post-quantum cryptography, and hybrid
+QKD–PQC composition.
+
+Provisional title:
+
+- **ES:** *QuantumSec: evaluación experimental del coste y los supuestos de seguridad de
+  estrategias de establecimiento de sesión quantum-safe basadas en QKD, PQC e hibridación*.
+- **EN:** *QuantumSec: Experimental Evaluation of the Cost and Security Assumptions of QKD-, PQC-
+  and Hybrid-Based Quantum-Safe Session Establishment*.
+
+The title remains provisional until the experimental results are available.
 
 ## 2. Problem Statement
 
-Quantum-safe key establishment spans technologies with different primitives, trust models,
-maturity, and measurable costs. QKD can generate shared secret material but requires an
-authenticated classical channel; PQC KEMs establish computationally protected shared secrets and
-signatures provide identity authentication; hybrid schemes must compose these outputs without
-hiding provenance or overstating security. Existing demonstrations are often isolated and measured
-under incompatible assumptions. The TFM therefore needs one bounded architecture and methodology
-that can execute, trace, visualize, and compare representative paths end to end.
+QKD, PQC, and hybrid approaches establish session material under different trust, channel,
+authentication, and security assumptions. Their costs are also expressed through different
+metrics. A numerical BB84 simulation cannot be treated as QKD hardware, while real liboqs
+operations can be timed on a documented software and hardware platform. A useful comparison must
+therefore preserve provenance, expose assumptions, and avoid collapsing incompatible quantities
+into a single performance ranking.
+
+The web is the interface to the laboratory, the protocols and primitives are the systems under
+study, the experiments are the evaluation method, and the experimental results and conclusions
+are the academic contribution.
 
 ## 3. Research Question
 
-How can implemented QKD and PQC session-establishment paths, together with explicitly specified
-hybrid compositions of their secret material, be integrated into a common reproducible laboratory
-to compare their behavior, security assumptions, and operational overhead?
+> What computational and communication costs are introduced by different quantum-safe
+> session-establishment strategies based on QKD, PQC, and hybrid composition, and how do the
+> channel model, authentication, and the presence of an adversary affect their behavior and the
+> validity of their security guarantees?
+
+Original Spanish formulation:
+
+> ¿Qué coste computacional y de comunicación introducen distintas estrategias de establecimiento
+> de sesión quantum-safe basadas en QKD, PQC e hibridación, y cómo afectan el modelo de canal, la
+> autenticación y la presencia de un adversario a su comportamiento y a la validez de sus garantías
+> de seguridad?
 
 ## 4. Research Subquestions
 
-1. Which common configuration, trace, metric, and result contracts permit fair comparison without
-   treating simulated QKD timing as physical-system performance?
-2. How do the implemented PQC and diversified PQC profiles differ in computational and
-   communication overhead?
-3. How can QKD-derived and PQC-derived secret material be combined with explicit encoding, domain
-   separation, provenance, and key confirmation while avoiding unsupported security claims?
-4. How effectively can a web laboratory communicate the distinction between key establishment and
-   authenticated application-data protection?
+1. What computational and communication overhead does `PQC-DIVERSE` add to `PQC-BASE`, and which
+   operations dominate it on the documented reference platform?
+2. Does the BB84 simulator reproduce the analytical per-basis error predictions of each supported
+   channel, and where is the current security estimator's domain of validity?
+3. Once the planned ideal intercept-resend model is implemented, how do interception fraction,
+   channel noise, and sampling affect QBER, final material, and abort probability?
+4. What overhead and security assumptions distinguish assumed, classical/ITS, and PQC
+   authentication of the QKD classical channel?
+5. What marginal orchestration, byte, derivation, and confirmation overhead is introduced by the
+   hybrid profiles without comparing simulated QKD runtime with real PQC timing?
+6. Can the web laboratory communicate each profile's provenance, assumptions, compatible metrics,
+   and outcome without presenting planned behavior as executed?
 
-## 5. General Objective
+## 5. Hypotheses
 
-Design, implement, and experimentally evaluate a modular laboratory for reproducible quantum-safe
-session establishment using BB84, implemented PQC primitives, and bounded hybrid QKD–PQC profiles.
+- **H1:** `PQC-DIVERSE` overhead relative to `PQC-BASE` will be dominated by HQC-3 rather than by
+  the structured combiner, HKDF, or key confirmation.
+- **H2:** Under the planned ideal intercept-resend model, induced QBER will be approximately
+  proportional to `0.25 f`, where `f` is the intercepted fraction.
+- **H3:** Aggregated QBER is not a conservative phase-error estimate for every asymmetric channel
+  supported by QuantumSec.
+- **H4:** The marginal computational cost of structured combination, HKDF, and confirmation will be
+  small relative to the KEM and signature primitives composing the session.
+- **H5:** Executing authentication of the QKD classical channel will add measurable overhead while
+  removing the external authentication assumption of the `QKD-ASSUMED` baseline.
 
-## 6. Specific Objectives
+These are working hypotheses, not results. They must be accepted, rejected, or qualified using the
+recorded evidence.
 
-1. Preserve and validate the implemented BB84 path from state preparation through privacy
-   amplification and explicit abort outcomes.
-2. Demonstrate the implemented mutually authenticated `LOW` and `HIGH` PQC handshakes using exact
-   algorithm and transcript bindings.
-3. Define and implement unified security profiles without introducing direct `qkd`/`pqc` coupling.
-4. Specify and implement a domain-separated hybrid secret input that retains component provenance
-   before HKDF-SHA-384 derives a 256-bit `K_SESSION`.
-5. Use the established `K_SESSION` in an AES-256-GCM protected-message demonstration with nonce and
-   tamper-handling tests.
-6. Produce reproducible experiment records and compare the principal QKD, PQC, and hybrid paths
-   using available metrics.
-7. Extend the web laboratory to configure, execute, trace, and visualize the principal TFM
-   scenarios without exposing unsupported options.
+## 6. General Objective
 
-## 7. Thesis Contribution
+Design, implement, and experimentally evaluate a bounded, modular, reproducible laboratory for
+quantum-safe session establishment using BB84, real PQC primitives, and explicit hybrid profiles.
 
-- **Engineering:** a modular integration boundary, explicit security profiles, common session
-  results, and an end-to-end data-protection demonstration.
-- **Experimental:** measured comparison of BB84 behavior, PQC profiles, hybrid overhead, and the
-  final protected-session flow.
-- **Methodological:** a reproducible `CONFIG -> RUN -> TRACE -> METRICS -> RESULT -> COMPARE`
-  process with explicit assumptions and provenance.
-- **Educational/visual:** an interface that shows what each primitive contributes and separates
-  establishment from payload encryption.
+## 7. Specific Objectives
 
-## 8. What QuantumSec Is
+1. Validate BB84 against analytical channel predictions using aggregated and per-basis QBER.
+2. Implement and evaluate an explicit intercept-resend adversary with a configurable interception
+   fraction.
+3. Replace the current symmetric-error assumption with a theoretically justified phase-error
+   model or fail conservatively outside its domain of validity.
+4. Execute at least one real authentication mechanism for the QKD classical transcript and expose
+   its trust and key-consumption assumptions.
+5. Evaluate the implemented mutually authenticated PQC handshakes under stable public profile
+   names while preserving their internal transcript identifiers.
+6. Compose independently produced QKD and PQC material above the sibling domains with canonical
+   encoding, provenance, domain separation, and deterministic ordering.
+7. Derive a 256-bit `K_SESSION`, demonstrate AES-256-GCM payload protection, and reject tampering.
+8. Produce versioned, reproducible experiment records and a web workflow for building, running,
+   and comparing exactly two runs.
 
-QuantumSec is research and educational software for logical-qubit BB84 simulation, standalone PQC
-handshakes, planned QKD–PQC composition, reproducible experiments, and protocol visualization. It
-uses real PQC backend operations while treating the QKD path as a seeded numerical model. It is a
-laboratory for integration and evaluation, not a new cryptographic primitive.
+## 8. Contributions
 
-## 9. What QuantumSec Is NOT
+- **Principal — experimental:** quantify the cost and behavior of successive quantum-safe
+  guarantees under one architecture and methodology: executed QKD authentication, PQC
+  authentication, KEM diversification, and hybrid QKD–PQC composition.
+- **Validation:** compare BB84 behavior with analytical predictions and an explicit adversary. The
+  discovery of the aggregated-QBER symmetry limitation is treated as a validation result:
+  `THEORY -> MODEL -> EXPERIMENT -> DISCREPANCY -> ASSUMPTION IDENTIFIED -> CORRECTION ->
+  REVALIDATION`.
+- **Engineering:** preserve acyclic QKD/PQC domains and add upper orchestration, configuration,
+  profile, trace, metric, result, and reproducibility contracts.
+- **Visualization:** make the protocol, adversary, authentication, assumptions, derivation,
+  metrics, and profile differences visible. The UI supports the research; it is not the principal
+  scientific contribution.
 
-QuantumSec is not commercial QKD hardware, a physical-network simulator, a production security
-product, a new QKD/PQC algorithm, a proof that hybrid combination is automatically robust, or a
-claim of unconditional end-to-end security. It does not equate QKD with encryption, a KEM with
-application-data encryption, a signature with key establishment, HKDF with encryption, or NumPy
-execution time with physical QKD latency or secret-key rate.
+QuantumSec does not claim a new QKD protocol, PQC primitive, or formal hybrid-combiner proof.
+
+## 9. QuantumSec Definition
+
+QuantumSec is a research laboratory, not primarily an educational site, algorithm collection,
+isolated QKD simulator, or demonstration that QKD and PQC can merely be combined. It contains:
+
+- a seeded numerical logical-qubit BB84 path;
+- real PQC operations through liboqs;
+- planned upper-layer QKD–PQC session composition;
+- a reproducible experiment method; and
+- a planned three-screen web interface to configure, observe, and compare runs.
 
 ## 10. Security Model
 
-- **QKD assumptions:** BB84 is modeled over logical qubits and configured CPTP channels. Security
-  decisions use sampled QBER; the current length estimator is asymptotic, not a composable
-  finite-key proof.
-- **Authenticated classical channel:** the BB84 classical transcript is currently assumed
-  authenticated. Standalone simulation does not supply that mechanism.
-- **PQC authentication:** ML-DSA-65 identities are trusted only through explicit pre-provisioning.
-  Both `ServerKeyOffer` and `ClientKeyExchange` are signed and verified before KEM operations that
-  depend on peer authenticity.
-- **KEM assumptions:** `LOW` uses ML-KEM-768; `HIGH` uses ML-KEM-768 and HQC-3. Successful KEM
-  operations produce independent shared-secret inputs for the configured profile.
-- **Hybrid diversification:** planned profiles combine successful QKD and PQC material in an upper
-  layer with labels, lengths, domain separation, and provenance.
-- **Combiner limitations:** the current PQC encoding and planned hybrid construction support
-  integration research. The TFM does not present a new formal robust-combiner proof and does not
-  claim that one secure input automatically guarantees the output.
-- **Key confirmation:** the current PQC handshake derives a separate 32-byte `K_CONFIRM` and uses
-  role-separated, chained HMAC-SHA-384 Finished messages. BB84's universal-hash verification is a
-  separate post-reconciliation mechanism.
-- **Data plane:** AES-256-GCM is planned to consume the established 32-byte `K_SESSION`; it will use
-  non-repeating nonces per key, authenticate optional session metadata as AAD, and reject modified
-  ciphertext or tags.
+### QKD boundary
 
-## 11. Security Profiles
+BB84 requires an authenticated classical channel. The current code assumes that authentication and
+does not execute it. Its existing universal-hash verification step only detects whether reconciled
+keys disagree; it is not a MAC and must not be described as channel authentication.
 
-| Profile | Components | Purpose | Current status |
-|---|---|---|---|
-| QKD Experimental | BB84 final material; authenticated classical channel as an explicit assumption | Study QKD channel and post-processing behavior | CURRENT standalone path; PLANNED unified profile |
-| PQC (`LOW`) | ML-KEM-768 + ML-DSA-65 | Authenticated PQC establishment | CURRENT |
-| PQC Diversified (`HIGH`) | ML-KEM-768 + HQC-3 + ML-DSA-65 | Diverse KEM integration and overhead | CURRENT |
-| Hybrid QKD–PQC | BB84 material + ML-KEM-768 + explicit authentication policy | Integrate QKD and standardized PQC establishment | PLANNED |
-| Hybrid Diversified | BB84 material + ML-KEM-768 + HQC-3 + explicit authentication policy | Evaluate added diversity and overhead | PLANNED |
+The planned authentication profiles must state which messages or canonical transcript are
+authenticated, the identity or pre-shared-key provisioning model, key separation, tag/signature
+generation and verification, failure behavior, and authentication-material consumption where
+applicable. A Toeplitz hash alone is not a Wegman–Carter MAC.
 
-As of **2026-09-05**, ML-KEM and ML-DSA are standardized by NIST in FIPS 203 and FIPS 204. HQC
-was selected for standardization on 2025-03-11; QuantumSec does not describe it as a final FIPS
-standard. `LOW` and `HIGH` are project profile names, not NIST categories.
+### QBER and secret-length limitation
+
+The current BB84 result exposes aggregated QBER only. Parameter estimation and
+`asymptotic_bb84_secret_length()` use the sampled aggregate under a symmetric phase-error
+assumption. Supported asymmetric channels can violate that assumption—for example, phase flip can
+produce approximately `e_Z = 0`, `e_X = p`, while the aggregate is near `p/2`. The current
+secret-length/security-decision path is therefore **PARTIAL** until it exposes `e_Z` and `e_X` and
+uses a theoretically justified phase-error estimate, or explicitly aborts outside the justified
+model. `max(e_Z, e_X)` must not be adopted without that justification.
+
+### Adversary boundary
+
+Intercept-resend Eve is **PLANNED**. Eve will intercept a fraction `f`, choose a basis, measure,
+prepare, and resend. Under the ideal assumptions used by the experiment, the expected induced QBER
+is approximately `0.25 f`. This is one concrete experimental model for validating a central BB84
+property, not a complete QKD adversary model.
+
+### PQC and hybrid boundary
+
+ML-KEM-768 performs key establishment, ML-DSA-65 performs authentication, HQC-3 adds a distinct KEM
+component for diversification, HKDF-SHA-384 derives keys, Finished/HMAC-SHA-384 confirms possession,
+and AES-256-GCM will protect application data. These roles are not interchangeable.
+
+The hybrid construction will not be described as automatically secure whenever one input remains
+secure. The TFM does not provide a new formal proof. If information-theoretic QKD material is fed
+through a KDF whose security is computational, the resulting hybrid key is described under that
+computational model; it does not automatically retain information-theoretic security.
+
+## 11. Profiles
+
+Public documentation and UI use these names. `PQCProfile.LOW` and `PQCProfile.HIGH` remain internal
+protocol/transcript identifiers to avoid changing existing derived keys and wire contracts.
+
+| Public profile | Secret / key establishment | Authentication | Purpose | Status |
+|---|---|---|---|---|
+| `QKD-ASSUMED` | BB84 | Authenticated classical channel assumed | Baseline QKD model | **PARTIAL** — BB84 executes; authentication is not executed and the estimator needs correction |
+| `QKD-CLASSICAL-AUTH` | BB84 | Planned universal-hash/Wegman–Carter-style construction with pre-shared authentication material | Executed classical/ITS authentication | **PLANNED** |
+| `QKD-PQC-AUTH` | BB84 | ML-DSA-65 with pre-provisioned identities over a specified classical transcript | Executed PQC authentication | **PLANNED** |
+| `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | Post-quantum establishment | **CURRENT** as internal `LOW` |
+| `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | Cryptographic diversification | **CURRENT** as internal `HIGH` |
+| `HYBRID` | BB84 + ML-KEM-768 | Explicit, recorded authentication policy | Hybrid secret provenance | **PLANNED** |
+| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit, recorded authentication policy | Diversified hybrid establishment | **PLANNED** |
+
+HQC-3 means the parameter set exposed by liboqs 0.16.0 as `HQC-3`. As of 2026-09-05, HQC is
+**selected for standardization**, not a published NIST standard. ML-KEM and ML-DSA are standardized
+as FIPS 203 and FIPS 204.
 
 ## 12. Experimental Methodology
 
-Every experiment follows a versioned record from configuration to comparison. Modeled randomness
-uses injected seeds; cryptographic operations retain secure backend randomness and record backend
-metadata instead of forcing deterministic keys. Repeated runs separate warm-up effects where
-needed and report distributions rather than a single favorable measurement.
+Every experiment follows `CONFIG -> RUN -> RECORD -> EXPORT -> ANALYZE` and records a run ID,
+normalized configuration, applicable seed, Python and NumPy versions, liboqs and wrapper versions,
+CPU, OS, profile, backend metadata, ordered condition, trace, metrics, and outcome. Secret values,
+private keys, shared secrets, `K_SESSION`, and `K_CONFIRM` are never exported as metrics.
 
-The planned campaign contains:
+For PQC timing, discard warm-up, randomize condition order, use at least 30 runs and preferably 50,
+and report distributions with median and IQR; p10/p90 may supplement them. Persistent identity
+generation is a provisioning cost and is measured separately from the handshake.
 
-1. **PQC profile comparison:** compare `LOW` and `HIGH` handshake timing and communication sizes.
-2. **BB84 channel behavior:** vary implemented noise parameters and study QBER, sifting, final
-   material, efficiency, leakage, and aborts.
-3. **Hybrid key establishment:** verify functional integration and measure overhead for QKD +
-   ML-KEM-768, with optional HQC-3 diversification.
-4. **End-to-end secure session:** derive `K_SESSION`, protect a payload with AES-256-GCM, verify
-   decryption, and demonstrate authentication failure after tampering.
+For QBER and other proportions, report an appropriate binomial confidence interval and justify the
+chosen confidence level. Use Mann–Whitney, Clopper–Pearson, or any other statistical procedure only
+when it answers the stated question and its assumptions are documented.
 
-## 13. Key Metrics
+### Fundamental measurement rule
 
-- terminal success/abort status and reason;
-- phase and total timings, clearly labeled as software measurements;
-- bytes exchanged and public-key, ciphertext, and signature sizes;
-- QKD raw, sifted, disclosed, candidate, reconciled, and final sizes;
-- diagnostic and sampled QBER, sifting efficiency, leakage, and final secret fraction;
-- derived-key length, profile, component provenance, run ID, seed, and configuration snapshot.
+The QKD route is a numerical simulation, not real QKD hardware. Its NumPy runtime is not physical
+secret-key rate, device latency, fiber throughput, or reachable distance, and it must not be timed
+against ML-KEM, ML-DSA, or HQC. Simulation time may characterize the software or compare simulator
+configurations only. The PQC route executes real cryptographic operations through liboqs; its
+operation and handshake timings may compare PQC profiles only on the documented hardware/software
+environment. Other documents should reference this rule instead of duplicating it.
 
-Secret values are not experiment metrics.
+Communication measurement distinguishes raw cryptographic sizes, canonical protocol sizes, and
+serialized transport sizes.
 
-## 14. TFM Deliverables
+## 13. Experiments
 
-- modular QuantumSec software;
-- reproducible experiment definitions and records;
-- comparative results, tables, and figures;
-- a web laboratory for the principal scenarios;
-- accurate architecture, security-model, usage, and scope documentation;
-- the Master's thesis and defense demonstration.
+### E1 — PQC Cost Decomposition
 
-## 15. Definition of Done
+Compare `PQC-BASE` and `PQC-DIVERSE`. Measure ephemeral KEM key generation, sign, verify,
+encapsulate, decapsulate, transcript hashing, combiner, HKDF, Finished generation/verification, and
+total handshake. Measure persistent identity generation separately. Report the three size layers
+defined in the methodology and do not extrapolate beyond the reference environment.
 
-The TFM is complete only when:
+### E2 — BB84 Model Validation
 
-- the QKD path is demonstrable from preparation through final material or justified abort;
-- the `LOW` and `HIGH` PQC paths are demonstrable through mutual Finished confirmation;
-- QKD–PQC hybrid integration is demonstrable without direct sibling-package coupling;
-- both sides derive the expected 256-bit `K_SESSION` under the implemented profile contract;
-- the AES-256-GCM protected-message demo decrypts valid data and rejects tampering;
-- the web laboratory runs and visualizes the principal QKD, PQC, hybrid, and data-plane scenarios;
-- reproducible experiments emit versioned configurations, traces, metrics, and comparable results;
-- the experimental evidence is sufficient to answer the research question and document
-  limitations honestly.
+For each supported channel, compare simulated `e_Z`, `e_X`, aggregated QBER, sifting efficiency,
+final material, and abort behavior with the applicable analytical formulas. Include the asymmetric
+case that exposed the current estimator limitation and document prior behavior, cause, correction,
+and revalidation. The aim is model validation, not the trivial claim that more noise raises QBER.
 
-## 16. Out of Scope
+### E3 — Eve / Intercept-Resend
 
-- multiple additional QKD protocols unless all required work is already complete;
-- QKD networks, routing, and quantum repeaters;
-- production or commercial QKD hardware;
-- a new formal cryptographic security proof;
-- new PQC algorithms;
-- LLM or autonomous agents;
-- production optimization, certification, or deployment hardening;
-- full physical simulation of commercial devices.
+Vary interception fraction `f`; measure QBER, `e_Z`, `e_X`, `P(abort)`, and `n_final`. Compare
+with the ideal `QBER ~= 0.25 f` prediction under its stated assumptions. Principal figures are QBER
+and abort probability versus `f`.
 
-## 17. Future Work
+### E4 — QKD Authentication Cost
 
-- E91, B92, and BBM92;
-- QKDN topology, routing, repeaters, and key management;
-- physical QKD device and optical-loss integration;
-- additional PQC algorithms and security profiles;
-- richer combiners and formal verification;
-- larger cross-platform benchmarking;
-- deployment and interoperability research.
+Compare `QKD-ASSUMED`, `QKD-CLASSICAL-AUTH`, and `QKD-PQC-AUTH`, but treat the first only as an
+assumption baseline. For executed profiles, measure authentication bytes, operations, meaningful
+latency, failures, consumed authentication material, and introduced assumptions. Include a
+qualitative comparison of guarantee types.
 
-## 18. Proposed Thesis Title
+### E5 — Hybrid Marginal Overhead
 
-**English:** *QuantumSec: Design and Evaluation of a Reproducible Laboratory for Quantum-Safe
-Session Establishment Based on QKD, PQC, and Hybrid Strategies*
+Compare `PQC-BASE`, `PQC-DIVERSE`, `HYBRID`, and `HYBRID-DIVERSE` using component provenance and
+sizes, additional orchestration bytes, combiner/HKDF/confirmation cost, outcome, and negative tests.
+Do not compare BB84 simulation time with liboqs time. Determine whether orchestration cost is
+material relative to the constituent primitives.
 
-**Español:** *QuantumSec: Diseño y evaluación de un laboratorio reproducible para el
-establecimiento de sesiones quantum-safe basado en QKD, PQC y estrategias híbridas*
+### D1 — End-to-End Protected Session Demo
 
-Standards references: [NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final),
+Demonstrate `K_SESSION -> AES-256-GCM -> protected payload`, successful decryption, and rejection
+of modified ciphertext, tag, or AAD. This is a functional closure, not a scientific discovery.
+
+## 14. Metrics
+
+- **QKD:** `e_Z`, `e_X`, aggregated QBER, binomial interval, sifting efficiency, candidate material,
+  final calculated length, final secret fraction, abort/continue, abort probability, channel and
+  adversary sensitivity, and explicit security-model assumptions.
+- **PQC:** per-operation and total handshake distributions, provisioning cost, raw cryptographic
+  sizes, canonical protocol sizes, serialized transport sizes, success/failure, and backend/profile
+  metadata.
+- **Authentication:** mechanism, authenticated transcript/messages, bytes, operations, failures,
+  trust model, and consumed authentication material where applicable.
+- **Hybrid:** component provenance, deterministic ordering, encoding/label/length overhead,
+  combiner/HKDF/confirmation cost, derived-key length, outcome, and negative-test coverage.
+- **Data protection:** key/nonce/tag sizes and acceptance or rejection of valid/tampered inputs.
+
+Metrics are shown only where meaningful for the profile. Incompatible QKD and PQC timings are never
+summed, ranked, or placed on a common performance axis.
+
+## 15. Deliverables
+
+- validated and corrected BB84 experiment path with per-basis metrics and Eve;
+- executed QKD authentication and the two current PQC profiles;
+- hybrid and hybrid-diverse session orchestration with explicit provenance;
+- AES-256-GCM protected-message demonstration;
+- versioned experiment configurations, records, exports, analysis, and figures for E1–E5;
+- Web Laboratory V1 with Builder, Run, and two-run Compare screens;
+- contextual, versioned component cards with sources and a status-as-of date; and
+- thesis text that answers every research question with evidence or an explicit limitation.
+
+## 16. Definition of Done
+
+The TFM is not complete until:
+
+1. BB84 returns a justified result or abort.
+2. `e_Z` and `e_X` are calculated and secret-length estimation is theoretically justified or fails
+   conservatively.
+3. Intercept-resend Eve is executable and produces a curve comparable with theory.
+4. `PQC-BASE` works end to end.
+5. `PQC-DIVERSE` works end to end.
+6. At least one QKD profile executes authentication rather than assuming it.
+7. Classical and PQC QKD authentication are compared if both are implemented correctly.
+8. `HYBRID` works end to end.
+9. `HYBRID-DIVERSE` works end to end.
+10. `K_SESSION` is 256 bits and records explicit provenance.
+11. AES-256-GCM protects data and rejects tampering.
+12. `CONFIG -> RUN -> RECORD -> EXPORT` works.
+13. E1–E5 are reproducible.
+14. Web Laboratory V1 provides Builder, Run, and Compare.
+15. Contextual cards show the role and dated status of components.
+16. Every research question is answered by results or explicit limitations.
+
+## 17. Out of Scope
+
+E91, B92, BBM92, QKDN, quantum repeaters, hardware-QKD modeling, physical fiber secret-key-rate
+prediction, dark counts, decoy states, photon-number splitting, additional PQC algorithms, LLM
+agents, advanced dashboards, N-run web analytics, a dynamic standards crawler, a formal proof of
+the hybrid combiner, full finite-key composable security, and production deployment/certification
+are excluded.
+
+## 18. Future Work
+
+Future research may replace the simulated QKD source with a standards-shaped key-delivery boundary,
+study physical/optical models and additional adversaries, extend finite-key security, add QKD
+protocols or PQC algorithms, analyze other combiners, and evaluate production/distributed
+deployments. None is required to answer the current research question.
+
+## 19. Threats to Validity
+
+- **Construct validity:** numerical BB84 runtime is not hardware performance; liboqs timing is
+  platform-specific; byte-count layers must not be conflated.
+- **Internal validity:** RNG seeds, warm-up, execution order, background load, sampling fraction,
+  channel assumptions, and implementation versions can affect measurements.
+- **External validity:** logical single-qubit channels omit optical loss, detectors, dark counts,
+  decoy states, devices, networks, and production transports.
+- **Conclusion validity:** small samples, inappropriate averages, unsupported tests, or aggregate
+  QBER can hide relevant behavior. Report distributions and justified intervals.
+- **Security validity:** intercept-resend is not a complete adversary model; the estimator is
+  currently partial; authentication and hybrid guarantees are limited to what is executed and
+  documented.
+
+## 20. Related Work Positioning
+
+QuantumSec is positioned as an experimental integration and validation laboratory. Its novelty is
+not the existence of BB84, ML-KEM, ML-DSA, HQC, HKDF, AES-GCM, or hybridization. Its target
+contribution is controlled measurement of cost and assumptions across representative strategies,
+validation against analytical behavior, correction and revalidation of the discovered
+model-assumption violation, and a reproducible interface for inspecting those results.
+
+Normative status references: [NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final),
 [NIST FIPS 204](https://csrc.nist.gov/pubs/fips/204/final), and
-[NIST HQC selection](https://www.nist.gov/news-events/news/2025/03/nist-selects-hqc-fifth-algorithm-post-quantum-encryption).
+[NIST's HQC selection announcement](https://www.nist.gov/news-events/news/2025/03/nist-selects-hqc-fifth-algorithm-post-quantum-encryption).

@@ -1,33 +1,29 @@
 # Agent-Based Extensions — Scope Decision
 
-This document supersedes the earlier proposal to add protocol-controller, adaptive-channel,
-experiment-orchestrator, or QKDN-routing agents to the TFM.
+Autonomous and LLM-based agents are **FUTURE** and explicitly outside the QuantumSec TFM. They do
+not answer the definitive research question, contribute to E1–E5, or satisfy the definition of
+done.
 
-## Decision
+Deterministic protocol decisions—BB84 aborts, authentication failures, profile validation,
+secret-length policy, hybrid ordering, and experiment scheduling—remain explicit, testable logic.
+They must not be relabeled as agents.
 
-Autonomous and LLM-based agents are **out of scope for the QuantumSec TFM**. They are not required
-by the research question, do not contribute to the definition of done, and would broaden the work
-beyond the bounded sequence:
+The bounded TFM sequence is:
 
 ```text
-QKD–PQC hybrid integration
-    -> AES-256-GCM protected-message demo
-    -> reproducible experiment engine
-    -> web laboratory
-    -> experimental campaign and thesis results
+intercept-resend Eve
+    -> per-basis QBER and model validation
+    -> corrected security-decision model
+    -> orchestration contracts
+    -> executed QKD authentication
+    -> hybrid profiles
+    -> AES-256-GCM
+    -> E1-E5 experiment campaign
+    -> Builder / Run / Compare
 ```
 
-Deterministic protocol decisions already implemented in domain code—such as BB84 abort conditions,
-privacy-amplification length calculation, and profile validation—remain ordinary explicit protocol
-logic. They should not be renamed “agents.” Experiment sweeps should first be transparent,
-configuration-driven, and reproducible.
+Adaptive schedulers, autonomous experiment selection, and QKDN-routing agents may be studied only
+as separate future research with their own question, threat model, policy, and evaluation.
 
-## Future research only
-
-After the TFM, adaptive schedulers or QKDN controllers could be studied if they answer a separate
-research question and preserve reproducibility. Any such work would require its own threat model,
-decision policy, evaluation methodology, and architecture review. QKDN routing is itself future
-work, so an agent controlling it is not part of the present system.
-
-The authoritative scope is [`../TFM_GOAL.md`](../TFM_GOAL.md); the implementation roadmap is
+The authoritative scope is [`../TFM_GOAL.md`](../TFM_GOAL.md); the exact implementation order is
 [`tasks.md`](tasks.md).

@@ -1,3 +1,6 @@
+> **Historical review prompt.** This file preserves a dated review instruction and is not a current
+> source of project truth. Use code/tests, `README.md`, `TFM_GOAL.md`, and `docs/structure.md`.
+
 Actúa como revisor independiente de este repositorio.
 
 No asumas que la implementación existente es correcta.
