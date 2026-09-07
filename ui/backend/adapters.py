@@ -1,7 +1,6 @@
 """Adapters between typed HTTP data and the QuantumSec simulation domain."""
 
 from collections import Counter
-from hashlib import sha256
 from time import perf_counter
 from typing import Literal
 from uuid import uuid4
@@ -11,34 +10,23 @@ import numpy.typing as npt
 
 from core.rng import BaseRNG, SeededRNG
 from qkd.channel import (
-    AmplitudeDampingChannel,
-    BitFlipChannel,
-    ChannelPipeline,
-    DepolarizingChannel,
-    IdentityChannel,
     InterceptResendAttack,
-    PauliChannel,
-    PhaseFlipChannel,
+    QKDChannelStageSpec,
     QuantumChannel,
+    build_channel_pipeline,
+    build_channel_stage,
 )
 from qkd.primitives import Basis
 from qkd.protocols import BB84Protocol
 from ui.backend.capabilities import INSPECTOR_LIMIT
 from ui.backend.schemas import (
-    AmplitudeDampingChannelConfiguration,
     AttackDiagnosticsSummary,
     BasisCounts,
     BB84SimulationRequest,
     BB84SimulationResponse,
-    BitFlipChannelConfiguration,
     ChannelConfiguration,
     ChannelSummary,
-    DepolarizingChannelConfiguration,
-    IdentityChannelConfiguration,
-    InterceptResendConfiguration,
     OutcomeCounts,
-    PauliChannelConfiguration,
-    PhaseFlipChannelConfiguration,
     PostprocessingSummary,
     SimulationMetadata,
     SimulationMetrics,
@@ -56,33 +44,13 @@ def _bb84_basis_value(basis: Basis) -> Literal["Z", "X"]:
     raise ValueError(f"BB84 returned an unsupported basis: {basis.value}")
 
 
-def _adversary_seed(root_seed: int, stage_index: int) -> int:
-    """Derive a stable domain-separated seed for one adversarial stage."""
-
-    material = f"quantumsec/adversary-rng/v1:{root_seed}:{stage_index}".encode("ascii")
-    return int.from_bytes(sha256(material).digest()[:16], byteorder="big")
-
-
 def build_channel(configuration: ChannelConfiguration, *, rng: BaseRNG) -> QuantumChannel:
     """Map one validated API channel configuration to the public channel API."""
 
-    match configuration:
-        case IdentityChannelConfiguration():
-            return IdentityChannel()
-        case DepolarizingChannelConfiguration(p=p):
-            return DepolarizingChannel(p=p)
-        case BitFlipChannelConfiguration(p=p):
-            return BitFlipChannel(p=p)
-        case PhaseFlipChannelConfiguration(p=p):
-            return PhaseFlipChannel(p=p)
-        case AmplitudeDampingChannelConfiguration(gamma=gamma):
-            return AmplitudeDampingChannel(gamma=gamma)
-        case PauliChannelConfiguration(px=px, py=py, pz=pz):
-            return PauliChannel(px=px, py=py, pz=pz)
-        case InterceptResendConfiguration(intercept_fraction=intercept_fraction):
-            return InterceptResendAttack(intercept_fraction=intercept_fraction, rng=rng)
-
-    raise TypeError(f"Unsupported channel configuration: {type(configuration).__name__}")
+    return build_channel_stage(
+        QKDChannelStageSpec.from_public_dict(configuration.model_dump()),
+        rng=rng,
+    )
 
 
 def _channel_summary(configuration: ChannelConfiguration) -> ChannelSummary:
@@ -117,13 +85,16 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     """Execute BB84 with the engine's seeded RNG and adapt its immutable result."""
 
     protocol_rng = SeededRNG(request.seed)
-    channels: list[QuantumChannel] = []
-    for stage_index, configuration in enumerate(request.channels):
-        stage_rng: BaseRNG = protocol_rng
-        if isinstance(configuration, InterceptResendConfiguration):
-            stage_rng = SeededRNG(_adversary_seed(request.seed, stage_index))
-        channels.append(build_channel(configuration, rng=stage_rng))
-    pipeline = ChannelPipeline(channels)
+    stage_specs = tuple(
+        QKDChannelStageSpec.from_public_dict(configuration.model_dump())
+        for configuration in request.channels
+    )
+    pipeline = build_channel_pipeline(
+        stage_specs,
+        root_seed=request.seed,
+        rng_factory=SeededRNG,
+        intercept_resend_factory=InterceptResendAttack,
+    )
 
     started = perf_counter()
     session = BB84Protocol(channel=pipeline, rng=protocol_rng).run_session(request.n_signals)
@@ -156,7 +127,7 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     diagnostic_qber = result.qber_by_basis if result.n_sifted > 0 else None
     summaries = [_channel_summary(configuration) for configuration in request.channels]
     attack_diagnostics: list[AttackDiagnosticsSummary] = []
-    for stage_index, channel in enumerate(channels):
+    for stage_index, channel in enumerate(pipeline.channels):
         if isinstance(channel, InterceptResendAttack):
             diagnostics = channel.diagnostics
             attack_diagnostics.append(

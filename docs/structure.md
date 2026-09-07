@@ -27,12 +27,15 @@ Current dependency flow:
 ```text
 ui/frontend -> ui/backend -> qkd -> quantum -> core
 
+                         experiments
+                              |
+                              v
                          orchestration
                         /      |       \
                       qkd     pqc   data_protection
 ```
 
-Target dependency flow:
+Target UI dependency flow:
 
 ```text
 ui/frontend
@@ -78,6 +81,7 @@ QuantumSec/
 |-- pqc/                        # CURRENT: standalone authenticated PQC handshakes
 |-- orchestration/              # CURRENT: session layer and data-plane adapter
 |-- data_protection/            # CURRENT: session-bound AES-256-GCM payload protection
+|-- experiments/                # CURRENT: reproducible config/runtime/record/export engine V1
 |-- ui/
 |   |-- backend/                # CURRENT: BB84 HTTP adapter only
 |   `-- frontend/               # CURRENT/PARTIAL: BB84 laboratory
@@ -88,7 +92,7 @@ QuantumSec/
 |   |-- reviews/                # HISTORICAL independent review snapshots
 |   |-- structure.md            # CURRENT architecture source
 |   `-- tasks.md                # CURRENT ordered implementation plan
-`-- experiments/               # PLANNED: config/run/record/export/analyze
+`-- examples/experiments/       # CURRENT: small secret-free QKD and PQC configs
 ```
 
 The names of planned packages may be refined when implementation begins; their dependency
@@ -398,11 +402,12 @@ returned on authentication failure.
 
 ```text
 ExperimentConfig
-    -> Runner
-        -> SessionResult + ordered Trace
-            -> MetricRecord
-                -> versioned JSON/CSV export
-                    -> analysis and figures
+    -> ExperimentRuntimeFactory -> SessionExecutionContext (runtime-only secrets)
+        -> ExperimentRunner -> run_session()
+            -> public SessionResult + ordered Trace + categorized SessionMetrics
+                -> immutable ExperimentRecord
+                    -> versioned JSON/analysis-ready CSV
+                        -> later analysis and figures
 ```
 
 The five required experiments and D1 are specified in
@@ -410,9 +415,12 @@ The five required experiments and D1 are specified in
 requirements are centralized in
 [`../TFM_GOAL.md §12`](../TFM_GOAL.md#12-experimental-methodology).
 
-The experiment layer records environment, versions, profile, config, applicable seed, randomized
-condition order, trace, public byte sizes, applicable timings, QKD metrics, and outcome. It never
-serializes secret values.
+The V1 experiment layer is **CURRENT**. It records environment, versions, profile, normalized
+round-trippable config, applicable seed, randomized condition order, trace, public byte sizes,
+applicable timings, QKD protocol estimates/diagnostics, and outcome. It never serializes secret
+values and closes each generic `SessionResult` after copying public evidence. Its exact contracts,
+CLI, seed policy, batch behavior, and export schemas are documented in
+[`EXPERIMENTS.md`](EXPERIMENTS.md).
 
 ## 12. Web Laboratory V1
 

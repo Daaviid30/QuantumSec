@@ -30,7 +30,7 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | Intercept-resend Eve | **CURRENT** | Seeded, configurable adversary stage with diagnostics and analytical `QBER ~= 0.25 f` validation |
 | Hybrid QKD–PQC | **CURRENT** | Authenticated raw QKD/KEM contributions, canonical encoding, independent HKDF keys, and bilateral hybrid Finished |
 | AES-256-GCM data protection | **CURRENT** | Session-bound payload protection with 96-bit direction/counter nonces, full 128-bit tags, canonical AAD, and explicit tamper failure |
-| Experiment engine | **PLANNED** | Versioned config/run/record/export contracts and E1–E5 campaign |
+| Experiment engine | **CURRENT V1** | Versioned secret-free config/runtime/record contracts, seven-profile execution, batch order/warm-up, JSON/CSV, median/IQR, and Wilson intervals; E1–E5 campaign not yet run |
 | Web laboratory | **CURRENT, PARTIAL** | Working BB84 builder/results view; target Builder, Run, and two-run Compare screens are not complete |
 
 ## Research focus
@@ -61,6 +61,9 @@ Current:
 ```text
 ui/frontend -> ui/backend -> qkd -> quantum -> core
 
+                         experiments
+                              |
+                              v
                          orchestration
                            /       \
                          qkd       pqc
@@ -195,6 +198,9 @@ The fundamental measurement rule is defined once in
 [`TFM_GOAL.md §12`](TFM_GOAL.md#12-experimental-methodology): numerical BB84 runtime is not physical
 QKD performance and is never compared temporally with real liboqs operations.
 
+The reusable V1 engine is implemented; the campaign itself has deliberately not been executed.
+See [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) for exact record/export schemas and CLI usage.
+
 ## Web Laboratory V1
 
 The final UI is intentionally limited to three screens:
@@ -224,8 +230,10 @@ POST /api/simulations/bb84
 
 QKD receives an injected `BaseRNG`; repeatable runs use `SeededRNG(seed=...)`. PQC primitives use
 liboqs and operating-system cryptographic randomness and are not forced to be deterministic.
-Experiment records will preserve the environment, versions, config, run ID, applicable seed,
-ordered conditions, trace, metrics, and outcome without serializing secrets.
+Experiment records preserve the environment, versions, config, run ID, applicable seed, ordered
+conditions, trace, metrics, and outcome without serializing secrets. Equal QKD config/seed means an
+equal protocol outcome (not run ID, timestamp, or timing); equal PQC config means an equal method,
+profile, algorithms, and metric schema, not equal random artifacts or timings.
 
 ## Quickstart
 
@@ -250,6 +258,13 @@ Then start the frontend from `ui/frontend`:
 npm run dev
 ```
 
+Run the secret-free experiment examples from the repository root:
+
+```bash
+uv run python -m experiments.cli run examples/experiments/qkd_eve_example.json --output experiments/output/qkd-eve.json
+uv run python -m experiments.cli run examples/experiments/pqc_base_example.json --output experiments/output/pqc-base.json
+```
+
 ## Verification
 
 ```bash
@@ -268,6 +283,7 @@ npm run build
 - [`TFM_GOAL.md`](TFM_GOAL.md) — definitive academic contract.
 - [`docs/structure.md`](docs/structure.md) — current and target architecture.
 - [`docs/tasks.md`](docs/tasks.md) — exact implementation order.
+- [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) — current experiment config, runtime, record, export, and CLI contracts.
 - [`ui/README.md`](ui/README.md) — current UI/API and three-screen target.
 - [`DEPLOYMENT.md`](DEPLOYMENT.md) — local and research-hosting setup.
 - [`docs/reviews/`](docs/reviews/) and [`reports/`](reports/) — historical snapshots, not current

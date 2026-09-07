@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "experiment_kind": "E1",
+  "condition_id": "pqc-base",
+  "replicate_index": 0,
+  "seed": null,
+  "session": {
+    "version": 1,
+    "profile": "PQC-BASE",
+    "qkd_authentication_profile": null,
+    "qkd_signal_count": null,
+    "qkd_postprocessing": null,
+    "internal_pqc_profile": "low"
+  },
+  "qkd_stages": [],
+  "tags": [
+    "example",
+    "pqc"
+  ]
+}

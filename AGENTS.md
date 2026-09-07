@@ -54,6 +54,9 @@ Work efficiently by combining the available tools according to the task type. **
    - `data_protection/`: Independent AES-256-GCM data plane. Never imports `qkd`, `pqc`, or
      `orchestration`; only the upper adapter transfers an established key into it.
    - `orchestration/`: Common session contracts and separate QKD, PQC, and hybrid runners above the sibling `qkd` and `pqc` domains. Hybrid composition never moves into either lower domain.
+   - `experiments/`: Upper reproducibility layer. It executes `orchestration` and may use public
+     lower-layer construction contracts, but never implements cryptography. No lower layer imports
+     `experiments`, and `experiments` never imports `ui`.
    - `ui/`: FastAPI (`ui/backend`) and React/Vite/Tailwind (`ui/frontend`).
    - *Never invert the import flow.*
 

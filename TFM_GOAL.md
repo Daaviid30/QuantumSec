@@ -207,12 +207,18 @@ normalized configuration, applicable seed, Python and NumPy versions, liboqs and
 CPU, OS, profile, backend metadata, ordered condition, trace, metrics, and outcome. Secret values,
 private keys, shared secrets, `K_SESSION`, and `K_CONFIRM` are never exported as metrics.
 
+The V1 implementation of this flow is **CURRENT** in `experiments/`; its concrete schemas, runtime
+provisioning boundary, CLI, and export behavior are documented in
+[`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md). The E1-E5 campaign and final figures have not yet been
+executed.
+
 For PQC timing, discard warm-up, randomize condition order, use at least 30 runs and preferably 50,
 and report distributions with median and IQR; p10/p90 may supplement them. Persistent identity
 generation is a provisioning cost and is measured separately from the handshake.
 
-For QBER and other proportions, report an appropriate binomial confidence interval and justify the
-chosen confidence level. Use Mann–Whitney, Clopper–Pearson, or any other statistical procedure only
+For QBER and other proportions, V1 provides a 95% two-sided Wilson score interval by default (not
+exact Clopper–Pearson); report and justify any changed confidence level. Use Mann–Whitney,
+Clopper–Pearson, or any other statistical procedure only
 when it answers the stated question and its assumptions are documented.
 
 ### Fundamental measurement rule

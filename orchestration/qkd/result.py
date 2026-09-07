@@ -26,12 +26,19 @@ class QKDSessionSummary:
     n_raw: int
     n_sifted: int
     n_disclosed: int
+    n_candidate: int
     n_reconciled: int
     n_final: int
+    sifting_efficiency: float
+    final_secret_fraction: float
     estimated_qber_z: float | None
     estimated_qber_x: float | None
     estimated_qber_aggregated: float | None
     phase_error_bound: float | None
+    diagnostic_full_sifted_qber: float | None
+    diagnostic_qber_z: float | None
+    diagnostic_qber_x: float | None
+    diagnostic_qber_aggregated: float | None
 
     @classmethod
     def from_session(cls, session: BB84SessionResult) -> QKDSessionSummary:
@@ -42,14 +49,21 @@ class QKDSessionSummary:
             n_raw=session.n_raw,
             n_sifted=session.n_sifted,
             n_disclosed=session.n_disclosed,
+            n_candidate=session.n_candidate,
             n_reconciled=session.n_reconciled,
             n_final=session.n_final,
+            sifting_efficiency=(session.n_sifted / session.n_raw if session.n_raw else 0.0),
+            final_secret_fraction=session.final_secret_fraction,
             estimated_qber_z=(estimation.estimated_qber_z if estimation is not None else None),
             estimated_qber_x=(estimation.estimated_qber_x if estimation is not None else None),
             estimated_qber_aggregated=(
                 estimation.estimated_qber_aggregated if estimation is not None else None
             ),
             phase_error_bound=(estimation.phase_error_bound if estimation is not None else None),
+            diagnostic_full_sifted_qber=session.diagnostic_full_sifted_qber,
+            diagnostic_qber_z=session.diagnostic_qber_z,
+            diagnostic_qber_x=session.diagnostic_qber_x,
+            diagnostic_qber_aggregated=session.diagnostic_qber_aggregated,
         )
 
 
@@ -165,12 +179,19 @@ class AuthenticatedQKDSessionResult:
                 "n_raw": self.qkd.n_raw,
                 "n_sifted": self.qkd.n_sifted,
                 "n_disclosed": self.qkd.n_disclosed,
+                "n_candidate": self.qkd.n_candidate,
                 "n_reconciled": self.qkd.n_reconciled,
                 "n_final": self.qkd.n_final,
+                "sifting_efficiency": self.qkd.sifting_efficiency,
+                "final_secret_fraction": self.qkd.final_secret_fraction,
                 "estimated_qber_z": self.qkd.estimated_qber_z,
                 "estimated_qber_x": self.qkd.estimated_qber_x,
                 "estimated_qber_aggregated": self.qkd.estimated_qber_aggregated,
                 "phase_error_bound": self.qkd.phase_error_bound,
+                "diagnostic_full_sifted_qber": self.qkd.diagnostic_full_sifted_qber,
+                "diagnostic_qber_z": self.qkd.diagnostic_qber_z,
+                "diagnostic_qber_x": self.qkd.diagnostic_qber_x,
+                "diagnostic_qber_aggregated": self.qkd.diagnostic_qber_aggregated,
             },
             "authentication": {
                 "state": self.authentication.state.value,

@@ -2,6 +2,12 @@
 
 from qkd.channel.attacks import AttackDiagnostics, InterceptResendAttack
 from qkd.channel.base import QuantumChannel
+from qkd.channel.config import (
+    QKDChannelStageSpec,
+    QKDChannelStageType,
+    build_channel_pipeline,
+    build_channel_stage,
+)
 from qkd.channel.ideal import IdentityChannel
 from qkd.channel.kraus import KrausChannel
 from qkd.channel.noise import (
@@ -25,4 +31,8 @@ __all__ = [
     "PauliChannel",
     "PhaseFlipChannel",
     "QuantumChannel",
+    "QKDChannelStageSpec",
+    "QKDChannelStageType",
+    "build_channel_pipeline",
+    "build_channel_stage",
 ]

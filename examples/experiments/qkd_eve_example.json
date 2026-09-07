@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "experiment_kind": "E3",
+  "condition_id": "eve-f-0.50",
+  "replicate_index": 0,
+  "seed": 202603,
+  "session": {
+    "version": 1,
+    "profile": "QKD-ASSUMED",
+    "qkd_authentication_profile": "QKD-ASSUMED",
+    "qkd_signal_count": 4000,
+    "qkd_postprocessing": {
+      "sample_fraction": 0.2,
+      "phase_error_abort_threshold": 0.11,
+      "cascade_passes": 4,
+      "cascade_initial_block_factor": 0.73,
+      "cascade_maximum_initial_block_size": null,
+      "cascade_maximum_lookback_steps": null,
+      "verification_tag_length": 32,
+      "security_margin_bits": 0
+    },
+    "internal_pqc_profile": null
+  },
+  "qkd_stages": [
+    {
+      "type": "intercept_resend",
+      "intercept_fraction": 0.5
+    }
+  ],
+  "tags": [
+    "example",
+    "eve"
+  ]
+}

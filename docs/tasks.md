@@ -124,16 +124,18 @@ Exit condition: D1 demonstrates the establishment/data-plane boundary and all ta
 
 ### 8. Minimal experiment engine
 
-- [ ] Implement `CONFIG -> RUN -> RECORD -> EXPORT -> ANALYZE`.
-- [ ] Capture run ID, profile, normalized config, seed where applicable, Python, NumPy, liboqs,
+- [x] Implement `CONFIG -> RUN -> RECORD -> EXPORT -> ANALYZE`.
+- [x] Capture run ID, profile, normalized config, seed where applicable, Python, NumPy, liboqs,
   wrapper, CPU, OS, backend versions, ordered condition, trace, metrics, and outcome.
-- [ ] Export versioned JSON and analysis-ready CSV without secrets.
-- [ ] Support randomized condition order and discarded warm-up for PQC timing.
-- [ ] Report median/IQR and justified distribution summaries.
-- [ ] Report justified binomial intervals for QBER/proportions.
-- [ ] Distinguish raw cryptographic, canonical protocol, and serialized transport sizes.
+- [x] Export versioned JSON and analysis-ready CSV without secrets.
+- [x] Support randomized condition order and discarded warm-up for PQC timing.
+- [x] Report median/IQR and justified distribution summaries.
+- [x] Report justified Wilson binomial intervals for QBER/proportions.
+- [x] Preserve available raw/canonical categories and record public JSON artifact size without
+  fabricating unavailable transport sizes.
 
-Exit condition: all five experiments can be reproduced from saved configurations and records.
+Exit condition met: the V1 engine and D1 label can execute all seven profiles from saved configs;
+the full E1-E5 campaign remains phase 9 and has not been run.
 
 ### 9. Execute the experimental campaign
 

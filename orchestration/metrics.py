@@ -14,7 +14,20 @@ class QKDSessionMetrics:
     simulation_time_ns: int
     n_raw: int
     n_sifted: int
+    n_disclosed: int
+    n_candidate: int
+    n_reconciled: int
     n_final: int
+    sifting_efficiency: float
+    final_secret_fraction: float
+    estimated_qber_z: float | None
+    estimated_qber_x: float | None
+    estimated_qber_aggregated: float | None
+    phase_error_bound: float | None
+    diagnostic_full_sifted_qber: float | None
+    diagnostic_qber_z: float | None
+    diagnostic_qber_x: float | None
+    diagnostic_qber_aggregated: float | None
     transcript_bytes: int
 
 
