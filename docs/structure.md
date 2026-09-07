@@ -28,8 +28,8 @@ Current dependency flow:
 ui/frontend -> ui/backend -> qkd -> quantum -> core
 
                          orchestration
-                           /       \
-                         qkd       pqc
+                        /      |       \
+                      qkd     pqc   data_protection
 ```
 
 Target dependency flow:
@@ -60,6 +60,8 @@ The invariants are:
 - `quantum` may depend on `core`, but knows nothing about QKD or PQC.
 - `qkd` may depend on `quantum` and `core`, but never imports `pqc`.
 - `pqc` is a sibling domain and never imports `qkd`.
+- `data_protection` owns only data-plane concepts and never imports `qkd`, `pqc`, or
+  `orchestration`; the ownership-transfer adapter lives in `orchestration`.
 - authentication policy and QKD–PQC composition belong above both domains.
 - `experiments` records and invokes capabilities; it does not implement cryptography.
 - `ui/backend` adapts typed contracts and does not hide domain logic in routes.
@@ -74,7 +76,8 @@ QuantumSec/
 |-- quantum/                    # CURRENT: numerical quantum mathematics
 |-- qkd/                        # CURRENT: BB84 and classical post-processing
 |-- pqc/                        # CURRENT: standalone authenticated PQC handshakes
-|-- orchestration/              # CURRENT: common QKD, PQC, and hybrid session layer
+|-- orchestration/              # CURRENT: session layer and data-plane adapter
+|-- data_protection/            # CURRENT: session-bound AES-256-GCM payload protection
 |-- ui/
 |   |-- backend/                # CURRENT: BB84 HTTP adapter only
 |   `-- frontend/               # CURRENT/PARTIAL: BB84 laboratory
@@ -85,7 +88,6 @@ QuantumSec/
 |   |-- reviews/                # HISTORICAL independent review snapshots
 |   |-- structure.md            # CURRENT architecture source
 |   `-- tasks.md                # CURRENT ordered implementation plan
-|-- data_protection/            # PLANNED: AES-256-GCM session payloads
 `-- experiments/               # PLANNED: config/run/record/export/analyze
 ```
 
@@ -362,7 +364,7 @@ computational KDF output is not automatically information-theoretically secure b
 came from QKD, and no formal robust-combiner proof is claimed. QKD simulator time and real PQC
 software-crypto time remain separate metric categories and are not presented as physical latency.
 
-## 10. Planned data-protection plane
+## 10. Current data-protection plane
 
 ```text
 ESTABLISHMENT PLANE -> 256-bit K_SESSION
@@ -371,9 +373,24 @@ DATA PLANE          -> AES-256-GCM
                     -> plaintext or explicit authentication failure
 ```
 
-The implementation requires a 96-bit nonce, uniqueness under each key, full authentication tag,
-appropriate session metadata as AAD, successful valid decryption, rejection of modified
-ciphertext/tag/AAD, and no partial plaintext on failure.
+`orchestration.open_data_plane()` accepts only an established 256-bit `SESSION_KEY`, constructs a
+public `DataPlaneContext`, transfers the key into `ProtectedSession`, and retires the source
+`SessionResult` capability. It supports `PQC-BASE`, `PQC-DIVERSE`, `HYBRID`, and
+`HYBRID-DIVERSE`. QKD-only `QKD_BITSTRING` results are rejected because no application-key schedule
+for their variable-length output is currently defined.
+
+`data_protection/` has no dependency on establishment domains. `ProtectedSession` uses
+`cryptography`'s `AESGCM` with exactly 32-byte keys. Each 96-bit nonce is a four-byte direction
+discriminator (`00000001` for Alice-to-Bob or `00000002` for Bob-to-Alice) followed by an unsigned
+64-bit big-endian monotonic sequence. Allocation is lock-protected; the final sequence value is
+usable once and the counter never wraps.
+
+Canonical AAD is the length-prefixed `QuantumSec/DataPlane/v1/AAD` domain, version, length-prefixed
+canonical `DataPlaneContext`, direction, uint64 sequence, declared application-AAD byte count, and
+length-prefixed application AAD. The context binds session ID, public profile, `SessionResult`
+version, key type/size, and typed public session-context entries. `ProtectedRecord` stores only
+public transport metadata, nonce, ciphertext, and the full 128-bit tag. `InvalidTag` propagates
+unchanged and no plaintext is returned on authentication failure.
 
 ## 11. Experiment architecture
 

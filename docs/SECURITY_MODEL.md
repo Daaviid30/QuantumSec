@@ -195,6 +195,33 @@ the computational model of that construction; it is not automatically an informa
 output. Numerical BB84 runtime and real PQC software runtime are separate categories, not a
 physical hybrid-latency claim.
 
+## AES-256-GCM data plane
+
+The data plane accepts only an established 256-bit `SESSION_KEY` from `PQC-BASE`, `PQC-DIVERSE`,
+`HYBRID`, or `HYBRID-DIVERSE`. QKD-only results expose a variable-length `QKD_BITSTRING` and are
+rejected: this phase does not silently truncate, hash, pad, or introduce a new application HKDF.
+
+Payload protection uses `cryptography`'s high-level AES-GCM AEAD with a 32-byte key, a 96-bit nonce,
+and the full 128-bit authentication tag. Under a correct secret key and a nonce never reused with
+that key, it provides confidentiality plus integrity/authenticity for ciphertext and AAD. It does
+not authenticate Alice's or Bob's identity; peer authentication belongs to the establishment
+plane.
+
+Nonce policy is deterministic and direction separated. The first four bytes are `00000001` for
+Alice-to-Bob or `00000002` for Bob-to-Alice, followed by a monotonic unsigned 64-bit big-endian
+sequence. Each direction has an independent lock-protected counter, their nonce sets cannot
+overlap, and exhaustion fails without wrapping.
+
+Internal AAD under `QuantumSec/DataPlane/v1/AAD` binds the data-plane version, established session
+ID and public profile, `SessionResult` version, key type and size, normalized public session
+context, record direction and sequence, declared application-AAD length, and application AAD.
+Changing ciphertext, tag, or application AAD causes `cryptography.exceptions.InvalidTag`; AEAD
+decryption returns plaintext only after successful tag verification.
+
+Nonce uniqueness on encryption is not network replay protection. This phase implements no replay
+window or receive sequence policy. Closing session capabilities releases Python references and
+prevents accidental reuse, but does not claim memory zeroization.
+
 ## Analytical channel expectations
 
 For uniformly random BB84 input bits and the channel parameterizations implemented in `qkd/`:
@@ -228,6 +255,8 @@ rates.
 - The simulator makes no physical secret-key-rate, distance, throughput, or hardware-latency claim.
 - The hybrid construction has no formal robust-combiner proof and no automatic
   information-theoretic output claim.
+- The AES-GCM data plane does not provide identity authentication, network anti-replay, or memory
+  zeroization.
 
 ## Reference
 

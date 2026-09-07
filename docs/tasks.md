@@ -112,12 +112,13 @@ Exit condition: `HYBRID` and `HYBRID-DIVERSE` work end to end.
 
 ### 7. AES-256-GCM protected session
 
-- [ ] Consume only an established 32-byte `K_SESSION`.
-- [ ] Use 96-bit nonces with enforced uniqueness per key/session policy.
-- [ ] Use the full 128-bit authentication tag.
-- [ ] Bind appropriate session/profile/transcript metadata as AAD.
-- [ ] Return plaintext only after successful authentication.
-- [ ] Test valid round-trip and modified ciphertext, tag, AAD, nonce policy, and wrong-key failure.
+- [x] Consume only an established 32-byte `K_SESSION`.
+- [x] Use 96-bit, direction-separated monotonic nonces with concurrency-safe allocation and no wrap.
+- [x] Use the full 128-bit authentication tag.
+- [x] Bind session/profile/result/key/public-context/direction/sequence metadata as canonical AAD.
+- [x] Return plaintext only after successful AEAD authentication.
+- [x] Test valid round-trip, modified ciphertext/tag/AAD, nonce policy, wrong key/session, lifecycle,
+  and the real HYBRID D1 path.
 
 Exit condition: D1 demonstrates the establishment/data-plane boundary and all tampering is rejected.
 
@@ -188,7 +189,7 @@ Before declaring the TFM complete, search live documentation, API capability tex
 - the reconciled-key verification tag presented as a channel MAC;
 - Eve or per-basis QBER presented as current before implementation;
 - aggregate QBER presented as valid for every supported channel;
-- AES-GCM or hybrid orchestration presented as current before implementation;
+- AES-GCM or hybrid orchestration presented with capabilities beyond the live implementation;
 - a separate Quantum-Safe Explorer or N-run dashboard;
 - incompatible metrics compared on one axis; and
 - obsolete roadmap or status text.

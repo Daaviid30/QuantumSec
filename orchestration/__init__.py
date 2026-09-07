@@ -2,6 +2,7 @@
 
 from orchestration.config import SESSION_CONFIG_VERSION, SessionConfig
 from orchestration.context import SessionExecutionContext
+from orchestration.data_plane import open_data_plane
 from orchestration.hybrid import (
     HybridPublicContext,
     HybridSecretComponent,
@@ -88,6 +89,7 @@ __all__ = [
     "SessionTraceSource",
     "qkd_profile_definition",
     "canonical_hybrid_secret_input",
+    "open_data_plane",
     "run_hybrid_session",
     "run_qkd_profile",
     "run_session",

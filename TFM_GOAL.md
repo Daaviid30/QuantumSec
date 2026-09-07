@@ -174,7 +174,7 @@ runner and statistical result set remain planned.
 
 ML-KEM-768 performs key establishment, ML-DSA-65 performs authentication, HQC-3 adds a distinct KEM
 component for diversification, HKDF-SHA-384 derives keys, Finished/HMAC-SHA-384 confirms possession,
-and AES-256-GCM will protect application data. These roles are not interchangeable.
+and AES-256-GCM protects application data after establishment. These roles are not interchangeable.
 
 The hybrid construction is not described as automatically secure whenever one input remains
 secure. The TFM does not provide a new formal proof. If information-theoretic QKD material is fed
@@ -266,7 +266,9 @@ material relative to the constituent primitives.
 ### D1 — End-to-End Protected Session Demo
 
 Demonstrate `K_SESSION -> AES-256-GCM -> protected payload`, successful decryption, and rejection
-of modified ciphertext, tag, or AAD. This is a functional closure, not a scientific discovery.
+of modified ciphertext, tag, or AAD. This **CURRENT** D1 capability is a functional closure, not a
+scientific discovery; it does not claim identity authentication, replay protection, or memory
+zeroization from AES-GCM.
 
 ## 14. Metrics
 

@@ -29,7 +29,7 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | PQC establishment | **CURRENT** | Mutually authenticated `PQC-BASE`/`PQC-DIVERSE` handshakes using ML-KEM-768, optional HQC-3, ML-DSA-65, structured KEM input, HKDF-SHA-384, and bilateral Finished |
 | Intercept-resend Eve | **CURRENT** | Seeded, configurable adversary stage with diagnostics and analytical `QBER ~= 0.25 f` validation |
 | Hybrid QKD–PQC | **CURRENT** | Authenticated raw QKD/KEM contributions, canonical encoding, independent HKDF keys, and bilateral hybrid Finished |
-| AES-256-GCM data protection | **PLANNED** | Functional protected-payload closure from the established 256-bit `K_SESSION` |
+| AES-256-GCM data protection | **CURRENT** | Session-bound payload protection with 96-bit direction/counter nonces, full 128-bit tags, canonical AAD, and explicit tamper failure |
 | Experiment engine | **PLANNED** | Versioned config/run/record/export contracts and E1–E5 campaign |
 | Web laboratory | **CURRENT, PARTIAL** | Working BB84 builder/results view; target Builder, Run, and two-run Compare screens are not complete |
 
@@ -74,7 +74,7 @@ ui/frontend
         -> session orchestration                     [CURRENT all seven profiles]
             -> qkd                                   [CURRENT domain]
             -> pqc                                   [CURRENT domain]
-            -> data protection                       [PLANNED]
+            -> data protection                       [CURRENT]
         -> direct BB84 adapter                        [CURRENT]
 ```
 
@@ -141,8 +141,8 @@ pre-provisioned ML-DSA-65 identities and trust
 ```
 
 ML-KEM performs key establishment, ML-DSA authentication, HQC diversification, HKDF derivation, and
-Finished explicit key confirmation. None protects application payloads; AES-256-GCM remains
-planned.
+Finished explicit key confirmation. AES-256-GCM is a separate data-plane operation that protects
+application payloads only after a confirmed 256-bit `K_SESSION` exists.
 
 As of **2026-09-05**, ML-KEM and ML-DSA are standardized in NIST FIPS 203 and FIPS 204. The
 implementation uses the parameter set exposed by liboqs 0.16.0 as `HQC-3`. HQC was selected by
@@ -151,7 +151,7 @@ NIST for standardization on 2025-03-11, but is not described as a published NIST
 The structured dual-KEM input is a research diversification construction, not a standardized
 multi-KEM combiner or proof that one uncompromised input automatically secures the final key.
 
-## Current hybrid path and planned data protection
+## Current hybrid path and data protection
 
 ```text
 K_QKD
@@ -173,7 +173,9 @@ DATA PLANE          -> AES-256-GCM -> protected payload or explicit authenticati
 
 The AES-GCM demonstration requires a 96-bit unique nonce, full 128-bit tag, appropriate session AAD,
 valid decryption, and rejection of modified ciphertext, tag, or AAD without returning partial
-plaintext.
+plaintext. `open_data_plane()` accepts `PQC-BASE`, `PQC-DIVERSE`, `HYBRID`, and
+`HYBRID-DIVERSE`; QKD-only bitstrings are rejected until an explicit application-key schedule is
+defined.
 
 ## Experimental campaign
 
