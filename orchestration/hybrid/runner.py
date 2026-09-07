@@ -1,5 +1,6 @@
 """Orchestrate authenticated QKD and raw authenticated PQC contributions."""
 
+from dataclasses import replace
 from hashlib import sha384
 from time import perf_counter_ns
 
@@ -13,6 +14,7 @@ from orchestration.hybrid.encoding import (
     HybridSecretComponent,
     canonical_hybrid_secret_input,
     hybrid_component_metadata_bytes,
+    hybrid_kem_label,
 )
 from orchestration.hybrid.finished import (
     HybridFinishedMessage,
@@ -42,6 +44,7 @@ from orchestration.result import (
     SessionStatus,
 )
 from orchestration.trace import SessionTraceBuilder, SessionTraceSource
+from pqc.errors import PQCError
 from pqc.protocol import (
     issue_initiator_hybrid_contributions,
     issue_responder_hybrid_contributions,
@@ -71,6 +74,20 @@ def _pqc_outcome(verified: bool) -> AuthenticationOutcome:
     )
 
 
+def _hybrid_public_context_entries(
+    context: HybridPublicContext | None,
+) -> tuple[tuple[str, str | int], ...]:
+    if context is None:
+        return ()
+    return (
+        ("hybrid_context_hash_sha384", context.context_hash.hex()),
+        ("qkd_transcript_hash_sha384", context.qkd_transcript_hash.hex()),
+        ("pqc_transcript_hash_sha384", context.pqc_transcript_hash.hex()),
+        ("hybrid_encoding_version", context.encoding_version),
+        ("hybrid_context_version", context.version),
+    )
+
+
 def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) -> SessionResult:
     """Establish a hybrid key only after both source protocols and hybrid Finished succeed."""
 
@@ -81,8 +98,10 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
         raise ValueError("Hybrid execution requires context.qkd_protocol.")
     if context.pqc_initiator is None or context.pqc_responder is None:
         raise ValueError("Hybrid execution requires pre-provisioned PQC parties.")
-    assert config.qkd_signal_count is not None
-    assert config.qkd_authentication_profile is not None
+    if config.qkd_signal_count is None:
+        raise ValueError("Hybrid execution requires a positive qkd_signal_count.")
+    if config.qkd_authentication_profile is None:
+        raise ValueError("Hybrid execution requires an explicit qkd_authentication_profile.")
     validate_qkd_authentication_context(
         config.qkd_authentication_profile,
         context.qkd_authentication,
@@ -112,12 +131,14 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
         )
 
     alice_keys = bob_keys = None
+    alice_capability = bob_capability = None
     qkd_result = None
     pqc_auth_metrics = None
     pqc_metrics = None
     qkd_metrics = None
     qkd_auth = None
     hybrid_metrics = None
+    public_context = None
     try:
         qkd_start = perf_counter_ns()
         qkd_result = run_qkd_profile(
@@ -212,7 +233,7 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
             values.extend(
                 HybridSecretComponent(
                     index,
-                    "SS_ML_KEM" if index == 2 else "SS_HQC",
+                    hybrid_kem_label(algorithm),
                     "pqc",
                     algorithm,
                     "raw-bytes",
@@ -255,66 +276,6 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
         alice_keys = HybridDerivedKeys(public_context.context_hash, alice_session_key, alice_confirmation_key)
         bob_keys = HybridDerivedKeys(public_context.context_hash, bob_session_key, bob_confirmation_key)
 
-        generation_start = perf_counter_ns()
-        responder_finished = create_finished(
-            bob_keys.confirmation_key(), public_context, HybridFinishedRole.RESPONDER
-        )
-        generation_time = perf_counter_ns() - generation_start
-        if context.hybrid_finished_transport_hook is not None:
-            transported = context.hybrid_finished_transport_hook(responder_finished)
-            if not isinstance(transported, HybridFinishedMessage):
-                raise TypeError("Hybrid Finished hook must return HybridFinishedMessage.")
-            responder_finished = transported
-        verification_start = perf_counter_ns()
-        responder_verified = verify_finished(
-            alice_keys.confirmation_key(),
-            public_context,
-            responder_finished,
-            HybridFinishedRole.RESPONDER,
-        )
-        verification_time = perf_counter_ns() - verification_start
-        if not responder_verified:
-            raise ValueError("Responder hybrid Finished verification failed.")
-        trace.append(
-            SessionTraceSource.HYBRID,
-            "finished_b",
-            "verified",
-            "Alice verified Bob's hybrid Finished.",
-        )
-
-        generation_start = perf_counter_ns()
-        initiator_finished = create_finished(
-            alice_keys.confirmation_key(),
-            public_context,
-            HybridFinishedRole.INITIATOR,
-            previous=responder_finished.verify_data,
-        )
-        generation_time += perf_counter_ns() - generation_start
-        if context.hybrid_finished_transport_hook is not None:
-            transported = context.hybrid_finished_transport_hook(initiator_finished)
-            if not isinstance(transported, HybridFinishedMessage):
-                raise TypeError("Hybrid Finished hook must return HybridFinishedMessage.")
-            initiator_finished = transported
-        verification_start = perf_counter_ns()
-        initiator_verified = verify_finished(
-            bob_keys.confirmation_key(),
-            public_context,
-            initiator_finished,
-            HybridFinishedRole.INITIATOR,
-            previous=responder_finished.verify_data,
-        )
-        verification_time += perf_counter_ns() - verification_start
-        if not initiator_verified:
-            raise ValueError("Initiator hybrid Finished verification failed.")
-        alice_keys.retire_confirmation_key()
-        bob_keys.retire_confirmation_key()
-        trace.append(
-            SessionTraceSource.HYBRID,
-            "finished_a",
-            "verified",
-            "Bob verified Alice's chained hybrid Finished.",
-        )
-
         raw_bytes = sum(len(component.secret) for component in alice_components)
         ml_bytes = len(alice_components[1].secret)
         hqc_bytes = len(alice_components[2].secret) if len(alice_components) == 3 else None
@@ -332,12 +293,91 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
             encoding_time_ns=encoding_time,
             hkdf_session_time_ns=hkdf_session_time,
             hkdf_confirmation_time_ns=hkdf_confirmation_time,
-            finished_generation_time_ns=generation_time,
-            finished_verification_time_ns=verification_time,
-            finished_responder_bytes=len(responder_finished.canonical_bytes()),
-            finished_initiator_bytes=len(initiator_finished.canonical_bytes()),
+            finished_generation_time_ns=0,
+            finished_verification_time_ns=0,
+            finished_responder_bytes=0,
+            finished_initiator_bytes=0,
             derived_session_key_bits=256,
         )
+
+        generation_start = perf_counter_ns()
+        responder_finished = create_finished(
+            bob_keys.confirmation_key(), public_context, HybridFinishedRole.RESPONDER
+        )
+        generation_time = perf_counter_ns() - generation_start
+        hybrid_metrics = replace(
+            hybrid_metrics,
+            finished_generation_time_ns=generation_time,
+            finished_responder_bytes=len(responder_finished.canonical_bytes()),
+        )
+        if context.hybrid_finished_transport_hook is not None:
+            transported = context.hybrid_finished_transport_hook(responder_finished)
+            if not isinstance(transported, HybridFinishedMessage):
+                raise TypeError("Hybrid Finished hook must return HybridFinishedMessage.")
+            responder_finished = transported
+        verification_start = perf_counter_ns()
+        responder_verified = verify_finished(
+            alice_keys.confirmation_key(),
+            public_context,
+            responder_finished,
+            HybridFinishedRole.RESPONDER,
+        )
+        verification_time = perf_counter_ns() - verification_start
+        hybrid_metrics = replace(
+            hybrid_metrics,
+            finished_verification_time_ns=verification_time,
+        )
+        if not responder_verified:
+            raise ValueError("Responder hybrid Finished verification failed.")
+        trace.append(
+            SessionTraceSource.HYBRID,
+            "finished_b",
+            "verified",
+            "Alice verified Bob's hybrid Finished.",
+        )
+
+        generation_start = perf_counter_ns()
+        initiator_finished = create_finished(
+            alice_keys.confirmation_key(),
+            public_context,
+            HybridFinishedRole.INITIATOR,
+            previous=responder_finished.verify_data,
+        )
+        generation_time += perf_counter_ns() - generation_start
+        hybrid_metrics = replace(
+            hybrid_metrics,
+            finished_generation_time_ns=generation_time,
+            finished_initiator_bytes=len(initiator_finished.canonical_bytes()),
+        )
+        if context.hybrid_finished_transport_hook is not None:
+            transported = context.hybrid_finished_transport_hook(initiator_finished)
+            if not isinstance(transported, HybridFinishedMessage):
+                raise TypeError("Hybrid Finished hook must return HybridFinishedMessage.")
+            initiator_finished = transported
+        verification_start = perf_counter_ns()
+        initiator_verified = verify_finished(
+            bob_keys.confirmation_key(),
+            public_context,
+            initiator_finished,
+            HybridFinishedRole.INITIATOR,
+            previous=responder_finished.verify_data,
+        )
+        verification_time += perf_counter_ns() - verification_start
+        hybrid_metrics = replace(
+            hybrid_metrics,
+            finished_verification_time_ns=verification_time,
+        )
+        if not initiator_verified:
+            raise ValueError("Initiator hybrid Finished verification failed.")
+        alice_keys.retire_confirmation_key()
+        bob_keys.retire_confirmation_key()
+        trace.append(
+            SessionTraceSource.HYBRID,
+            "finished_a",
+            "verified",
+            "Bob verified Alice's chained hybrid Finished.",
+        )
+
         key = alice_keys.session_key()
         trace.append(
             SessionTraceSource.SESSION,
@@ -374,13 +414,7 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
                 hybrid=hybrid_metrics,
                 orchestration_software_wall_time_ns=perf_counter_ns() - wall_start,
             ),
-            (
-                ("hybrid_context_hash_sha384", public_context.context_hash.hex()),
-                ("qkd_transcript_hash_sha384", public_context.qkd_transcript_hash.hex()),
-                ("pqc_transcript_hash_sha384", public_context.pqc_transcript_hash.hex()),
-                ("hybrid_encoding_version", public_context.encoding_version),
-                ("hybrid_context_version", public_context.version),
-            ),
+            _hybrid_public_context_entries(public_context),
             EstablishedKeyCapability(key, bit_length=256, key_type=EstablishedKeyType.SESSION_KEY),
         )
     except ValueError as exc:
@@ -404,10 +438,38 @@ def run_hybrid_session(config: SessionConfig, context: SessionExecutionContext) 
                 hybrid=hybrid_metrics,
                 orchestration_software_wall_time_ns=perf_counter_ns() - wall_start,
             ),
+            _hybrid_public_context_entries(public_context),
+        )
+    except (PQCError, RuntimeError, TypeError) as exc:
+        reason = f"Operational execution failure: {exc}"
+        trace.append(SessionTraceSource.HYBRID, "execution", "failed", reason)
+        trace.append(SessionTraceSource.SESSION, "session", "failed", reason)
+        return SessionResult(
+            SESSION_RESULT_VERSION,
+            exchange.transcript.session_id,
+            config.profile,
+            SessionStatus.FAILED,
+            reason,
+            (),
+            SessionAuthentication(qkd_auth, _pqc_outcome(True)),
+            trace.freeze(),
+            SessionMetrics(
+                qkd=qkd_metrics,
+                pqc=pqc_metrics,
+                qkd_authentication=(qkd_result.authentication.metrics if qkd_result else None),
+                pqc_authentication=pqc_auth_metrics,
+                hybrid=hybrid_metrics,
+                orchestration_software_wall_time_ns=perf_counter_ns() - wall_start,
+            ),
+            _hybrid_public_context_entries(public_context),
         )
     finally:
         if alice_keys is not None:
             alice_keys.close()
         if bob_keys is not None:
             bob_keys.close()
+        if alice_capability is not None:
+            alice_capability.close()
+        if bob_capability is not None:
+            bob_capability.close()
         exchange.close()

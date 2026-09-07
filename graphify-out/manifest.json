@@ -1362,8 +1362,8 @@
     "semantic_hash": ""
   },
   "orchestration/authentication/ml_dsa.py": {
-    "mtime": 1788763265.3053486,
-    "seen": 1788764535.9866796,
+    "mtime": 1788788691.4650795,
+    "seen": 1788788971.9582238,
     "ast_hash": "4ae568f1c2cf390591b41433407f2f51",
     "semantic_hash": ""
   },
@@ -1428,27 +1428,27 @@
     "semantic_hash": ""
   },
   "orchestration/hybrid/__init__.py": {
-    "mtime": 1788763601.9843457,
-    "seen": 1788764535.986685,
-    "ast_hash": "ff56abcd26f19689462c89ff58bb4932",
+    "mtime": 1788788522.4860075,
+    "seen": 1788788971.95823,
+    "ast_hash": "861aed8f44a25576d6c246657c888fe0",
     "semantic_hash": ""
   },
   "orchestration/hybrid/context.py": {
-    "mtime": 1788764897.9205914,
-    "seen": 1788765172.7501338,
-    "ast_hash": "19366f9aefa0fbfb60336d12f0ef1b4c",
+    "mtime": 1788788691.4629755,
+    "seen": 1788788971.9582312,
+    "ast_hash": "37ec350a554c97ae7346a1d8335cf08d",
     "semantic_hash": ""
   },
   "orchestration/hybrid/encoding.py": {
-    "mtime": 1788764214.5640318,
-    "seen": 1788764535.9866867,
-    "ast_hash": "206f47d3488a4253780e202c62071004",
+    "mtime": 1788788519.3322937,
+    "seen": 1788788971.9582324,
+    "ast_hash": "fe4e2d5f80418e41e4f488524aa57bfb",
     "semantic_hash": ""
   },
   "orchestration/hybrid/finished.py": {
-    "mtime": 1788763940.5926964,
-    "seen": 1788764535.9866877,
-    "ast_hash": "1f0480195a222120d6f0efadabce7010",
+    "mtime": 1788788521.549386,
+    "seen": 1788788971.9582336,
+    "ast_hash": "b5858e395fa3c1e8c2ea1a5ead512dbb",
     "semantic_hash": ""
   },
   "orchestration/hybrid/key_schedule.py": {
@@ -1458,9 +1458,9 @@
     "semantic_hash": ""
   },
   "orchestration/hybrid/runner.py": {
-    "mtime": 1788764898.7018461,
-    "seen": 1788765172.7501395,
-    "ast_hash": "c94c332cedd04570fd4663b9fab5a168",
+    "mtime": 1788788612.656616,
+    "seen": 1788788971.9582362,
+    "ast_hash": "cb8484e106cc14c418987473578e7edc",
     "semantic_hash": ""
   },
   "orchestration/metrics.py": {
@@ -1482,9 +1482,9 @@
     "semantic_hash": ""
   },
   "orchestration/pqc/runner.py": {
-    "mtime": 1788764752.633746,
-    "seen": 1788764866.2772372,
-    "ast_hash": "f67d2bfec31d0fac42d0e3c1d15290d8",
+    "mtime": 1788788662.0433903,
+    "seen": 1788788971.9582412,
+    "ast_hash": "a766b0d12442f9a6ecf57133716c5470",
     "semantic_hash": ""
   },
   "orchestration/qkd/session_runner.py": {
@@ -1494,9 +1494,9 @@
     "semantic_hash": ""
   },
   "orchestration/result.py": {
-    "mtime": 1788764945.1351686,
-    "seen": 1788765172.750153,
-    "ast_hash": "76e9198f9fcfc6929ef267d72e15a4ba",
+    "mtime": 1788788518.187922,
+    "seen": 1788788971.9582498,
+    "ast_hash": "d18a54dc79d17ca1fc09cb5ec10beef8",
     "semantic_hash": ""
   },
   "orchestration/runner.py": {
@@ -1524,27 +1524,33 @@
     "semantic_hash": ""
   },
   "tests/test_orchestration/test_hybrid_primitives.py": {
-    "mtime": 1788765214.5118415,
-    "seen": 1788765293.9481792,
-    "ast_hash": "c59dd228eda57a4f1195c1e00a160a5b",
+    "mtime": 1788788789.2090552,
+    "seen": 1788788971.9583492,
+    "ast_hash": "c75318bd28b4592bf1db0778c9f03ac8",
     "semantic_hash": ""
   },
   "tests/test_orchestration/test_hybrid_session.py": {
-    "mtime": 1788765060.9937499,
-    "seen": 1788765172.7502549,
-    "ast_hash": "b40a9bb4fb5b6e10254c9736108abba7",
+    "mtime": 1788788827.2234683,
+    "seen": 1788788971.9583504,
+    "ast_hash": "8f133715b55e86360bec96c89c294f05",
     "semantic_hash": ""
   },
   "tests/test_orchestration/test_session_layer.py": {
-    "mtime": 1788764740.3335538,
-    "seen": 1788764866.27735,
-    "ast_hash": "4e5489b93a8a87a7f0554deab81a4e59",
+    "mtime": 1788788826.4175296,
+    "seen": 1788788971.9583526,
+    "ast_hash": "211cdd7870eaf8aab23e17b7b8cf58ce",
     "semantic_hash": ""
   },
   "tests/test_pqc/test_hybrid_contributions.py": {
     "mtime": 1788764142.4181263,
     "seen": 1788764535.9868052,
     "ast_hash": "42acd8bc44ab1ccb77bdc0df2f91a24e",
+    "semantic_hash": ""
+  },
+  "docs/reviews/review_orchestration_phase4_5.md": {
+    "mtime": 1788767900.559448,
+    "seen": 1788767953.4956532,
+    "ast_hash": "6b5aafd86f6003e5ec4e1fe7535562cd",
     "semantic_hash": ""
   }
 }

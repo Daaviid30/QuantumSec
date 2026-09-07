@@ -1,9 +1,15 @@
 from dataclasses import replace
+from typing import Any, cast
 
 import pytest
 
 from orchestration.hybrid.context import HybridPublicContext
-from orchestration.hybrid.encoding import HybridSecretComponent, canonical_hybrid_secret_input
+from orchestration.hybrid.encoding import (
+    HybridSecretComponent,
+    canonical_hybrid_secret_input,
+    hybrid_kem_label,
+)
+from orchestration.hybrid.finished import HybridFinishedRole, verify_finished
 from orchestration.hybrid.key_schedule import (
     derive_hybrid_confirmation_key,
     derive_hybrid_session_key,
@@ -112,6 +118,43 @@ def test_exact_bit_length_makes_padding_ambiguity_invalid() -> None:
         _component(1, "K_QKD", "qkd", "BB84-final-key", b"\xaa\xe1", bit_length=13)
     with pytest.raises(ValueError, match="bit_length"):
         _component(1, "K_QKD", "qkd", "BB84-final-key", b"\xaa", bit_length=9)
+
+
+def test_secret_component_rejects_boolean_integer_fields() -> None:
+    with pytest.raises(ValueError, match="position"):
+        _component(cast(int, True), "K_QKD", "qkd", "BB84-final-key", b"\x80", bit_length=1)
+    with pytest.raises(TypeError, match="bit_length"):
+        _component(1, "K_QKD", "qkd", "BB84-final-key", b"\x80", bit_length=cast(int, True))
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("qkd_transcript_version", -1),
+        ("qkd_transcript_version", 0x1_0000),
+        ("pqc_protocol_version", cast(int, True)),
+        ("pqc_protocol_version", -1),
+    ],
+)
+def test_hybrid_context_rejects_invalid_transcript_versions(field: str, value: int) -> None:
+    with pytest.raises(ValueError, match=field):
+        replace(_context(), **{field: value})
+
+
+def test_kem_labels_are_declarative_and_unknown_algorithms_fail_closed() -> None:
+    assert hybrid_kem_label("ML-KEM-768") == "SS_ML_KEM"
+    assert hybrid_kem_label("HQC-3") == "SS_HQC"
+    with pytest.raises(ValueError, match="Unsupported hybrid KEM"):
+        hybrid_kem_label("future-kem")
+
+
+def test_finished_verification_rejects_unexpected_message_types() -> None:
+    assert not verify_finished(
+        b"k" * 32,
+        _context(),
+        cast(Any, None),
+        HybridFinishedRole.RESPONDER,
+    )
 
 
 def test_secret_component_repr_and_api_do_not_serialize_secret_bytes() -> None:

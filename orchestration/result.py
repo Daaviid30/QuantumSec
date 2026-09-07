@@ -181,6 +181,12 @@ class SessionResult:
     def established_key_type(self) -> EstablishedKeyType | None:
         return self._key_capability.key_type if self._key_capability is not None else None
 
+    @property
+    def is_closed(self) -> bool:
+        """Return whether this result no longer exposes live key material."""
+
+        return self._key_capability is None or self._key_capability.is_closed
+
     def export_session_key(self) -> bytes:
         """Export accepted key bytes; QKD exact bit length remains in result metadata."""
 
@@ -191,6 +197,12 @@ class SessionResult:
     def close(self) -> None:
         if self._key_capability is not None:
             self._key_capability.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
 
     def to_public_dict(self) -> dict[str, object]:
         return {

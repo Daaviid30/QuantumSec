@@ -18,6 +18,7 @@ from orchestration.result import (
     SessionStatus,
 )
 from orchestration.trace import SessionTraceBuilder, SessionTraceSource
+from pqc.errors import PQCError
 from pqc.profiles import profile_definition
 from pqc.protocol import (
     PQCConfirmationKeyDeriver,
@@ -114,6 +115,7 @@ def run_pqc_session(config: SessionConfig, context: SessionExecutionContext) -> 
             SessionMetrics(orchestration_software_wall_time_ns=elapsed),
         )
 
+    alice_key = bob_key = None
     alice_session = bob_session = None
     alice_confirmation = bob_confirmation = None
     key_time = 0
@@ -230,10 +232,6 @@ def run_pqc_session(config: SessionConfig, context: SessionExecutionContext) -> 
             EstablishedKeyCapability(key, bit_length=256, key_type=EstablishedKeyType.SESSION_KEY),
         )
     except ValueError as exc:
-        if alice_confirmation is not None:
-            alice_confirmation.close()
-        if bob_confirmation is not None:
-            bob_confirmation.close()
         pqc_metrics, auth_metrics = _pqc_metrics(
             exchange,
             key_schedule_time_ns=key_time,
@@ -269,11 +267,64 @@ def run_pqc_session(config: SessionConfig, context: SessionExecutionContext) -> 
                 pqc_authentication=auth_metrics,
                 orchestration_software_wall_time_ns=perf_counter_ns() - wall_start,
             ),
+            (
+                ("pqc_protocol_version", exchange.transcript.protocol_version),
+                ("pqc_transcript_hash_sha384", exchange.transcript.transcript_hash.hex()),
+            ),
+        )
+    except (PQCError, RuntimeError, TypeError) as exc:
+        pqc_metrics, auth_metrics = _pqc_metrics(
+            exchange,
+            key_schedule_time_ns=key_time,
+            confirmation_time_ns=confirmation_time,
+            public_key_provisioning_bytes=(
+                len(context.pqc_initiator.public_identity.public_key)
+                + len(context.pqc_responder.public_identity.public_key)
+            ),
+        )
+        reason = f"Operational execution failure: {exc}"
+        trace.append(SessionTraceSource.PQC, "execution", "failed", reason)
+        trace.append(SessionTraceSource.SESSION, "session", "failed", reason)
+        return SessionResult(
+            SESSION_RESULT_VERSION,
+            exchange.transcript.session_id,
+            config.profile,
+            SessionStatus.FAILED,
+            reason,
+            (),
+            SessionAuthentication(
+                pqc_exchange=AuthenticationOutcome(
+                    "PQC handshake authentication",
+                    auth_metrics.mechanism,
+                    auth_metrics.algorithm,
+                    True,
+                    True,
+                    auth_metrics.trust_assumption,
+                )
+            ),
+            trace.freeze(),
+            SessionMetrics(
+                pqc=pqc_metrics,
+                pqc_authentication=auth_metrics,
+                orchestration_software_wall_time_ns=perf_counter_ns() - wall_start,
+            ),
+            (
+                ("pqc_protocol_version", exchange.transcript.protocol_version),
+                ("pqc_transcript_hash_sha384", exchange.transcript.transcript_hash.hex()),
+            ),
         )
     finally:
         if alice_session is not None:
             alice_session.close()
         if bob_session is not None:
             bob_session.close()
+        if alice_confirmation is not None:
+            alice_confirmation.close()
+        if bob_confirmation is not None:
+            bob_confirmation.close()
+        if alice_key is not None:
+            alice_key.close()
+        if bob_key is not None:
+            bob_key.close()
         # KEM states are already retired by confirmation derivation; close is idempotent.
         exchange.close()

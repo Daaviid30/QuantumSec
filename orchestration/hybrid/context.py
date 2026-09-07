@@ -32,6 +32,10 @@ class HybridPublicContext:
     version: int = HYBRID_PUBLIC_CONTEXT_VERSION
 
     def __post_init__(self) -> None:
+        for name in ("qkd_transcript_version", "pqc_protocol_version"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 0xFFFF:
+                raise ValueError(f"{name} must be an unsigned 16-bit integer.")
         if len(self.session_id) != QKD_CLASSICAL_SESSION_ID_LENGTH:
             raise ValueError("Hybrid session_id must contain 16 bytes.")
         if self.profile not in (SessionProfile.HYBRID, SessionProfile.HYBRID_DIVERSE):

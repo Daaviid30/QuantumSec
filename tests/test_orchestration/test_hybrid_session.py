@@ -104,7 +104,34 @@ def test_tampered_hybrid_finished_aborts() -> None:
         context,
     )
     assert result.status is SessionStatus.ABORTED
+    assert result.metrics.hybrid is not None
+    assert result.metrics.hybrid.hkdf_session_time_ns >= 0
+    assert result.metrics.hybrid.finished_responder_bytes > 0
+    public_context = dict(result.public_context)
+    assert public_context["hybrid_context_hash_sha384"]
+    assert public_context["qkd_transcript_hash_sha384"]
+    assert public_context["pqc_transcript_hash_sha384"]
     with pytest.raises(RuntimeError):
+        result.export_session_key()
+
+
+def test_hybrid_operational_failure_returns_failed_result(monkeypatch) -> None:
+    def fail_finished(*_args, **_kwargs):
+        raise BackendOperationError("injected Finished backend failure")
+
+    monkeypatch.setattr("orchestration.hybrid.runner.create_finished", fail_finished)
+    result = run_session(
+        SessionConfig(
+            SessionProfile.HYBRID,
+            qkd_authentication_profile=QKDProfile.QKD_ASSUMED,
+            qkd_signal_count=512,
+        ),
+        _context(),
+    )
+    assert result.status is SessionStatus.FAILED
+    assert result.metrics.hybrid is not None
+    assert dict(result.public_context)["hybrid_context_hash_sha384"]
+    with pytest.raises(RuntimeError, match="withheld"):
         result.export_session_key()
 
 

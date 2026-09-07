@@ -1,6 +1,7 @@
 """Unambiguous encoding of independently established QKD and KEM contributions."""
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import Final
 
 from orchestration._encoding import length_prefixed, unsigned
@@ -10,6 +11,23 @@ from pqc.kem import HQC_3_ALGORITHM, ML_KEM_768_ALGORITHM
 HYBRID_SECRET_INPUT_DOMAIN: Final = b"QuantumSec/HybridSession/v1/SecretInput"
 HYBRID_ENCODING_VERSION: Final = 1
 QKD_COMPONENT_ALGORITHM: Final = "BB84-final-key"
+HYBRID_KEM_LABELS: Final = MappingProxyType(
+    {
+        ML_KEM_768_ALGORITHM: "SS_ML_KEM",
+        HQC_3_ALGORITHM: "SS_HQC",
+    }
+)
+
+
+def hybrid_kem_label(algorithm: str) -> str:
+    """Return the canonical hybrid label for a supported KEM algorithm."""
+
+    if not isinstance(algorithm, str) or not algorithm:
+        raise ValueError("KEM algorithm must be a non-empty string.")
+    try:
+        return HYBRID_KEM_LABELS[algorithm]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported hybrid KEM algorithm: {algorithm}.") from exc
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -23,8 +41,10 @@ class HybridSecretComponent:
     secret: bytes = field(repr=False)
 
     def __post_init__(self) -> None:
-        if self.position <= 0:
-            raise ValueError("position must be positive.")
+        if isinstance(self.position, bool) or not isinstance(self.position, int) or self.position <= 0:
+            raise ValueError("position must be a positive integer.")
+        if isinstance(self.bit_length, bool) or not isinstance(self.bit_length, int):
+            raise TypeError("bit_length must be an integer.")
         if not self.label or not self.source or not self.algorithm or not self.encoding:
             raise ValueError("label, source, algorithm, and encoding must be non-empty.")
         if not isinstance(self.secret, bytes) or not self.secret:

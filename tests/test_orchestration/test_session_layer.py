@@ -18,7 +18,14 @@ from orchestration.authentication import (
     MLDSAAuthenticationContext,
     WegmanCarterAuthenticationContext,
 )
-from pqc import MLDSAIdentity, PQCFinishedMessage, PQCParty, TrustedIdentityStore
+from pqc import (
+    MLDSAIdentity,
+    PQCFinishedMessage,
+    PQCParty,
+    PQCSessionKeyDeriver,
+    TrustedIdentityStore,
+)
+from pqc.errors import BackendOperationError
 from qkd.channel import IdentityChannel
 from qkd.protocols import BB84Protocol
 
@@ -99,6 +106,21 @@ def test_common_runner_executes_all_qkd_profiles(session_profile, qkd_profile) -
         result.export_session_key()
 
 
+def test_session_result_context_manager_closes_established_key() -> None:
+    result = run_session(
+        SessionConfig(SessionProfile.QKD_ASSUMED, qkd_signal_count=512),
+        SessionExecutionContext(
+            qkd_protocol=BB84Protocol(IdentityChannel(), SeededRNG(813)),
+        ),
+    )
+    assert not result.is_closed
+    with result as managed:
+        assert managed.export_session_key()
+    assert result.is_closed
+    with pytest.raises(RuntimeError, match="closed"):
+        result.export_session_key()
+
+
 @pytest.mark.parametrize("profile", [SessionProfile.PQC_BASE, SessionProfile.PQC_DIVERSE])
 def test_common_runner_executes_both_pqc_profiles(profile: SessionProfile) -> None:
     alice, bob = _parties()
@@ -132,5 +154,25 @@ def test_pqc_finished_failure_withholds_the_key() -> None:
         ),
     )
     assert result.status is SessionStatus.ABORTED
+    with pytest.raises(RuntimeError, match="withheld"):
+        result.export_session_key()
+
+
+def test_pqc_operational_failure_returns_failed_result(monkeypatch) -> None:
+    alice, bob = _parties()
+
+    def fail_derivation(*_args, **_kwargs):
+        raise BackendOperationError("injected key-schedule failure")
+
+    monkeypatch.setattr(PQCSessionKeyDeriver, "derive_initiator", fail_derivation)
+    result = run_session(
+        SessionConfig(SessionProfile.PQC_BASE),
+        SessionExecutionContext(pqc_initiator=alice, pqc_responder=bob),
+    )
+    assert result.status is SessionStatus.FAILED
+    assert "Operational execution failure" in (result.abort_reason or "")
+    assert result.authentication.pqc_exchange is not None
+    assert result.authentication.pqc_exchange.verified is True
+    assert dict(result.public_context)["pqc_transcript_hash_sha384"]
     with pytest.raises(RuntimeError, match="withheld"):
         result.export_session_key()

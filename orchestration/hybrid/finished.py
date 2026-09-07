@@ -123,6 +123,8 @@ def verify_finished(
     *,
     previous: bytes | None = None,
 ) -> bool:
+    if not isinstance(message, HybridFinishedMessage):
+        return False
     metadata_matches = (
         message.version == HYBRID_FINISHED_VERSION
         and message.session_id == context.session_id
