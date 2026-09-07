@@ -7,7 +7,7 @@ import numpy as np
 import numpy.typing as npt
 
 from core.constants import DEFAULT_ATOL
-from core.rng import BaseRNG
+from core.rng import BaseRNG, random_bit
 from qkd._validation import copy_binary_vector, copy_indices, validate_aligned_keys
 from qkd.metrics.qber import qber_by_basis
 from qkd.primitives.bases import Basis
@@ -27,13 +27,28 @@ def _copy_bb84_bases(
     return bases
 
 
-def _explicit_stratified_counts(n_z: int, n_x: int, sample_size: int) -> tuple[int, int]:
+def _explicit_stratified_counts(
+    n_z: int,
+    n_x: int,
+    sample_size: int,
+    rng: BaseRNG,
+) -> tuple[int, int]:
+    """Allocate a proportional explicit sample with seeded, unbiased tie-breaking."""
+
     if sample_size < 2 or sample_size > n_z + n_x - 2:
         raise ValueError(
             "sample_size must disclose at least one bit from each BB84 basis and leave "
             f"at least one candidate bit in each basis. Got sample_size={sample_size}."
         )
-    disclose_z = int(round(sample_size * n_z / (n_z + n_x)))
+    total = n_z + n_x
+    disclose_z, remainder = divmod(sample_size * n_z, total)
+    if 2 * remainder > total:
+        disclose_z += 1
+    elif 2 * remainder == total:
+        tie_choice = random_bit(rng)
+        if isinstance(tie_choice, np.ndarray):
+            raise RuntimeError("Scalar stratified tie-breaking unexpectedly returned an array.")
+        disclose_z += int(tie_choice)
     disclose_z = min(max(disclose_z, 1), n_z - 1)
     disclose_x = sample_size - disclose_z
     if disclose_x < 1:
@@ -220,7 +235,7 @@ def estimate_qber_from_sample(
         if isinstance(sample_size, (bool, np.bool_)) or not isinstance(sample_size, (int, np.integer)):
             raise ValueError(f"sample_size must be a positive integer. Got {sample_size!r}.")
         disclose_z, disclose_x = _explicit_stratified_counts(
-            int(z_indices.size), int(x_indices.size), int(sample_size)
+            int(z_indices.size), int(x_indices.size), int(sample_size), rng
         )
 
     indices = np.sort(

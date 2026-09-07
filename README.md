@@ -25,7 +25,7 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | Core and quantum mathematics | **CURRENT** | Injected RNGs, immutable values, validation, linear algebra, information measures, and projective measurements |
 | BB84 execution | **CURRENT** | Seeded logical-qubit simulation, channel pipeline, sifting, basis-stratified parameter estimation, Cascade, reconciled-key verification, asymptotic length estimation, Toeplitz privacy amplification, and explicit aborts |
 | BB84 security estimator | **CURRENT, ASYMPTOTIC** | Per-basis `e_Z/e_X`, diagnostic aggregate QBER, an explicit mixed-basis phase-error bound, and conservative aborts; no composable finite-key claim |
-| QKD classical-channel authentication | **PARTIAL** | Authentication is assumed, not executed; the existing universal-hash verification is not channel authentication |
+| QKD classical-channel authentication | **CURRENT** | Explicit assumed baseline plus executed one-time Toeplitz/Wegman–Carter-style and ML-DSA-65 transcript-checkpoint profiles |
 | PQC establishment | **CURRENT** | Mutually authenticated `PQC-BASE`/`PQC-DIVERSE` handshakes using ML-KEM-768, optional HQC-3, ML-DSA-65, structured KEM input, HKDF-SHA-384, and bilateral Finished |
 | Intercept-resend Eve | **CURRENT** | Seeded, configurable adversary stage with diagnostics and analytical `QBER ~= 0.25 f` validation |
 | Hybrid QKD–PQC | **PLANNED** | Upper-layer composition with provenance, canonical encoding, and explicit authentication policy |
@@ -61,7 +61,9 @@ Current:
 ```text
 ui/frontend -> ui/backend -> qkd -> quantum -> core
 
-                  pqc (independent sibling domain)
+                         orchestration
+                           /       \
+                         qkd       pqc
 ```
 
 Target:
@@ -69,7 +71,7 @@ Target:
 ```text
 ui/frontend
     -> ui/backend
-        -> session / experiment orchestration        [PLANNED]
+        -> session / experiment orchestration        [CURRENT minimal QKD-auth subset]
             -> qkd                                   [CURRENT domain]
             -> pqc                                   [CURRENT domain]
             -> data protection                       [PLANNED]
@@ -85,9 +87,9 @@ Public documentation and UI use the following profile names:
 
 | Profile | Establishment | Authentication | Status |
 |---|---|---|---|
-| `QKD-ASSUMED` | BB84 | Authenticated classical channel assumed, not executed | **PARTIAL** |
-| `QKD-CLASSICAL-AUTH` | BB84 | Universal-hash/Wegman–Carter-style construction with pre-shared material | **PLANNED** |
-| `QKD-PQC-AUTH` | BB84 | ML-DSA-65 and pre-provisioned identities over a specified transcript | **PLANNED** |
+| `QKD-ASSUMED` | BB84 | Authenticated classical channel assumed, not executed | **CURRENT baseline** |
+| `QKD-CLASSICAL-AUTH` | BB84 | One-time Toeplitz/Wegman–Carter-style tags with explicit pre-shared material | **CURRENT** |
+| `QKD-PQC-AUTH` | BB84 | ML-DSA-65 and pre-provisioned identities over the canonical public transcript | **CURRENT** |
 | `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | **CURRENT** as internal `PQCProfile.LOW` |
 | `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | **CURRENT** as internal `PQCProfile.HIGH` |
 | `HYBRID` | BB84 + ML-KEM-768 | Explicit profile policy | **PLANNED** |

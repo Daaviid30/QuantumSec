@@ -17,7 +17,12 @@ export function ResultsSummary({ result }: ResultsSummaryProps) {
     { label: 'Raw signals', value: result.metrics.n_raw.toLocaleString(), icon: RadioTower, tone: 'cyan' },
     { label: 'Sifted positions', value: result.metrics.n_sifted.toLocaleString(), icon: Binary, tone: 'violet' },
     { label: 'Candidate bits', value: result.postprocessing.n_candidate.toLocaleString(), icon: Binary, tone: 'blue' },
-    { label: 'Estimated QBER', value: formatPercent(result.postprocessing.estimated_qber), icon: Gauge, tone: 'green' },
+    {
+      label: 'Phase-error bound',
+      value: formatPercent(result.postprocessing.phase_error_bound),
+      icon: Gauge,
+      tone: 'green',
+    },
     { label: 'Final secret bits', value: result.postprocessing.n_final.toLocaleString(), icon: KeyRound, tone: 'green' },
     { label: 'Engine time', value: `${result.metadata.duration_ms.toFixed(1)} ms`, icon: Clock3, tone: 'amber' },
   ]

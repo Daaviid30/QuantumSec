@@ -108,10 +108,12 @@ export interface PostprocessingSummary {
   status: 'completed' | 'aborted'
   abort_reason: string | null
   n_disclosed: number
+  /** Backwards-compatible aggregate bit-QBER alias; it does not control the security abort. */
   estimated_qber: number | null
   estimated_qber_z: number | null
   estimated_qber_x: number | null
   estimated_qber_aggregated: number | null
+  /** Security-decision bound used for abort and secret-length estimation. */
   phase_error_bound: number | null
   n_candidate: number
   leak_ec: number

@@ -172,11 +172,20 @@ class PostprocessingSummary(StrictModel):
     status: Literal["completed", "aborted"]
     abort_reason: str | None
     n_disclosed: int
-    estimated_qber: float | None
+    estimated_qber: float | None = Field(
+        description=(
+            "Backward-compatible alias for aggregate sampled bit QBER; used to configure "
+            "reconciliation, not as the security-abort threshold variable."
+        )
+    )
     estimated_qber_z: float | None
     estimated_qber_x: float | None
-    estimated_qber_aggregated: float | None
-    phase_error_bound: float | None
+    estimated_qber_aggregated: float | None = Field(
+        description="Aggregate sampled bit QBER used to configure reconciliation."
+    )
+    phase_error_bound: float | None = Field(
+        description="Per-basis-derived bound used by the security abort and secret-length estimator."
+    )
     n_candidate: int
     leak_ec: int
     corrected_errors: int

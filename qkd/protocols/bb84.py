@@ -229,10 +229,11 @@ class BB84SessionStatus(StrEnum):
 class BB84PostprocessingConfig:
     """Configuration for BB84 post-processing under assumed channel authentication.
 
-    The legacy-named ``qber_abort_threshold`` is applied to the explicit common
-    phase-error bound. Its 11% default is the familiar ideal/asymptotic BB84
-    boundary under this simulator's assumptions, not a universal practical
-    finite-key threshold.
+    ``phase_error_abort_threshold`` is the canonical security-decision name.
+    The legacy ``qber_abort_threshold`` argument remains accepted for backwards
+    compatibility and is normalized to the same value. Their 11% default is the
+    familiar ideal/asymptotic BB84 boundary under this simulator's assumptions,
+    not a universal practical finite-key threshold.
     """
 
     sample_fraction: float = 0.2
@@ -240,9 +241,10 @@ class BB84PostprocessingConfig:
     cascade: CascadeConfig = field(default_factory=CascadeConfig)
     verification_tag_length: int = 32
     security_margin_bits: int = 0
+    phase_error_abort_threshold: float = field(default=0.11, kw_only=True)
 
     def __post_init__(self) -> None:
-        for name in ("sample_fraction", "qber_abort_threshold"):
+        for name in ("sample_fraction", "qber_abort_threshold", "phase_error_abort_threshold"):
             value = getattr(self, name)
             if isinstance(value, (bool, np.bool_)) or not isinstance(
                 value, (float, int, np.floating, np.integer)
@@ -254,6 +256,28 @@ class BB84PostprocessingConfig:
                 interval = "strictly between 0 and 1" if name == "sample_fraction" else "in [0, 1]"
                 raise ValueError(f"{name} must lie {interval}. Got {clean}.")
             object.__setattr__(self, name, clean)
+        legacy_threshold = self.qber_abort_threshold
+        canonical_threshold = self.phase_error_abort_threshold
+        default_threshold = 0.11
+        legacy_changed = not np.isclose(legacy_threshold, default_threshold, atol=0.0, rtol=0.0)
+        canonical_changed = not np.isclose(canonical_threshold, default_threshold, atol=0.0, rtol=0.0)
+        if (
+            legacy_changed
+            and canonical_changed
+            and not np.isclose(
+                legacy_threshold,
+                canonical_threshold,
+                atol=0.0,
+                rtol=0.0,
+            )
+        ):
+            raise ValueError(
+                "qber_abort_threshold and phase_error_abort_threshold must agree when both "
+                "non-default names are supplied."
+            )
+        threshold = canonical_threshold if canonical_changed else legacy_threshold
+        object.__setattr__(self, "qber_abort_threshold", threshold)
+        object.__setattr__(self, "phase_error_abort_threshold", threshold)
         if not isinstance(self.cascade, CascadeConfig):
             raise TypeError(f"cascade must be a CascadeConfig. Got {type(self.cascade).__name__}.")
         for name in ("verification_tag_length", "security_margin_bits"):
@@ -266,12 +290,6 @@ class BB84PostprocessingConfig:
             if name == "security_margin_bits" and clean < 0:
                 raise ValueError("security_margin_bits must be non-negative.")
             object.__setattr__(self, name, clean)
-
-    @property
-    def phase_error_abort_threshold(self) -> float:
-        """Return the phase-error threshold stored under the legacy QBER name."""
-
-        return self.qber_abort_threshold
 
 
 @dataclass(frozen=True, slots=True, eq=False)

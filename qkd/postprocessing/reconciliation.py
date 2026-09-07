@@ -2,6 +2,7 @@
 
 from collections import deque
 from dataclasses import dataclass, field
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -89,6 +90,50 @@ class CascadePassStatistics:
 
 
 @dataclass(frozen=True, slots=True, eq=False)
+class CascadePublicEvent:
+    """One public Cascade coordination or parity message, without secret key material."""
+
+    sender: Literal["alice", "bob"]
+    event_type: Literal["permutation", "root_parity", "binary_parity"]
+    pass_index: int
+    active_pass_index: int
+    block_index: int
+    query_index: int
+    indices: npt.NDArray[np.intp] = field(repr=False)
+    parity: int | None
+
+    def __post_init__(self) -> None:
+        if self.sender not in ("alice", "bob"):
+            raise ValueError(f"Unsupported Cascade sender {self.sender!r}.")
+        if self.event_type not in ("permutation", "root_parity", "binary_parity"):
+            raise ValueError(f"Unsupported Cascade event type {self.event_type!r}.")
+        for name in ("pass_index", "active_pass_index", "query_index"):
+            value = getattr(self, name)
+            if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
+                raise ValueError(f"{name} must be a non-negative integer. Got {value!r}.")
+            if int(value) < 0:
+                raise ValueError(f"{name} must be non-negative. Got {value}.")
+            object.__setattr__(self, name, int(value))
+        if isinstance(self.block_index, (bool, np.bool_)) or not isinstance(
+            self.block_index, (int, np.integer)
+        ):
+            raise ValueError("block_index must be an integer.")
+        block_index = int(self.block_index)
+        indices = copy_indices(self.indices, name="indices")
+        if indices.size == 0:
+            raise ValueError("Cascade public-event indices must not be empty.")
+        if self.event_type == "permutation":
+            if self.sender != "alice" or block_index != -1 or self.parity is not None:
+                raise ValueError("A permutation event must be an Alice coordination message.")
+        else:
+            if block_index < 0 or self.parity not in (0, 1):
+                raise ValueError("A parity event requires a block index and binary parity.")
+            object.__setattr__(self, "parity", int(self.parity))
+        object.__setattr__(self, "block_index", block_index)
+        object.__setattr__(self, "indices", indices)
+
+
+@dataclass(frozen=True, slots=True, eq=False)
 class ReconciliationResult:
     """Immutable corrected key and conservative public parity transcript size."""
 
@@ -97,11 +142,13 @@ class ReconciliationResult:
     corrected_errors: int
     parity_disclosures: int
     pass_statistics: tuple[CascadePassStatistics, ...]
+    public_events: tuple[CascadePublicEvent, ...] = field(repr=False)
     residual_mismatch_count: int
 
     def __post_init__(self) -> None:
         alice, bob = validate_aligned_keys(self.alice_key, self.bob_corrected_key)
         stats = tuple(self.pass_statistics)
+        public_events = tuple(self.public_events)
         if not stats or not all(isinstance(item, CascadePassStatistics) for item in stats):
             raise ValueError("pass_statistics must contain at least one CascadePassStatistics value.")
         for name in ("corrected_errors", "parity_disclosures", "residual_mismatch_count"):
@@ -115,12 +162,22 @@ class ReconciliationResult:
             raise ValueError("corrected_errors must equal the sum of per-pass corrections.")
         if self.parity_disclosures != sum(item.parity_disclosures for item in stats):
             raise ValueError("parity_disclosures must equal the sum of per-pass disclosures.")
+        if not all(isinstance(item, CascadePublicEvent) for item in public_events):
+            raise TypeError("public_events must contain only CascadePublicEvent values.")
+        alice_disclosures = sum(
+            event.sender == "alice" and event.event_type != "permutation" for event in public_events
+        )
+        if alice_disclosures != self.parity_disclosures:
+            raise ValueError("Alice parity events must match the conservative disclosure count.")
+        if sum(event.event_type == "permutation" for event in public_events) != len(stats):
+            raise ValueError("public_events must contain one permutation announcement per pass.")
         actual_residual = int(np.count_nonzero(alice != bob))
         if self.residual_mismatch_count != actual_residual:
             raise ValueError("residual_mismatch_count must match the simulator-only exact diagnostic.")
         object.__setattr__(self, "alice_key", alice)
         object.__setattr__(self, "bob_corrected_key", bob)
         object.__setattr__(self, "pass_statistics", stats)
+        object.__setattr__(self, "public_events", public_events)
 
     @property
     def input_length(self) -> int:
@@ -195,6 +252,8 @@ def reconcile_cascade(
     first_block_size = _initial_block_size(n_bits, clean_bit_error_rate, clean_config)
     layouts: list[_PassLayout] = []
     statistics: list[CascadePassStatistics] = []
+    public_events: list[CascadePublicEvent] = []
+    query_index = 0
 
     for pass_index in range(clean_config.passes):
         permutation = (
@@ -207,6 +266,18 @@ def reconcile_cascade(
         inverse = np.empty(n_bits, dtype=np.intp)
         inverse[permutation] = np.arange(n_bits, dtype=np.intp)
         layouts.append(_PassLayout(permutation, block_size, blocks, inverse))
+        public_events.append(
+            CascadePublicEvent(
+                sender="alice",
+                event_type="permutation",
+                pass_index=pass_index,
+                active_pass_index=pass_index,
+                block_index=-1,
+                query_index=query_index,
+                indices=permutation,
+                parity=None,
+            )
+        )
 
         disclosure_counts = [0] * (pass_index + 1)
         correction_counts = [0] * (pass_index + 1)
@@ -215,7 +286,27 @@ def reconcile_cascade(
         pending: deque[tuple[int, int]] = deque()
         queued: set[tuple[int, int]] = set()
         for block_index, indices in enumerate(blocks):
-            if _parity(alice, indices) != _parity(bob, indices):
+            alice_parity = _parity(alice, indices)
+            bob_parity = _parity(bob, indices)
+            parity_messages: tuple[tuple[Literal["alice", "bob"], int], ...] = (
+                ("alice", alice_parity),
+                ("bob", bob_parity),
+            )
+            for sender, parity in parity_messages:
+                public_events.append(
+                    CascadePublicEvent(
+                        sender=sender,
+                        event_type="root_parity",
+                        pass_index=pass_index,
+                        active_pass_index=pass_index,
+                        block_index=block_index,
+                        query_index=query_index,
+                        indices=indices,
+                        parity=parity,
+                    )
+                )
+            query_index += 1
+            if alice_parity != bob_parity:
                 item = (pass_index, block_index)
                 pending.append(item)
                 queued.add(item)
@@ -241,9 +332,24 @@ def reconcile_cascade(
                 midpoint = search_indices.size // 2
                 left = search_indices[:midpoint]
                 disclosure_counts[source_pass] += 1
-                search_indices = (
-                    left if _parity(alice, left) != _parity(bob, left) else search_indices[midpoint:]
-                )
+                alice_parity = _parity(alice, left)
+                bob_parity = _parity(bob, left)
+                parity_messages = (("alice", alice_parity), ("bob", bob_parity))
+                for sender, parity in parity_messages:
+                    public_events.append(
+                        CascadePublicEvent(
+                            sender=sender,
+                            event_type="binary_parity",
+                            pass_index=source_pass,
+                            active_pass_index=pass_index,
+                            block_index=block_index,
+                            query_index=query_index,
+                            indices=left,
+                            parity=parity,
+                        )
+                    )
+                query_index += 1
+                search_indices = left if alice_parity != bob_parity else search_indices[midpoint:]
             corrected_position = int(search_indices[0])
             bob[corrected_position] ^= np.uint8(1)
             correction_counts[source_pass] += 1
@@ -288,5 +394,6 @@ def reconcile_cascade(
         corrected_errors=sum(item.corrected_errors for item in statistics),
         parity_disclosures=sum(item.parity_disclosures for item in statistics),
         pass_statistics=tuple(statistics),
+        public_events=tuple(public_events),
         residual_mismatch_count=int(np.count_nonzero(alice != bob)),
     )

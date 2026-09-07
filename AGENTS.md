@@ -44,10 +44,14 @@ Work efficiently by combining the available tools according to the task type. **
 ## 3. Architectural Invariants & Project Rules
 
 1. **Strict Layer Discipline (Acyclic Layering)**:
-   $$\text{ui (backend/frontend)} \longrightarrow \text{qkd} \longrightarrow \text{quantum} \longrightarrow \text{core}$$
+   $$\text{ui/experiments} \longrightarrow \text{orchestration} \longrightarrow
+   \{\text{qkd},\text{pqc}\}$$
+   $$\text{qkd} \longrightarrow \text{quantum} \longrightarrow \text{core}$$
    - `core/`: Global constants (`DEFAULT_ATOL`), RNG abstractions (`BaseRNG`, `SeededRNG`), errors. Zero domain dependencies.
    - `quantum/`: Linear algebra, pure/density states (`dm_from_ket`), operators, projective measurements (`ProjectiveMeasurement`), CPTP channels (`QuantumChannel`). No knowledge of QKD.
    - `qkd/`: Protocols (BB84), sifting, error reconciliation (Cascade), parameter estimation, privacy amplification (Toeplitz), security bounds (QBER, Shor-Preskill).
+   - `pqc/`: Independent post-quantum primitives and authenticated handshakes. Never imports `qkd`.
+   - `orchestration/`: Profile, trace, metric, result, and authentication policy above the sibling `qkd` and `pqc` domains.
    - `ui/`: FastAPI (`ui/backend`) and React/Vite/Tailwind (`ui/frontend`).
    - *Never invert the import flow.*
 

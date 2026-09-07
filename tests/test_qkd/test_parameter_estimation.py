@@ -48,6 +48,24 @@ def test_parameter_estimation_explicit_sample_size_preserves_alignment():
     assert result.n_candidate == 4
 
 
+def test_odd_explicit_sample_breaks_equal_basis_ties_with_the_injected_rng():
+    alice = np.arange(20, dtype=np.uint8) % 2
+    bases = (Basis.Z,) * 10 + (Basis.X,) * 10
+    allocations: set[tuple[int, int]] = set()
+
+    for seed in range(32):
+        result = estimate_qber_from_sample(
+            alice,
+            alice,
+            bases,
+            SeededRNG(seed),
+            sample_size=5,
+        )
+        allocations.add((result.sample_size_z, result.sample_size_x))
+
+    assert allocations == {(2, 3), (3, 2)}
+
+
 @pytest.mark.parametrize("fraction", [0.0, 1.0, -0.1, True])
 def test_parameter_estimation_rejects_invalid_fraction(fraction):
     with pytest.raises(ValueError, match="sample_fraction"):

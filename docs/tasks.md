@@ -17,8 +17,8 @@ behavior from an earlier unfinished phase.
 - [x] Current BB84 FastAPI adapter and React workspace.
 - [x] Seeded Intercept-Resend stage, ordered pipeline configuration, and bounded diagnostics.
 
-The existing QKD session is **PARTIAL** as a security profile because it assumes classical-channel
-authentication. Its basis-aware estimator handles the currently supported asymmetric channels.
+The three QKD authentication profiles are **CURRENT**. `QKD-ASSUMED` remains the explicit
+non-executed baseline; the two executed profiles gate key release on transcript authentication.
 
 ## Exact implementation order
 
@@ -62,13 +62,13 @@ the estimator reason.
 
 ### 4. Session, profile, trace, metric, and result contracts
 
-- [ ] Add an upper orchestration layer that imports `qkd` and `pqc`; keep both domains independent.
-- [ ] Implement public profile names while preserving internal `PQCProfile.LOW/HIGH` values.
-- [ ] Represent establishment provenance and authentication as independent, explicit dimensions.
+- [x] Add an upper orchestration layer that imports `qkd` and `pqc`; keep both domains independent.
+- [x] Implement the three public QKD profile names while preserving internal PQC profile values.
+- [x] Represent QKD establishment provenance and authentication as independent dimensions.
 - [ ] Define versioned configuration, ordered trace, compatible metric, terminal result, and abort
   contracts.
 - [ ] Ensure capability discovery distinguishes **CURRENT**, **PARTIAL**, and **PLANNED**.
-- [ ] Prohibit secret values and private key material from trace/result serialization.
+- [x] Prohibit secret values and private key material from QKD-auth trace/result representations.
 
 Exit condition: all later profiles can share one orchestration boundary without semantic loss.
 
@@ -76,20 +76,20 @@ Exit condition: all later profiles can share one orchestration boundary without 
 
 #### 5a. `QKD-PQC-AUTH` — required first
 
-- [ ] Define the canonical security-relevant BB84 classical transcript/messages.
-- [ ] Reuse ML-DSA-65 identities and explicit pre-provisioned trust above the sibling domains.
-- [ ] Sign and verify before any unauthenticated security-relevant data can be accepted.
-- [ ] Add transcript/message tamper, wrong identity, missing signature, replay/context, and failure
+- [x] Define the canonical security-relevant BB84 classical transcript/messages.
+- [x] Reuse ML-DSA-65 identities and explicit pre-provisioned trust above the sibling domains.
+- [x] Sign and verify before any unauthenticated security-relevant data can be accepted.
+- [x] Add transcript/message tamper, wrong identity, missing signature, replay/context, and failure
   tests.
-- [ ] Record operations, bytes, meaningful latency, trust assumptions, and outcome.
+- [x] Record operations, bytes, meaningful latency, trust assumptions, and outcome.
 
 #### 5b. `QKD-CLASSICAL-AUTH` — required for the definitive comparison
 
-- [ ] Specify a correct universal-hash/Wegman–Carter-style construction.
-- [ ] Provide secret pre-shared authentication material and required key separation.
-- [ ] Implement tag generation, verification, and explicit failure.
-- [ ] Account for authentication-key consumption where the construction requires it.
-- [ ] Test modified transcript/tag, wrong key, reuse constraints, and consumption accounting.
+- [x] Specify a conservative one-time universal-hash/Wegman–Carter-style construction.
+- [x] Provide secret pre-shared authentication material and required key separation.
+- [x] Implement tag generation, constant-time verification, and explicit failure.
+- [x] Account for all authentication-key consumption; no key recycling is claimed.
+- [x] Test modified transcript/tag, wrong key, reuse constraints, and consumption accounting.
 
 Exit condition: at least one QKD profile executes authentication; E4 compares both mechanisms only
 if both constructions satisfy their contracts.

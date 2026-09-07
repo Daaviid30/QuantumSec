@@ -51,6 +51,32 @@ def test_full_interception_resends_a_valid_bb84_state_and_counts_observations():
     assert diagnostics.eve_zero_outcomes + diagnostics.eve_one_outcomes == 40
 
 
+def test_full_interception_resends_a_pure_state_from_a_mixed_input():
+    attack = InterceptResendAttack(1.0, SeededRNG(42))
+    maximally_mixed = np.eye(2, dtype=np.complex128) / 2.0
+
+    output = attack.apply(maximally_mixed)
+
+    validate_density_matrix(output)
+    assert float(np.real(np.trace(output @ output))) == pytest.approx(1.0, abs=1e-12)
+
+
+def test_attack_diagnostics_can_be_reset_without_rewinding_the_rng():
+    attack_rng = SeededRNG(77)
+    reference_rng = SeededRNG(77)
+    attack = InterceptResendAttack(1.0, attack_rng)
+    rho = dm_from_ket(KET0)
+
+    attack.apply(rho)
+    reference_rng.random_bits()
+    reference_rng.gen.choice(2, p=[1.0, 0.0])
+    attack.reset_diagnostics()
+
+    assert attack.diagnostics.n_signals_seen == 0
+    assert attack.diagnostics.n_intercepted == 0
+    assert attack_rng.gen.random() == reference_rng.gen.random()
+
+
 def test_intercept_resend_is_reproducible_with_the_same_seed():
     first = InterceptResendAttack(0.63, SeededRNG(2026))
     second = InterceptResendAttack(0.63, SeededRNG(2026))

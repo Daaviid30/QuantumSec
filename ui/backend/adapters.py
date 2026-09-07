@@ -1,6 +1,7 @@
 """Adapters between typed HTTP data and the QuantumSec simulation domain."""
 
 from collections import Counter
+from hashlib import sha256
 from time import perf_counter
 from typing import Literal
 from uuid import uuid4
@@ -53,6 +54,13 @@ def _bb84_basis_value(basis: Basis) -> Literal["Z", "X"]:
     if basis is Basis.X:
         return "X"
     raise ValueError(f"BB84 returned an unsupported basis: {basis.value}")
+
+
+def _adversary_seed(root_seed: int, stage_index: int) -> int:
+    """Derive a stable domain-separated seed for one adversarial stage."""
+
+    material = f"quantumsec/adversary-rng/v1:{root_seed}:{stage_index}".encode("ascii")
+    return int.from_bytes(sha256(material).digest()[:16], byteorder="big")
 
 
 def build_channel(configuration: ChannelConfiguration, *, rng: BaseRNG) -> QuantumChannel:
@@ -108,12 +116,17 @@ def _final_key_string(session_key: npt.NDArray[np.uint8] | None) -> str | None:
 def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     """Execute BB84 with the engine's seeded RNG and adapt its immutable result."""
 
-    rng = SeededRNG(request.seed)
-    channels = tuple(build_channel(configuration, rng=rng) for configuration in request.channels)
+    protocol_rng = SeededRNG(request.seed)
+    channels: list[QuantumChannel] = []
+    for stage_index, configuration in enumerate(request.channels):
+        stage_rng: BaseRNG = protocol_rng
+        if isinstance(configuration, InterceptResendConfiguration):
+            stage_rng = SeededRNG(_adversary_seed(request.seed, stage_index))
+        channels.append(build_channel(configuration, rng=stage_rng))
     pipeline = ChannelPipeline(channels)
 
     started = perf_counter()
-    session = BB84Protocol(channel=pipeline, rng=rng).run_session(request.n_signals)
+    session = BB84Protocol(channel=pipeline, rng=protocol_rng).run_session(request.n_signals)
     result = session.raw
     duration_ms = (perf_counter() - started) * 1000.0
 

@@ -45,6 +45,10 @@ class _OQSModule(Protocol):
 
     def is_sig_enabled(self, alg_name: str) -> int: ...
 
+    def oqs_version(self) -> str: ...
+
+    def oqs_python_version(self) -> str | None: ...
+
 
 @dataclass(frozen=True, slots=True)
 class OQSKeyPair:
@@ -52,6 +56,28 @@ class OQSKeyPair:
 
     public_key: bytes = field(repr=False)
     secret_key: bytes = field(repr=False)
+
+
+@dataclass(frozen=True, slots=True)
+class OQSRuntimeVersions:
+    """Versions needed to interpret timings produced by the liboqs backend."""
+
+    liboqs: str
+    liboqs_python: str
+
+
+def oqs_runtime_versions() -> OQSRuntimeVersions:
+    """Return installed C-library and Python-wrapper versions from liboqs-python."""
+
+    module = _load_oqs()
+    try:
+        wrapper_version = module.oqs_python_version()
+        return OQSRuntimeVersions(
+            liboqs=str(module.oqs_version()),
+            liboqs_python=str(wrapper_version or "unknown"),
+        )
+    except Exception as exc:
+        raise BackendUnavailableError("The liboqs backend could not report runtime versions.") from exc
 
 
 @lru_cache(maxsize=1)

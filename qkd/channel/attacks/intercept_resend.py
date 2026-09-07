@@ -80,7 +80,7 @@ class InterceptResendAttack(QuantumChannel):
 
     The stage receives only a density matrix. It has no access to Alice's bit or
     basis, Bob's future basis, parameter estimation, or abort decisions.
-    Diagnostics are cumulative for the lifetime of this attack instance.
+    Diagnostics are cumulative until ``reset_diagnostics()`` is called.
     """
 
     __slots__ = (
@@ -122,6 +122,16 @@ class InterceptResendAttack(QuantumChannel):
             eve_zero_outcomes=self._eve_zero_outcomes,
             eve_one_outcomes=self._eve_one_outcomes,
         )
+
+    def reset_diagnostics(self) -> None:
+        """Reset aggregate counters without rewinding the injected RNG stream."""
+
+        self._n_signals_seen = 0
+        self._n_intercepted = 0
+        self._eve_z_measurements = 0
+        self._eve_x_measurements = 0
+        self._eve_zero_outcomes = 0
+        self._eve_one_outcomes = 0
 
     def apply(
         self,

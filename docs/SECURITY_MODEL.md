@@ -11,6 +11,10 @@ without replacement inside each basis, reveals those positions, and removes them
 candidate material. A session fails closed unless both bases provide at least one disclosed and one
 retained position.
 
+When an explicit total sample size creates an exact proportional tie, the injected RNG decides
+which basis receives the unavoidable extra position. This avoids a fixed Z/X label bias while
+remaining reproducible.
+
 The protocol transcript exposes:
 
 - `estimated_qber_z` and `estimated_qber_x`: errors in the disclosed Z and X subsets;
@@ -43,10 +47,13 @@ measurement and resend, Bob's sampled measurement, and sifting. The same existin
 parameter estimation and phase-error policy decides whether to abort. Eve diagnostics are
 external observations and are not passed into any security decision.
 
-The stage shares the run's injected `BaseRNG`, so equal configuration and seed reproduce the full
-run. At `f=0` it returns an independent copy without consuming randomness; at `f=1` it avoids an
-unnecessary interception-decision draw. It can be placed before or after physical channel stages,
-and `ChannelPipeline` preserves that configured order.
+The backend derives a domain-separated `SeededRNG` stream for each adversarial stage while the
+protocol retains the stream identified directly by the run seed. Eve's stochastic choices
+therefore cannot advance Bob's or post-processing's PRNG cursor, while equal configuration and seed
+still reproduce the full run. At `f=0` Eve returns an independent copy without consuming her own
+stream; at `f=1` she avoids an unnecessary interception-decision draw. The stage can be placed
+before or after physical channel stages, and `ChannelPipeline` preserves that configured order.
+Diagnostics accumulate per instance and can be cleared explicitly without rewinding Eve's RNG.
 
 ## Phase-error relation
 
@@ -91,14 +98,78 @@ A non-positive result produces no final material and the session aborts. Missing
 non-finite or out-of-range rates, invalid lengths, or a phase-error value outside the entropy
 model's `[0, 0.5]` domain cannot silently produce a key.
 
-The default `qber_abort_threshold = 0.11` is applied to the common per-basis phase-error bound. It is
-the familiar ideal asymptotic one-way BB84 boundary associated with the symmetric
+The default `phase_error_abort_threshold = 0.11` is applied to the common per-basis phase-error
+bound. The legacy constructor name `qber_abort_threshold` remains a normalized compatibility alias.
+The default is the familiar ideal asymptotic one-way BB84 boundary associated with the symmetric
 `1 - 2*h2(Q)` expression; it is not a universal operational threshold for real QKD systems.
 
 Reconciled-key verification uses a 32-bit universal-hash tag by default. This raises the previous
 16-bit default but still represents only a bounded simulator agreement check. It does not
 authenticate the classical channel, and a 32-bit tag must not be presented as a general deployment
 recommendation.
+
+## Classical-channel authentication profiles
+
+The low-level `BB84SessionResult` continues to model post-processing under an authenticated-channel
+assumption. The upper `orchestration/` layer makes the policy and acceptance barrier explicit:
+
+- `QKD-ASSUMED` reports `ASSUMED_NOT_EXECUTED`, produces no authentication evidence, and retains
+  the exact trust statement that authentication is external.
+- `QKD-CLASSICAL-AUTH` executes bilateral 128-bit one-time universal-hash tags from explicitly
+  provisioned PSK material.
+- `QKD-PQC-AUTH` executes bilateral ML-DSA-65 signatures verified with pre-provisioned trusted
+  public identities.
+
+The canonical public transcript contains Alice's and Bob's basis announcements, retained sifting
+indices, per-basis estimation indices/bases/disclosed bits, every Cascade permutation and both
+parties' root/binary parities (including look-back), the reconciled-key comparison seed and tags,
+and the privacy-amplification seed. Raw, candidate, reconciled, and final keys are excluded. Every
+event is length-delimited and binds a domain, version, 128-bit session identifier, direction,
+sequence number, and message type. Two directional checkpoint frames then bind that complete
+ordered encoding. Persistent authentication contexts reserve session identifiers and reject their
+reuse; callers that rebuild a context must preserve this public replay state or provision a fresh,
+unique identifier through their surrounding session system.
+
+This is explicitly an end-of-transcript checkpoint model, not a distributed message-by-message
+network simulation. Tampering may therefore cause computation to be wasted before the checkpoint
+fails (a denial-of-service limitation), but unverified data can never produce accepted key
+material at the orchestration boundary.
+
+### One-time Toeplitz/Wegman-Carter-style construction
+
+For a canonical `n`-bit frame and a `t`-bit tag, the classical profile computes
+
+```text
+tag = Toeplitz_selector(frame) XOR fresh_secret_mask
+```
+
+where the secret Toeplitz selector consumes `n + t - 1` fresh bits and the independent mask
+consumes `t` fresh bits. Thus each direction/checkpoint consumes exactly `n + 2t - 1` PSK bits.
+The current `t = 128` policy yields a forgery/substitution bound no larger than `2^-128` per
+fresh-key checkpoint under the XOR-universal Toeplitz-family and uniform independent-secret
+assumptions. Both selector and mask are single-use; this implementation claims no hash-key or
+authentication-key recycling. Reuse of the same session/direction/sequence/type context and
+material exhaustion fail explicitly. Tags use `hmac.compare_digest`, without claiming general
+side-channel resistance for the Python process.
+
+The construction follows the universal-hashing authentication framework of Wegman and Carter and
+uses the conservative fresh-key policy because no key-recycling theorem is relied upon here. The
+PSK must exist before the first authenticated QKD session and is separate from every QKD key,
+verification seed, privacy-amplification seed, and PQC-derived key.
+
+### ML-DSA-65 checkpoint authentication
+
+Each signature covers the exact canonical authentication frame, including the full public
+transcript plus frame domain/version/session/direction/sequence/type/length. Alice's private
+identity signs Alice-to-Bob and Bob's signs Bob-to-Alice; the receiver resolves the expected owner
+in its pre-provisioned `TrustedIdentityStore`. Public identities are provisioning cost, not
+per-session transport bytes. Measurements record sign/verify operations and time, signature and
+authenticated bytes, Python/platform/processor, and the `liboqs`/`liboqs-python` versions; timings
+are observations of that recorded environment, not universal performance claims.
+
+Classical-channel authentication protects transcript authenticity and integrity. It does not
+protect quantum states: with valid ML-DSA or PSK evidence, full intercept-resend still produces a
+normal BB84 phase-error abort.
 
 ## Analytical channel expectations
 
@@ -120,7 +191,8 @@ rates.
 
 - The secret-length model is asymptotic and uses sampled point estimates as asymptotic rates.
 - There is no composable finite-key proof or finite-sample confidence correction.
-- The classical BB84 transcript is assumed authenticated; authentication is not yet executed.
+- Authentication is batched at terminal bilateral transcript checkpoints rather than simulated
+  on a distributed network message by message; this leaves a denial-of-service/wasted-work window.
 - There is no optical loss model, vacuum outcome, detector dark counts, decoy states, multi-photon
   source model, or photon-number-splitting analysis.
 - Amplitude damping is logical-qubit relaxation, not fiber loss.
@@ -136,3 +208,14 @@ rates.
 P. W. Shor and J. Preskill, “Simple Proof of Security of the BB84 Quantum Key Distribution
 Protocol,” *Physical Review Letters* 85, 441–444 (2000),
 [doi:10.1103/PhysRevLett.85.441](https://doi.org/10.1103/PhysRevLett.85.441).
+
+M. N. Wegman and J. L. Carter, “New hash functions and their use in authentication and set
+equality,” *Journal of Computer and System Sciences* 22(3), 265–279 (1981),
+[doi:10.1016/0022-0000(81)90033-7](https://doi.org/10.1016/0022-0000(81)90033-7).
+
+H. Krawczyk, “LFSR-based hashing and authentication,” *CRYPTO '94*, LNCS 839, 129–139 (1994),
+[doi:10.1007/3-540-48658-5_11](https://doi.org/10.1007/3-540-48658-5_11).
+
+C. Portmann, “Key recycling in authentication,” *IEEE Transactions on Information Theory* 60(7),
+4383–4396 (2014), [IACR ePrint 2012/058](https://eprint.iacr.org/2012/058). QuantumSec does not
+implement or claim the recycling result in this phase.

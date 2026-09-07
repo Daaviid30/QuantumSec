@@ -7,9 +7,9 @@ from qkd.protocols import BB84Protocol, BB84SessionStatus
 
 
 def _run_with_eve(intercept_fraction: float, *, seed: int, n_signals: int):
-    rng = SeededRNG(seed)
-    attack = InterceptResendAttack(intercept_fraction, rng)
-    result = BB84Protocol(ChannelPipeline((attack,)), rng).run(n_signals)
+    protocol_rng = SeededRNG(seed)
+    attack = InterceptResendAttack(intercept_fraction, SeededRNG(seed + 1_000_000))
+    result = BB84Protocol(ChannelPipeline((attack,)), protocol_rng).run(n_signals)
     return result, attack.diagnostics
 
 
@@ -47,10 +47,10 @@ def test_zero_fraction_matches_an_attack_free_seeded_run_exactly():
 
 
 def test_full_interception_causes_a_security_abort_from_observed_errors():
-    rng = SeededRNG(44)
-    attack = InterceptResendAttack(1.0, rng)
+    protocol_rng = SeededRNG(44)
+    attack = InterceptResendAttack(1.0, SeededRNG(1_000_044))
 
-    session = BB84Protocol(ChannelPipeline((attack,)), rng).run_session(12_000)
+    session = BB84Protocol(ChannelPipeline((attack,)), protocol_rng).run_session(12_000)
 
     assert session.status is BB84SessionStatus.ABORTED
     assert session.abort_reason is not None
@@ -62,10 +62,10 @@ def test_full_interception_causes_a_security_abort_from_observed_errors():
 
 def test_attack_and_noise_pipeline_is_reproducible_end_to_end():
     def run(seed: int):
-        rng = SeededRNG(seed)
-        attack = InterceptResendAttack(0.4, rng)
+        protocol_rng = SeededRNG(seed)
+        attack = InterceptResendAttack(0.4, SeededRNG(seed + 1_000_000))
         pipeline = ChannelPipeline((attack, DepolarizingChannel(p=0.08)))
-        result = BB84Protocol(pipeline, rng).run(2_048)
+        result = BB84Protocol(pipeline, protocol_rng).run(2_048)
         return result, attack.diagnostics
 
     first, first_diagnostics = run(991)

@@ -161,6 +161,28 @@ def test_bb84_rejects_non_positive_or_non_integer_signal_counts(n_signals):
         protocol.run(n_signals)
 
 
+def test_postprocessing_config_accepts_the_canonical_phase_error_threshold_name():
+    config = BB84PostprocessingConfig(phase_error_abort_threshold=0.08)
+
+    assert config.phase_error_abort_threshold == 0.08
+    assert config.qber_abort_threshold == 0.08
+
+
+def test_postprocessing_config_preserves_the_legacy_qber_threshold_name():
+    config = BB84PostprocessingConfig(qber_abort_threshold=0.09)
+
+    assert config.phase_error_abort_threshold == 0.09
+    assert config.qber_abort_threshold == 0.09
+
+
+def test_postprocessing_config_rejects_conflicting_non_default_threshold_names():
+    with pytest.raises(ValueError, match="must agree"):
+        BB84PostprocessingConfig(
+            qber_abort_threshold=0.09,
+            phase_error_abort_threshold=0.08,
+        )
+
+
 def test_ideal_bb84_session_completes_full_postprocessing_pipeline():
     session = BB84Protocol(IdentityChannel(), SeededRNG(2026)).run_session(512)
 

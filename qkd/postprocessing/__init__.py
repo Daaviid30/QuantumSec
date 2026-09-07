@@ -8,6 +8,7 @@ from qkd.postprocessing.privacy_amplification import PrivacyAmplificationResult,
 from qkd.postprocessing.reconciliation import (
     CascadeConfig,
     CascadePassStatistics,
+    CascadePublicEvent,
     ReconciliationResult,
     reconcile_cascade,
 )
@@ -22,6 +23,7 @@ from qkd.postprocessing.verification import VerificationResult, verify_reconcile
 __all__ = [
     "CascadeConfig",
     "CascadePassStatistics",
+    "CascadePublicEvent",
     "ParameterEstimationResult",
     "PrivacyAmplificationResult",
     "ReconciliationResult",

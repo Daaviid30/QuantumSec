@@ -1,6 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from core.rng import BaseRNG, SeededRNG
+from qkd.channel import InterceptResendAttack, QuantumChannel
+from qkd.protocols import BB84Protocol
+from ui.backend import adapters
 from ui.backend.main import app
 
 client = TestClient(app)
@@ -217,6 +221,50 @@ def test_intercept_resend_api_is_seeded_and_exposes_isolated_diagnostics():
         diagnostics["eve_z_measurements"] + diagnostics["eve_x_measurements"] == diagnostics["n_intercepted"]
     )
     assert diagnostics["eve_zero_outcomes"] + diagnostics["eve_one_outcomes"] == diagnostics["n_intercepted"]
+
+
+def test_backend_gives_protocol_and_each_eve_stage_independent_rng_streams(monkeypatch):
+    attack_rngs: list[BaseRNG] = []
+    protocol_rngs: list[BaseRNG] = []
+    constructed_seeds: list[int] = []
+
+    class TrackingSeededRNG(SeededRNG):
+        def __init__(self, seed: int) -> None:
+            constructed_seeds.append(seed)
+            super().__init__(seed)
+
+    class TrackingAttack(InterceptResendAttack):
+        def __init__(self, intercept_fraction: float, rng: BaseRNG) -> None:
+            attack_rngs.append(rng)
+            super().__init__(intercept_fraction, rng)
+
+    def tracking_protocol(*, channel: QuantumChannel, rng: BaseRNG) -> BB84Protocol:
+        protocol_rngs.append(rng)
+        return BB84Protocol(channel=channel, rng=rng)
+
+    monkeypatch.setattr(adapters, "InterceptResendAttack", TrackingAttack)
+    monkeypatch.setattr(adapters, "BB84Protocol", tracking_protocol)
+    monkeypatch.setattr(adapters, "SeededRNG", TrackingSeededRNG)
+
+    response = client.post(
+        "/api/simulations/bb84",
+        json={
+            "protocol": "bb84",
+            "n_signals": 64,
+            "seed": 33,
+            "channels": [
+                {"type": "intercept_resend", "intercept_fraction": 0.3},
+                {"type": "intercept_resend", "intercept_fraction": 0.7},
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    assert len(protocol_rngs) == 1
+    assert len(attack_rngs) == 2
+    assert len({id(protocol_rngs[0]), *(id(rng) for rng in attack_rngs)}) == 3
+    assert constructed_seeds[0] == 33
+    assert len(set(constructed_seeds)) == 3
 
 
 def test_attack_and_noise_order_is_preserved_in_response_and_diagnostics():

@@ -136,14 +136,15 @@ isolated QKD simulator, or demonstration that QKD and PQC can merely be combined
 
 ### QKD boundary
 
-BB84 requires an authenticated classical channel. The current code assumes that authentication and
-does not execute it. Its existing universal-hash verification step only detects whether reconciled
-keys disagree; it is not a MAC and must not be described as channel authentication.
+BB84 requires an authenticated classical channel. `QKD-ASSUMED` keeps that requirement explicit
+without pretending to execute it. `QKD-CLASSICAL-AUTH` executes one-time Toeplitz universal-hash
+authentication with a fresh secret selector and fresh secret tag mask from provisioned PSK
+material. `QKD-PQC-AUTH` executes ML-DSA-65 with pre-provisioned peer identities. Both executed
+profiles authenticate bilateral checkpoints over the complete canonical public BB84 transcript
+and withhold final key material if verification fails.
 
-The planned authentication profiles must state which messages or canonical transcript are
-authenticated, the identity or pre-shared-key provisioning model, key separation, tag/signature
-generation and verification, failure behavior, and authentication-material consumption where
-applicable. A Toeplitz hash alone is not a Wegman–Carter MAC.
+The existing universal-hash key-agreement verification only detects whether reconciled keys
+disagree; it is not a MAC and is independent of channel authentication.
 
 ### QBER and secret-length model
 
@@ -187,9 +188,9 @@ protocol/transcript identifiers to avoid changing existing derived keys and wire
 
 | Public profile | Secret / key establishment | Authentication | Purpose | Status |
 |---|---|---|---|---|
-| `QKD-ASSUMED` | BB84 | Authenticated classical channel assumed | Baseline QKD model | **PARTIAL** — BB84 executes; authentication is not executed and the estimator needs correction |
-| `QKD-CLASSICAL-AUTH` | BB84 | Planned universal-hash/Wegman–Carter-style construction with pre-shared authentication material | Executed classical/ITS authentication | **PLANNED** |
-| `QKD-PQC-AUTH` | BB84 | ML-DSA-65 with pre-provisioned identities over a specified classical transcript | Executed PQC authentication | **PLANNED** |
+| `QKD-ASSUMED` | BB84 | Authenticated classical channel assumed | Explicit assumption baseline | **CURRENT** |
+| `QKD-CLASSICAL-AUTH` | BB84 | One-time Toeplitz/Wegman–Carter-style construction with pre-shared authentication material | Executed classical/ITS authentication | **CURRENT** |
+| `QKD-PQC-AUTH` | BB84 | ML-DSA-65 with pre-provisioned identities over the canonical public transcript | Executed PQC authentication | **CURRENT** |
 | `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | Post-quantum establishment | **CURRENT** as internal `LOW` |
 | `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | Cryptographic diversification | **CURRENT** as internal `HIGH` |
 | `HYBRID` | BB84 + ML-KEM-768 | Explicit, recorded authentication policy | Hybrid secret provenance | **PLANNED** |

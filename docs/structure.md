@@ -27,7 +27,9 @@ Current dependency flow:
 ```text
 ui/frontend -> ui/backend -> qkd -> quantum -> core
 
-                  pqc (independent sibling domain)
+                         orchestration
+                           /       \
+                         qkd       pqc
 ```
 
 Target dependency flow:
@@ -70,8 +72,9 @@ The invariants are:
 QuantumSec/
 |-- core/                       # CURRENT: constants, RNG, shared foundations
 |-- quantum/                    # CURRENT: numerical quantum mathematics
-|-- qkd/                        # CURRENT/PARTIAL: BB84 and classical post-processing
+|-- qkd/                        # CURRENT: BB84 and classical post-processing
 |-- pqc/                        # CURRENT: standalone authenticated PQC handshakes
+|-- orchestration/              # CURRENT: QKD profiles and classical-auth policy
 |-- ui/
 |   |-- backend/                # CURRENT: BB84 HTTP adapter only
 |   `-- frontend/               # CURRENT/PARTIAL: BB84 laboratory
@@ -82,7 +85,6 @@ QuantumSec/
 |   |-- reviews/                # HISTORICAL independent review snapshots
 |   |-- structure.md            # CURRENT architecture source
 |   `-- tasks.md                # CURRENT ordered implementation plan
-|-- orchestration/              # PLANNED: profiles, session composition, auth policy
 |-- data_protection/            # PLANNED: AES-256-GCM session payloads
 `-- experiments/               # PLANNED: config/run/record/export/analyze
 ```
@@ -162,10 +164,10 @@ candidate mixes both subsets, `max(e_Z, e_X)` is their documented common upper b
 QBER remains descriptive and sizes Cascade; it cannot authorize privacy amplification as a phase
 estimate. Missing per-basis data fails closed. `docs/SECURITY_MODEL.md` records the derivation.
 
-`QKD-ASSUMED` remains **PARTIAL** as a complete security profile because the classical transcript
-is assumed authenticated rather than authenticated by code. Its implemented secret-length decision
-is explicitly asymptotic, not a composable finite-key proof. Intercept-resend is executable but is
-only one bounded adversary model.
+`QKD-ASSUMED` is the **CURRENT** explicit assumption baseline. It never reports authentication as
+verified. Executed authentication is available only through the upper-layer profiles described
+below. The secret-length decision remains asymptotic, not a composable finite-key proof;
+intercept-resend remains one bounded adversary model.
 
 #### Verification is not authentication
 
@@ -219,7 +221,15 @@ formal robust-combiner proof.
 The implementation uses the parameter set exposed by liboqs 0.16.0 as `HQC-3`. Its documented
 status as of 2026-09-05 is selected for standardization, not a final NIST standard.
 
-### 5.5 `ui/` — CURRENT BB84 interface, PARTIAL TFM laboratory
+### 5.5 `orchestration/` — CURRENT minimal QKD authentication layer
+
+This upper layer imports the independent `qkd` and `pqc` domains. It defines orthogonal BB84 key
+source and classical-authentication dimensions, a versioned canonical transcript, bilateral
+authentication checkpoints, safe results, bounded trace, and authentication metrics. Failed
+executed authentication always withholds final material. It deliberately does not yet implement
+hybrid establishment, data protection, experiment records, or UI routes.
+
+### 5.6 `ui/` — CURRENT BB84 interface, PARTIAL TFM laboratory
 
 Current backend routes:
 
@@ -238,7 +248,7 @@ There are no PQC, QKD-authentication, hybrid, experiment, compare, or AES-GCM ro
 available through the existing BB84 simulation route, but this phase adds no Eve UI. The frontend
 provides a BB84 builder and result workspace only.
 
-### 5.6 `benchmarks/` — CURRENT, not the experiment engine
+### 5.7 `benchmarks/` — CURRENT, not the experiment engine
 
 The existing benchmark measures projective sampling paths. It does not implement E1–E5 and must
 not be presented as the TFM experimental framework.
@@ -247,9 +257,9 @@ not be presented as the TFM experimental framework.
 
 | Public profile | Establishment source | Authentication policy | Status |
 |---|---|---|---|
-| `QKD-ASSUMED` | BB84 | Assumed authenticated classical channel | **PARTIAL** |
-| `QKD-CLASSICAL-AUTH` | BB84 | Executed universal-hash/Wegman–Carter-style authentication | **PLANNED** |
-| `QKD-PQC-AUTH` | BB84 | Executed ML-DSA-65 transcript authentication | **PLANNED** |
+| `QKD-ASSUMED` | BB84 | Assumed authenticated classical channel; not executed | **CURRENT baseline** |
+| `QKD-CLASSICAL-AUTH` | BB84 | Executed one-time Toeplitz/Wegman–Carter-style authentication | **CURRENT** |
+| `QKD-PQC-AUTH` | BB84 | Executed ML-DSA-65 transcript authentication | **CURRENT** |
 | `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | **CURRENT** |
 | `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | **CURRENT** |
 | `HYBRID` | BB84 + ML-KEM-768 | Explicit policy recorded in the profile/result | **PLANNED** |
@@ -264,27 +274,41 @@ The profile contract must make these independent dimensions explicit:
 - terminal outcome and reason;
 - applicable metrics only.
 
-## 7. Planned QKD authentication
+## 7. Current QKD authentication
 
 ### `QKD-CLASSICAL-AUTH`
 
-This profile requires a complete construction, not merely the existing Toeplitz helper:
+This profile implements a complete construction, not merely the existing Toeplitz helper:
 
 - pre-shared secret authentication material;
-- separation between hash-selection and one-time/tag-protection material as required;
+- a fresh secret Toeplitz selector and independent fresh one-time tag mask per checkpoint;
 - canonical authenticated messages/transcript;
 - tag generation and verification;
 - explicit failure path; and
-- accounting for consumed authentication material where applicable.
+- exact accounting of `n + 2t - 1` consumed PSK bits for an `n`-bit frame and `t`-bit tag.
 
-It remains **PLANNED** until all properties are executable and tested.
+The current default is `t = 128`, giving a per-checkpoint substitution/forgery bound no larger
+than `2^-128` under the stated XOR-universal Toeplitz-family and uniform-secret assumptions. The
+implementation conservatively consumes both selector and mask material exactly once and claims no
+key recycling. Byte tags are checked with `hmac.compare_digest`; this does not imply whole-Python
+side-channel resistance. The PSK is provisioned before the session and is never derived from the
+QKD key being authenticated.
 
 ### `QKD-PQC-AUTH`
 
-This profile reuses ML-DSA-65 identities and explicit pre-provisioned trust above `qkd` and `pqc`.
-The design must define which classical messages or canonical transcript are signed and when
-verification occurs. A decorative signature over a final summary is not equivalent to
-authenticating all security-relevant exchanges.
+This profile reuses real ML-DSA-65 identities and explicit pre-provisioned trust above `qkd` and
+`pqc`. Alice and Bob each sign the canonical public-transcript checkpoint in their communication
+direction; the peer resolves the signer through its existing trusted identity store. Identity
+generation and public-key provisioning are outside per-session latency.
+
+Both executed profiles authenticate the same complete public transcript. Its ordered events bind
+Alice/Bob basis announcements, sifting positions, per-basis parameter-estimation positions/bases/
+bits, every Cascade permutation and Alice/Bob root/binary parity (including look-back context),
+the reconciled-key verification public seed and both comparison tags, and the privacy-amplification
+public seed. Each event binds domain, version, session ID, direction, sequence number, message type,
+payload length, and payload. The end-of-transcript bilateral checkpoint strategy may permit wasted
+work or denial of service before verification, but the orchestrator never releases a final key
+until every required checkpoint verifies.
 
 ## 8. Current intercept-resend adversary and corrected estimator
 
