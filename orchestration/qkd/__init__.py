@@ -6,7 +6,11 @@ from orchestration.qkd.result import (
     QKDSessionSummary,
     QKDTraceEvent,
 )
-from orchestration.qkd.runner import AuthenticationContext, run_qkd_profile
+from orchestration.qkd.runner import (
+    AuthenticationContext,
+    run_qkd_profile,
+    validate_qkd_authentication_context,
+)
 from orchestration.qkd.transcript import (
     QKD_CLASSICAL_SESSION_ID_LENGTH,
     QKD_CLASSICAL_TRANSCRIPT_VERSION,
@@ -31,4 +35,5 @@ __all__ = [
     "QKDTraceEvent",
     "build_qkd_classical_transcript",
     "run_qkd_profile",
+    "validate_qkd_authentication_context",
 ]

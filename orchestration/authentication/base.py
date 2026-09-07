@@ -251,16 +251,11 @@ class AuthenticationMetrics:
             raise ValueError("total_time_ns must equal generation plus verification time.")
         for name in ("secret_bits_consumed", "public_key_provisioning_bytes"):
             value = getattr(self, name)
-            if value is not None and (
-                isinstance(value, bool) or not isinstance(value, int) or value < 0
-            ):
+            if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 0):
                 raise ValueError(f"{name} must be a non-negative integer or None.")
         environment = tuple(self.runtime_environment)
         if not environment or not all(
-            isinstance(key, str)
-            and key.strip()
-            and isinstance(value, str)
-            and value.strip()
+            isinstance(key, str) and key.strip() and isinstance(value, str) and value.strip()
             for key, value in environment
         ):
             raise ValueError("runtime_environment must contain non-empty string pairs.")

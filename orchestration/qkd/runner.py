@@ -36,10 +36,19 @@ def _session_identifier(protocol: BB84Protocol, supplied: bytes | None) -> bytes
     return np.asarray(values, dtype=np.uint8).tobytes()
 
 
-def _validate_context(profile: QKDProfile, context: AuthenticationContext | None) -> None:
+def validate_qkd_authentication_context(
+    profile: QKDProfile,
+    context: AuthenticationContext | None,
+    *,
+    transport_hook: AuthenticationTransportHook | None = None,
+) -> None:
+    """Validate runtime authentication capabilities before starting QKD work."""
+
     if profile is QKDProfile.QKD_ASSUMED:
         if context is not None:
             raise ValueError("QKD-ASSUMED does not execute or accept an authentication context.")
+        if transport_hook is not None:
+            raise ValueError("QKD-ASSUMED has no authentication transport boundary to mutate.")
     elif profile is QKDProfile.QKD_CLASSICAL_AUTH:
         if not isinstance(context, WegmanCarterAuthenticationContext):
             raise TypeError("QKD-CLASSICAL-AUTH requires a WegmanCarterAuthenticationContext.")
@@ -63,9 +72,11 @@ def run_qkd_profile(
         raise TypeError("protocol must be a BB84Protocol.")
     if not isinstance(profile, QKDProfile):
         raise TypeError("profile must be a QKDProfile.")
-    _validate_context(profile, authentication_context)
-    if profile is QKDProfile.QKD_ASSUMED and transport_hook is not None:
-        raise ValueError("QKD-ASSUMED has no authentication transport boundary to mutate.")
+    validate_qkd_authentication_context(
+        profile,
+        authentication_context,
+        transport_hook=transport_hook,
+    )
 
     clean_session_id = _session_identifier(protocol, session_id)
     if authentication_context is not None:
@@ -91,10 +102,7 @@ def run_qkd_profile(
         QKDTraceEvent(
             stage="classical_authentication",
             state=authentication.state.value,
-            detail=(
-                authentication.failure_reason
-                or authentication.metrics.trust_assumption
-            ),
+            detail=(authentication.failure_reason or authentication.metrics.trust_assumption),
         ),
     ]
     if authentication.executed and authentication.verified is not True:

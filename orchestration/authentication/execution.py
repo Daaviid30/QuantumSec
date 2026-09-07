@@ -73,9 +73,7 @@ def authenticate_transcript_checkpoints(
     ]
     if metadata.mechanism is ClassicalAuthenticationMode.ML_DSA_65:
         versions = oqs_runtime_versions()
-        environment.extend(
-            (("liboqs", versions.liboqs), ("liboqs-python", versions.liboqs_python))
-        )
+        environment.extend((("liboqs", versions.liboqs), ("liboqs-python", versions.liboqs_python)))
     evidence_items: list[AuthenticationEvidence] = []
     authenticated_bytes = 0
     evidence_bytes = 0
@@ -86,9 +84,7 @@ def authenticate_transcript_checkpoints(
     verification_time_ns = 0
     failure_reason: str | None = None
 
-    for offset, (direction, authenticator) in enumerate(
-        zip(directions, authenticators, strict=True)
-    ):
+    for offset, (direction, authenticator) in enumerate(zip(directions, authenticators, strict=True)):
         frame = AuthenticationFrame(
             session_id=transcript.session_id,
             direction=direction,
@@ -157,9 +153,7 @@ def authenticate_transcript_checkpoints(
         total_time_ns=generation_time_ns + verification_time_ns,
         trust_assumption=metadata.trust_assumption,
         secret_bits_consumed=(
-            secret_bits_consumed
-            if metadata.mechanism is ClassicalAuthenticationMode.WEGMAN_CARTER
-            else None
+            secret_bits_consumed if metadata.mechanism is ClassicalAuthenticationMode.WEGMAN_CARTER else None
         ),
         public_key_provisioning_bytes=public_key_provisioning_bytes,
         forgery_bound=metadata.forgery_bound,

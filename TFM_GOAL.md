@@ -128,7 +128,7 @@ isolated QKD simulator, or demonstration that QKD and PQC can merely be combined
 
 - a seeded numerical logical-qubit BB84 path;
 - real PQC operations through liboqs;
-- planned upper-layer QKD–PQC session composition;
+- current upper-layer QKD–PQC session composition with canonical provenance and confirmation;
 - a reproducible experiment method; and
 - a planned three-screen web interface to configure, observe, and compare runs.
 
@@ -176,7 +176,7 @@ ML-KEM-768 performs key establishment, ML-DSA-65 performs authentication, HQC-3 
 component for diversification, HKDF-SHA-384 derives keys, Finished/HMAC-SHA-384 confirms possession,
 and AES-256-GCM will protect application data. These roles are not interchangeable.
 
-The hybrid construction will not be described as automatically secure whenever one input remains
+The hybrid construction is not described as automatically secure whenever one input remains
 secure. The TFM does not provide a new formal proof. If information-theoretic QKD material is fed
 through a KDF whose security is computational, the resulting hybrid key is described under that
 computational model; it does not automatically retain information-theoretic security.
@@ -193,8 +193,8 @@ protocol/transcript identifiers to avoid changing existing derived keys and wire
 | `QKD-PQC-AUTH` | BB84 | ML-DSA-65 with pre-provisioned identities over the canonical public transcript | Executed PQC authentication | **CURRENT** |
 | `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | Post-quantum establishment | **CURRENT** as internal `LOW` |
 | `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | Cryptographic diversification | **CURRENT** as internal `HIGH` |
-| `HYBRID` | BB84 + ML-KEM-768 | Explicit, recorded authentication policy | Hybrid secret provenance | **PLANNED** |
-| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit, recorded authentication policy | Diversified hybrid establishment | **PLANNED** |
+| `HYBRID` | BB84 + ML-KEM-768 | Explicit QKD policy + ML-DSA-65 PQC authentication | Hybrid secret provenance | **CURRENT** |
+| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit QKD policy + ML-DSA-65 PQC authentication | Diversified hybrid establishment | **CURRENT** |
 
 HQC-3 means the parameter set exposed by liboqs 0.16.0 as `HQC-3`. As of 2026-09-05, HQC is
 **selected for standardization**, not a published NIST standard. ML-KEM and ML-DSA are standardized

@@ -112,10 +112,7 @@ class AuthenticatedQKDSessionResult:
         alice = _optional_key_copy(self._alice_final_key)
         bob = _optional_key_copy(self._bob_final_key)
         if self.status is QKDOrchestrationStatus.ACCEPTED:
-            auth_allows_release = (
-                not self.authentication.executed
-                or self.authentication.verified is True
-            )
+            auth_allows_release = not self.authentication.executed or self.authentication.verified is True
             if (
                 self.qkd.status is not BB84SessionStatus.COMPLETED
                 or not auth_allows_release
@@ -203,8 +200,7 @@ class AuthenticatedQKDSessionResult:
                 "canonical_bytes": len(self.transcript.canonical_bytes()),
             },
             "trace": tuple(
-                {"stage": event.stage, "state": event.state, "detail": event.detail}
-                for event in self.trace
+                {"stage": event.stage, "state": event.state, "detail": event.detail} for event in self.trace
             ),
         }
 

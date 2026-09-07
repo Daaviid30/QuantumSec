@@ -74,6 +74,20 @@ class _KEMSharedSecretStateBase:
             hqc_shared_secret=self._hqc_shared_secret,
         )
 
+    def _consume_hybrid_components(self) -> tuple[tuple[str, bytes], ...]:
+        """Transfer raw KEM contributions once to the domain-owned hybrid capability."""
+
+        if self._closed or self._ml_kem_shared_secret is None:
+            raise RuntimeError("KEM shared-secret state is closed.")
+        definition = profile_definition(self.profile)
+        components = [(definition.ml_kem_algorithm, bytes(self._ml_kem_shared_secret))]
+        if definition.hqc_algorithm is not None:
+            if self._hqc_shared_secret is None:
+                raise RuntimeError("Diversified KEM state is missing its HQC contribution.")
+            components.append((definition.hqc_algorithm, bytes(self._hqc_shared_secret)))
+        self.close()
+        return tuple(components)
+
     def __enter__(self) -> Self:
         """Enter a managed lifetime for this private state."""
 

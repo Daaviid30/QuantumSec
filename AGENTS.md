@@ -51,7 +51,7 @@ Work efficiently by combining the available tools according to the task type. **
    - `quantum/`: Linear algebra, pure/density states (`dm_from_ket`), operators, projective measurements (`ProjectiveMeasurement`), CPTP channels (`QuantumChannel`). No knowledge of QKD.
    - `qkd/`: Protocols (BB84), sifting, error reconciliation (Cascade), parameter estimation, privacy amplification (Toeplitz), security bounds (QBER, Shor-Preskill).
    - `pqc/`: Independent post-quantum primitives and authenticated handshakes. Never imports `qkd`.
-   - `orchestration/`: Profile, trace, metric, result, and authentication policy above the sibling `qkd` and `pqc` domains.
+   - `orchestration/`: Common session contracts and separate QKD, PQC, and hybrid runners above the sibling `qkd` and `pqc` domains. Hybrid composition never moves into either lower domain.
    - `ui/`: FastAPI (`ui/backend`) and React/Vite/Tailwind (`ui/frontend`).
    - *Never invert the import flow.*
 

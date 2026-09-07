@@ -74,7 +74,7 @@ QuantumSec/
 |-- quantum/                    # CURRENT: numerical quantum mathematics
 |-- qkd/                        # CURRENT: BB84 and classical post-processing
 |-- pqc/                        # CURRENT: standalone authenticated PQC handshakes
-|-- orchestration/              # CURRENT: QKD profiles and classical-auth policy
+|-- orchestration/              # CURRENT: common QKD, PQC, and hybrid session layer
 |-- ui/
 |   |-- backend/                # CURRENT: BB84 HTTP adapter only
 |   `-- frontend/               # CURRENT/PARTIAL: BB84 laboratory
@@ -221,13 +221,15 @@ formal robust-combiner proof.
 The implementation uses the parameter set exposed by liboqs 0.16.0 as `HQC-3`. Its documented
 status as of 2026-09-05 is selected for standardization, not a final NIST standard.
 
-### 5.5 `orchestration/` — CURRENT minimal QKD authentication layer
+### 5.5 `orchestration/` — CURRENT common session layer
 
-This upper layer imports the independent `qkd` and `pqc` domains. It defines orthogonal BB84 key
-source and classical-authentication dimensions, a versioned canonical transcript, bilateral
-authentication checkpoints, safe results, bounded trace, and authentication metrics. Failed
-executed authentication always withholds final material. It deliberately does not yet implement
-hybrid establishment, data protection, experiment records, or UI routes.
+This upper layer imports the independent `qkd` and `pqc` domains. `SessionConfig`,
+`SessionExecutionContext`, `SessionTrace`, `SessionMetrics`, `SessionResult`, and `run_session()`
+provide one versioned contract for all seven public profiles. QKD, PQC, and hybrid adapters remain
+separate below the thin dispatcher. Runtime identities, authentication material, protocol engines,
+and test transport boundaries never enter the serializable configuration. Failed authentication,
+security aborts, and Finished failures always withhold final material. Data protection, experiment
+records, and new UI routes remain outside this phase.
 
 ### 5.6 `ui/` — CURRENT BB84 interface, PARTIAL TFM laboratory
 
@@ -262,8 +264,8 @@ not be presented as the TFM experimental framework.
 | `QKD-PQC-AUTH` | BB84 | Executed ML-DSA-65 transcript authentication | **CURRENT** |
 | `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | **CURRENT** |
 | `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | **CURRENT** |
-| `HYBRID` | BB84 + ML-KEM-768 | Explicit policy recorded in the profile/result | **PLANNED** |
-| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit policy recorded in the profile/result | **PLANNED** |
+| `HYBRID` | BB84 + ML-KEM-768 | Explicit QKD policy + ML-DSA-65 PQC exchange authentication | **CURRENT** |
+| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit QKD policy + ML-DSA-65 PQC exchange authentication | **CURRENT** |
 
 The profile contract must make these independent dimensions explicit:
 
@@ -325,7 +327,7 @@ the analytical predictions for all implemented channels. Seeded tests now valida
 `QBER ~= 0.25 f` adversary baseline and symmetric Z/X disturbance. The multi-seed E3 experiment
 campaign remains planned.
 
-## 9. Planned hybrid orchestration
+## 9. Current hybrid orchestration
 
 ```text
 K_QKD
@@ -337,14 +339,28 @@ SS_HQC optional -> hybrid domain separation
                 -> explicit provenance and confirmation
 ```
 
-The hybrid encoding is distinct from the current PQC-only `canonical_kem_secret_input()`. It must
-specify canonical encoding, labels, lengths, deterministic order, profile, domain separation,
-provenance, and binding inputs. Boundary, order, profile-mismatch, omission, duplication, and
-sensitivity tests are mandatory.
+The hybrid encoding is distinct from the PQC-only `canonical_kem_secret_input()`. It binds the
+domain and version, public profile, component count, and each component's position, label, source,
+algorithm, encoding, exact bit length, byte length, and length-prefixed secret bytes. Order is
+strictly QKD, ML-KEM-768, then optional HQC-3. The QKD bitstring is big-endian packed with its exact
+bit length, so padding cannot alias another input.
+
+PQC phases 2–4 authenticate the signed offer and client exchange before the domain-owned single-use
+`AuthenticatedKEMContributions` capability releases defensive secret copies. The source KEM states
+close during transfer. The hybrid layer never reads PQC private fields and never mixes the pure-PQC
+`K_SESSION`.
+
+The public hybrid context binds the shared 16-byte session ID, hybrid and QKD profiles, canonical
+QKD transcript hash/version, PQC transcript hash/protocol/internal profile, ordered algorithms, and
+encoding/context versions. Its SHA-384 digest is the salt for independent 32-byte SessionKey and
+ConfirmationKey HKDF calls. A hybrid-specific versioned HMAC-SHA-384 Finished exchange runs Bob
+then Alice, with Alice's message chained to Bob's verify data. Only bilateral verification creates
+the common established-key capability.
 
 The security description is limited to the construction and assumptions actually implemented. A
 computational KDF output is not automatically information-theoretically secure because one input
-came from QKD.
+came from QKD, and no formal robust-combiner proof is claimed. QKD simulator time and real PQC
+software-crypto time remain separate metric categories and are not presented as physical latency.
 
 ## 10. Planned data-protection plane
 

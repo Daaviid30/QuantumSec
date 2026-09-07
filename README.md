@@ -28,7 +28,7 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | QKD classical-channel authentication | **CURRENT** | Explicit assumed baseline plus executed one-time Toeplitz/Wegman–Carter-style and ML-DSA-65 transcript-checkpoint profiles |
 | PQC establishment | **CURRENT** | Mutually authenticated `PQC-BASE`/`PQC-DIVERSE` handshakes using ML-KEM-768, optional HQC-3, ML-DSA-65, structured KEM input, HKDF-SHA-384, and bilateral Finished |
 | Intercept-resend Eve | **CURRENT** | Seeded, configurable adversary stage with diagnostics and analytical `QBER ~= 0.25 f` validation |
-| Hybrid QKD–PQC | **PLANNED** | Upper-layer composition with provenance, canonical encoding, and explicit authentication policy |
+| Hybrid QKD–PQC | **CURRENT** | Authenticated raw QKD/KEM contributions, canonical encoding, independent HKDF keys, and bilateral hybrid Finished |
 | AES-256-GCM data protection | **PLANNED** | Functional protected-payload closure from the established 256-bit `K_SESSION` |
 | Experiment engine | **PLANNED** | Versioned config/run/record/export contracts and E1–E5 campaign |
 | Web laboratory | **CURRENT, PARTIAL** | Working BB84 builder/results view; target Builder, Run, and two-run Compare screens are not complete |
@@ -71,7 +71,7 @@ Target:
 ```text
 ui/frontend
     -> ui/backend
-        -> session / experiment orchestration        [CURRENT minimal QKD-auth subset]
+        -> session orchestration                     [CURRENT all seven profiles]
             -> qkd                                   [CURRENT domain]
             -> pqc                                   [CURRENT domain]
             -> data protection                       [PLANNED]
@@ -92,8 +92,8 @@ Public documentation and UI use the following profile names:
 | `QKD-PQC-AUTH` | BB84 | ML-DSA-65 and pre-provisioned identities over the canonical public transcript | **CURRENT** |
 | `PQC-BASE` | ML-KEM-768 | ML-DSA-65 | **CURRENT** as internal `PQCProfile.LOW` |
 | `PQC-DIVERSE` | ML-KEM-768 + HQC-3 | ML-DSA-65 | **CURRENT** as internal `PQCProfile.HIGH` |
-| `HYBRID` | BB84 + ML-KEM-768 | Explicit profile policy | **PLANNED** |
-| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit profile policy | **PLANNED** |
+| `HYBRID` | BB84 + ML-KEM-768 | Explicit QKD policy + ML-DSA-65 PQC authentication | **CURRENT** |
+| `HYBRID-DIVERSE` | BB84 + ML-KEM-768 + HQC-3 | Explicit QKD policy + ML-DSA-65 PQC authentication | **CURRENT** |
 
 `LOW` and `HIGH` remain internal identifiers because they are bound into the current transcript
 and HKDF context. Renaming the presentation does not alter derived keys or wire contracts.
@@ -151,7 +151,7 @@ NIST for standardization on 2025-03-11, but is not described as a published NIST
 The structured dual-KEM input is a research diversification construction, not a standardized
 multi-KEM combiner or proof that one uncompromised input automatically secures the final key.
 
-## Planned hybrid and data-protection paths
+## Current hybrid path and planned data protection
 
 ```text
 K_QKD
@@ -159,9 +159,12 @@ SS_ML_KEM      -> canonical hybrid encoding -> HKDF-SHA-384 -> K_SESSION
 SS_HQC optional
 ```
 
-The hybrid encoding must bind labels, lengths, deterministic order, domains, profile, transcript or
-ciphertext where appropriate, and component provenance. Passing information-theoretic QKD material
-through a computational KDF does not automatically preserve information-theoretic security.
+The current hybrid encoding binds labels, exact bit/byte lengths, deterministic order, domains,
+profile, QKD/PQC transcript hashes, shared session ID, and component provenance. Independent
+HKDF-SHA-384 calls derive 32-byte session and confirmation keys, followed by a hybrid-specific
+Bob-then-Alice HMAC-SHA-384 Finished exchange. Passing information-theoretic QKD material through a
+computational KDF does not automatically preserve information-theoretic security, and no formal
+robust-combiner proof is claimed.
 
 ```text
 ESTABLISHMENT PLANE -> 256-bit K_SESSION

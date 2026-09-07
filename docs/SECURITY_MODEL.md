@@ -171,6 +171,30 @@ Classical-channel authentication protects transcript authenticity and integrity.
 protect quantum states: with valid ML-DSA or PSK evidence, full intercept-resend still produces a
 normal BB84 phase-error abort.
 
+## Hybrid session composition
+
+`HYBRID` combines only an accepted BB84 final bitstring and authenticated ML-KEM-768 shared secret.
+`HYBRID-DIVERSE` additionally includes the authenticated HQC-3 shared secret. The QKD contribution
+is released through `AuthenticatedQKDSessionResult`; KEM contributions are released by a
+single-use, transcript/session/profile-bound PQC capability only after both ML-DSA-65 signatures
+verify. The hybrid path does not consume the pure-PQC derived session key.
+
+`QuantumSec/HybridSession/v1/SecretInput` encodes the fixed component order with explicit labels,
+sources, algorithms, encodings, exact bit and byte lengths. The public context under
+`QuantumSec/HybridSession/v1/Transcript` binds the shared session ID, selected QKD authentication
+policy and transcript hash, authenticated PQC transcript and internal profile, algorithm order,
+and versions. Its SHA-384 digest salts independent HKDF-SHA-384 derivations under the SessionKey
+and ConfirmationKey domains. A versioned `QuantumSec/HybridSession/v1/Finished` HMAC-SHA-384
+exchange verifies Bob first and then Alice, whose MAC binds Bob's verify data. Key equality is not
+the protocol decision.
+
+This is a domain-separated canonical hybrid composition and cryptographic diversification design,
+not a new formal robust combiner. It does not establish that one secure component makes the result
+secure under every adversary. Passing QKD material through HKDF-SHA-384 places the derived key in
+the computational model of that construction; it is not automatically an information-theoretic
+output. Numerical BB84 runtime and real PQC software runtime are separate categories, not a
+physical hybrid-latency claim.
+
 ## Analytical channel expectations
 
 For uniformly random BB84 input bits and the channel parameterizations implemented in `qkd/`:
@@ -202,6 +226,8 @@ rates.
 - Eve acts on one logical qubit at a time; there is no optical hardware, loss, multi-photon source,
   quantum memory, side channel, or classical man-in-the-middle model.
 - The simulator makes no physical secret-key-rate, distance, throughput, or hardware-latency claim.
+- The hybrid construction has no formal robust-combiner proof and no automatic
+  information-theoretic output claim.
 
 ## Reference
 

@@ -65,9 +65,9 @@ the estimator reason.
 - [x] Add an upper orchestration layer that imports `qkd` and `pqc`; keep both domains independent.
 - [x] Implement the three public QKD profile names while preserving internal PQC profile values.
 - [x] Represent QKD establishment provenance and authentication as independent dimensions.
-- [ ] Define versioned configuration, ordered trace, compatible metric, terminal result, and abort
+- [x] Define versioned configuration, ordered trace, compatible metric, terminal result, and abort
   contracts.
-- [ ] Ensure capability discovery distinguishes **CURRENT**, **PARTIAL**, and **PLANNED**.
+- [x] Ensure capability discovery reports every actually executable session profile as **CURRENT**.
 - [x] Prohibit secret values and private key material from QKD-auth trace/result representations.
 
 Exit condition: all later profiles can share one orchestration boundary without semantic loss.
@@ -96,16 +96,16 @@ if both constructions satisfy their contracts.
 
 ### 6. Hybrid session establishment
 
-- [ ] Implement `HYBRID` from successful BB84 material and authenticated ML-KEM-768 material.
-- [ ] Implement `HYBRID-DIVERSE` with the additional HQC-3 component.
-- [ ] Define a hybrid-specific canonical encoding with labels, lengths, count, deterministic order,
+- [x] Implement `HYBRID` from successful BB84 material and authenticated ML-KEM-768 material.
+- [x] Implement `HYBRID-DIVERSE` with the additional HQC-3 component.
+- [x] Define a hybrid-specific canonical encoding with labels, lengths, count, deterministic order,
   profile, provenance, and domain separation.
-- [ ] Bind transcript/ciphertext context where required by the final protocol specification.
-- [ ] Derive a 32-byte `K_SESSION` with HKDF-SHA-384 and preserve explicit provenance.
-- [ ] Define final confirmation semantics and distributed-session limitations.
-- [ ] Add order, omission, duplication, profile mismatch, boundary, sensitivity, authentication
+- [x] Bind the shared session ID, QKD transcript, and authenticated PQC transcript into the context.
+- [x] Derive independent 32-byte `K_SESSION`/`K_CONFIRM` values and preserve provenance.
+- [x] Implement hybrid-specific Bob-then-Alice Finished confirmation.
+- [x] Add order, omission, duplication, profile mismatch, boundary, sensitivity, authentication
   failure, QKD abort, KEM failure, and Finished failure tests.
-- [ ] State only the security claim justified by the construction; do not claim a new robust
+- [x] State only the security claim justified by the construction; do not claim a new robust
   combiner proof or automatic information-theoretic security.
 
 Exit condition: `HYBRID` and `HYBRID-DIVERSE` work end to end.

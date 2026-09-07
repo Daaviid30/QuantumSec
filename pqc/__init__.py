@@ -6,6 +6,7 @@ from pqc.protocol import (
     PQC_CONFIRMATION_KEY_LENGTH,
     PQC_FINISHED_VERIFY_DATA_LENGTH,
     PQC_SESSION_KEY_LENGTH,
+    AuthenticatedKEMContributions,
     ClientKeyExchange,
     ClientKeyExchangeFactory,
     ClientKeyExchangeProcessingStatus,
@@ -33,9 +34,12 @@ from pqc.protocol import (
     SignedClientKeyExchange,
     SignedServerKeyOffer,
     TrustedIdentityStore,
+    issue_initiator_hybrid_contributions,
+    issue_responder_hybrid_contributions,
 )
 
 __all__ = [
+    "AuthenticatedKEMContributions",
     "ClientKeyExchange",
     "ClientKeyExchangeFactory",
     "ClientKeyExchangeProcessingStatus",
@@ -70,4 +74,6 @@ __all__ = [
     "SignedClientKeyExchange",
     "SignedServerKeyOffer",
     "TrustedIdentityStore",
+    "issue_initiator_hybrid_contributions",
+    "issue_responder_hybrid_contributions",
 ]

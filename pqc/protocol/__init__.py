@@ -7,6 +7,11 @@ from pqc.protocol.client_exchange import (
     ProcessedClientKeyExchange,
     ResponderSharedSecretState,
 )
+from pqc.protocol.hybrid_contributions import (
+    AuthenticatedKEMContributions,
+    issue_initiator_hybrid_contributions,
+    issue_responder_hybrid_contributions,
+)
 from pqc.protocol.identity import MLDSAIdentity, PublicIdentity
 from pqc.protocol.initiator import (
     InitiatorKEMState,
@@ -43,6 +48,7 @@ from pqc.protocol.transcript import PQCHandshakeTranscript
 from pqc.protocol.trust import TrustedIdentityStore
 
 __all__ = [
+    "AuthenticatedKEMContributions",
     "ClientKeyExchange",
     "ClientKeyExchangeFactory",
     "ClientKeyExchangeProcessingStatus",
@@ -76,4 +82,6 @@ __all__ = [
     "SignedClientKeyExchange",
     "SignedServerKeyOffer",
     "TrustedIdentityStore",
+    "issue_initiator_hybrid_contributions",
+    "issue_responder_hybrid_contributions",
 ]

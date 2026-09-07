@@ -89,7 +89,7 @@ class MLDSADirectionalAuthenticator(DirectionalAuthenticator):
             verified = trusted_identity.verify(frame.canonical_bytes(), evidence.value)
         except UnknownTrustedPeerError:
             return AuthenticationVerification(False, "The ML-DSA signer is not in the verifier trust store.")
-        except (PQCError, TypeError, ValueError):
+        except PQCError, TypeError, ValueError:
             return AuthenticationVerification(False, "ML-DSA signature verification failed.")
         if not verified:
             return AuthenticationVerification(False, "ML-DSA signature verification failed.")
