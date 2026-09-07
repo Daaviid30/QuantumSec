@@ -1,16 +1,17 @@
 """Immutable public record produced by the AES-256-GCM data plane."""
 
 from dataclasses import dataclass, field
-from typing import Final
+from struct import pack, unpack
+from typing import Final, Self
 
 from data_protection.context import (
     DATA_PLANE_ALGORITHM,
     DATA_PLANE_NONCE_BYTES,
     DATA_PLANE_SESSION_ID_BYTES,
     DATA_PLANE_TAG_BYTES,
-    DATA_PLANE_VERSION,
     MAX_SEQUENCE_NUMBER,
     DataPlaneDirection,
+    _length_prefixed,
     _require_bytes,
     _require_text,
     _require_uint,
@@ -18,6 +19,36 @@ from data_protection.context import (
 )
 
 PROTECTED_RECORD_VERSION: Final = 1
+PROTECTED_RECORD_DOMAIN: Final = b"QuantumSec/ProtectedRecord/v1"
+
+
+class _RecordReader:
+    __slots__ = ("_data", "_offset")
+
+    def __init__(self, data: bytes) -> None:
+        self._data = _require_bytes(data, name="data")
+        self._offset = 0
+
+    def _take(self, length: int) -> bytes:
+        end = self._offset + length
+        if end > len(self._data):
+            raise ValueError("Protected record encoding is truncated.")
+        value = self._data[self._offset : end]
+        self._offset = end
+        return value
+
+    def uint16(self) -> int:
+        return unpack(">H", self._take(2))[0]
+
+    def uint64(self) -> int:
+        return unpack(">Q", self._take(8))[0]
+
+    def length_prefixed(self) -> bytes:
+        return self._take(self.uint64())
+
+    def require_end(self) -> None:
+        if self._offset != len(self._data):
+            raise ValueError("Protected record encoding contains trailing bytes.")
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -35,7 +66,7 @@ class ProtectedRecord:
     application_aad_bytes: int
 
     def __post_init__(self) -> None:
-        if self.version != PROTECTED_RECORD_VERSION or self.version != DATA_PLANE_VERSION:
+        if self.version != PROTECTED_RECORD_VERSION:
             raise ValueError(f"version must be {PROTECTED_RECORD_VERSION}.")
         session_id = _require_bytes(
             self.session_id,
@@ -68,6 +99,62 @@ class ProtectedRecord:
         object.__setattr__(self, "ciphertext", ciphertext)
         object.__setattr__(self, "tag", tag)
         object.__setattr__(self, "application_aad_bytes", aad_bytes)
+
+    def canonical_bytes(self) -> bytes:
+        """Encode this public transport record with deterministic binary framing."""
+
+        return b"".join(
+            (
+                _length_prefixed(PROTECTED_RECORD_DOMAIN),
+                pack(">H", self.version),
+                _length_prefixed(self.session_id),
+                _length_prefixed(self.profile.encode("utf-8")),
+                _length_prefixed(self.context_hash),
+                _length_prefixed(self.algorithm.encode("ascii")),
+                _length_prefixed(self.direction.value.encode("ascii")),
+                pack(">Q", self.sequence_number),
+                _length_prefixed(self.nonce),
+                _length_prefixed(self.ciphertext),
+                _length_prefixed(self.tag),
+                pack(">Q", self.application_aad_bytes),
+            )
+        )
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Parse one complete canonical record and reject malformed or trailing input."""
+
+        reader = _RecordReader(data)
+        if reader.length_prefixed() != PROTECTED_RECORD_DOMAIN:
+            raise ValueError("Protected record domain is invalid.")
+        version = reader.uint16()
+        session_id = reader.length_prefixed()
+        try:
+            profile = reader.length_prefixed().decode("utf-8")
+            context_hash = reader.length_prefixed()
+            algorithm = reader.length_prefixed().decode("ascii")
+            direction = DataPlaneDirection(reader.length_prefixed().decode("ascii"))
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise ValueError("Protected record text metadata is invalid.") from exc
+        sequence_number = reader.uint64()
+        nonce = reader.length_prefixed()
+        ciphertext = reader.length_prefixed()
+        tag = reader.length_prefixed()
+        application_aad_bytes = reader.uint64()
+        reader.require_end()
+        return cls(
+            version,
+            session_id,
+            profile,
+            context_hash,
+            algorithm,
+            direction,
+            sequence_number,
+            nonce,
+            ciphertext,
+            tag,
+            application_aad_bytes,
+        )
 
     def to_public_dict(self) -> dict[str, object]:
         return {

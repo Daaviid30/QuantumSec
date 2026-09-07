@@ -168,3 +168,11 @@ def test_aborted_session_cannot_open_data_plane() -> None:
     assert result.status is SessionStatus.ABORTED
     with pytest.raises(RuntimeError, match="established session"):
         open_data_plane(result)
+
+
+def test_data_plane_fails_fast_when_session_key_was_already_consumed() -> None:
+    result = _establish(SessionProfile.PQC_BASE)
+    protected = open_data_plane(result)
+    protected.close()
+    with pytest.raises(RuntimeError, match="already closed"):
+        open_data_plane(result)

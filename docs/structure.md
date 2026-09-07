@@ -389,8 +389,10 @@ Canonical AAD is the length-prefixed `QuantumSec/DataPlane/v1/AAD` domain, versi
 canonical `DataPlaneContext`, direction, uint64 sequence, declared application-AAD byte count, and
 length-prefixed application AAD. The context binds session ID, public profile, `SessionResult`
 version, key type/size, and typed public session-context entries. `ProtectedRecord` stores only
-public transport metadata, nonce, ciphertext, and the full 128-bit tag. `InvalidTag` propagates
-unchanged and no plaintext is returned on authentication failure.
+public transport metadata, nonce, ciphertext, and the full 128-bit tag; it provides deterministic
+length-prefixed `canonical_bytes()` / `from_bytes()` transport framing. Public-context map entries
+are ordered by UTF-8 key bytes before hashing. `InvalidTag` propagates unchanged and no plaintext is
+returned on authentication failure.
 
 ## 11. Experiment architecture
 

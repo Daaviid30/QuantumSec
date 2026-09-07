@@ -11,6 +11,8 @@ def open_data_plane(session: SessionResult) -> ProtectedSession:
         raise TypeError("session must be a SessionResult.")
     if session.status is not SessionStatus.ESTABLISHED:
         raise RuntimeError("Data plane requires an established session.")
+    if session.is_closed:
+        raise RuntimeError("Session key capability is already closed.")
     if session.established_key_type is not EstablishedKeyType.SESSION_KEY:
         raise ValueError(
             "AES-256-GCM data plane requires EstablishedKeyType.SESSION_KEY; "

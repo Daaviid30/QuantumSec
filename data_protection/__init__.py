@@ -21,7 +21,7 @@ from data_protection.context import (
     canonical_data_plane_aad,
     nonce_for,
 )
-from data_protection.record import PROTECTED_RECORD_VERSION, ProtectedRecord
+from data_protection.record import PROTECTED_RECORD_DOMAIN, PROTECTED_RECORD_VERSION, ProtectedRecord
 from data_protection.session import ProtectedSession
 
 __all__ = [
@@ -35,6 +35,7 @@ __all__ = [
     "DATA_PLANE_VERSION",
     "MAX_SEQUENCE_NUMBER",
     "PROTECTED_RECORD_VERSION",
+    "PROTECTED_RECORD_DOMAIN",
     "DataPlaneContext",
     "DataPlaneDirection",
     "InvalidTag",

@@ -86,6 +86,12 @@ class ProtectedSession:
         )
 
     def decrypt(self, record: ProtectedRecord, *, aad: bytes = b"") -> bytes:
+        """Authenticate and decrypt without claiming network anti-replay protection.
+
+        The caller or a future transport layer remains responsible for tracking received
+        sequence numbers and rejecting duplicate records before application processing.
+        """
+
         clean_aad = _require_bytes(aad, name="aad")
         with self._lock:
             key = self._live_key()

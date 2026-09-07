@@ -1,5 +1,6 @@
 """Public context and deterministic nonce policy for the AES-256-GCM data plane."""
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
 from hashlib import sha384
@@ -17,6 +18,9 @@ DATA_PLANE_SESSION_ID_BYTES: Final = 16
 DATA_PLANE_NONCE_BYTES: Final = 12
 DATA_PLANE_TAG_BYTES: Final = 16
 MAX_SEQUENCE_NUMBER: Final = (1 << 64) - 1
+
+type PublicContextEntries = tuple[tuple[str, str | int], ...]
+type PublicContextInput = PublicContextEntries | Mapping[str, str | int]
 
 
 class DataPlaneDirection(StrEnum):
@@ -65,7 +69,7 @@ def _length_prefixed(value: bytes) -> bytes:
     return pack(">Q", len(value)) + value
 
 
-def _encode_public_context(entries: tuple[tuple[str, str | int], ...]) -> bytes:
+def _encode_public_context(entries: PublicContextEntries) -> bytes:
     encoded = [pack(">H", len(entries))]
     for name, value in entries:
         encoded.append(_length_prefixed(name.encode("utf-8")))
@@ -85,7 +89,7 @@ class DataPlaneContext:
     session_result_version: int
     key_type: str
     key_bits: int
-    public_context: tuple[tuple[str, str | int], ...]
+    public_context: PublicContextInput
     version: int = DATA_PLANE_VERSION
 
     def __post_init__(self) -> None:
@@ -109,7 +113,11 @@ class DataPlaneContext:
         if self.key_bits != DATA_PLANE_KEY_BITS:
             raise ValueError(f"key_bits must be {DATA_PLANE_KEY_BITS}.")
 
-        entries = tuple(self.public_context)
+        entries = (
+            tuple(self.public_context.items())
+            if isinstance(self.public_context, Mapping)
+            else tuple(self.public_context)
+        )
         if not entries:
             raise ValueError("public_context must contain the established session binding.")
         clean_entries: list[tuple[str, str | int]] = []
@@ -127,6 +135,7 @@ class DataPlaneContext:
             clean_entries.append((name, clean_value))
         if len({name for name, _value in clean_entries}) != len(clean_entries):
             raise ValueError("public_context keys must be unique.")
+        clean_entries.sort(key=lambda entry: entry[0].encode("utf-8"))
 
         object.__setattr__(self, "session_id", session_id)
         object.__setattr__(self, "profile", profile)
@@ -143,7 +152,11 @@ class DataPlaneContext:
                 pack(">H", self.session_result_version),
                 _length_prefixed(self.key_type.encode("ascii")),
                 pack(">H", self.key_bits),
-                _encode_public_context(self.public_context),
+                _encode_public_context(
+                    tuple(self.public_context.items())
+                    if isinstance(self.public_context, Mapping)
+                    else self.public_context
+                ),
             )
         )
 

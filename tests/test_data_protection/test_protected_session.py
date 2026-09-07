@@ -87,6 +87,26 @@ def test_internal_aad_is_always_nonempty_and_session_bound() -> None:
     assert len({first, second, different_profile, different_public_context}) == 4
 
 
+def test_public_context_order_is_canonical_and_mapping_input_is_supported() -> None:
+    entries = (
+        ("zeta", 7),
+        ("alpha", "value"),
+    )
+    tuple_context = DataPlaneContext(
+        b"protected-test01",
+        "PQC-BASE",
+        1,
+        "session_key",
+        256,
+        entries,
+    )
+    reverse_context = replace(tuple_context, public_context=tuple(reversed(entries)))
+    mapping_context = replace(tuple_context, public_context=dict(entries))
+    assert tuple_context.public_context == (("alpha", "value"), ("zeta", 7))
+    assert tuple_context.canonical_bytes() == reverse_context.canonical_bytes()
+    assert tuple_context.context_hash == mapping_context.context_hash
+
+
 def test_application_aad_change_reaches_aead_and_raises_invalid_tag() -> None:
     with ProtectedSession(b"k" * 32, _context()) as session:
         record = session.encrypt(
@@ -108,6 +128,14 @@ def test_wrong_key_with_same_public_context_raises_invalid_tag() -> None:
         record = sender.encrypt(b"payload", direction=DataPlaneDirection.ALICE_TO_BOB)
         with pytest.raises(InvalidTag):
             receiver.decrypt(record)
+
+
+def test_decrypt_is_explicitly_stateless_and_transport_owns_replay_policy() -> None:
+    with ProtectedSession(b"k" * 32, _context()) as session:
+        record = session.encrypt(b"idempotent payload", direction=DataPlaneDirection.ALICE_TO_BOB)
+        assert session.decrypt(record) == b"idempotent payload"
+        assert session.decrypt(record) == b"idempotent payload"
+    assert "anti-replay" in (ProtectedSession.decrypt.__doc__ or "")
 
 
 def test_record_from_other_session_is_rejected_before_aead() -> None:
@@ -171,3 +199,37 @@ def test_protected_record_is_immutable() -> None:
     with pytest.raises((AttributeError, TypeError)):
         record.sequence_number = 7  # type: ignore[misc]
     assert isinstance(record, ProtectedRecord)
+
+
+def test_protected_record_binary_transport_round_trip() -> None:
+    with ProtectedSession(b"k" * 32, _context()) as session:
+        record = session.encrypt(
+            b"x" * 1024,
+            direction=DataPlaneDirection.BOB_TO_ALICE,
+            aad=b"transport metadata",
+        )
+        encoded = record.canonical_bytes()
+        decoded = ProtectedRecord.from_bytes(encoded)
+        assert decoded == record
+        assert decoded.canonical_bytes() == encoded
+        assert session.decrypt(decoded, aad=b"transport metadata") == b"x" * 1024
+        assert len(encoded) < len(json.dumps(record.to_public_dict()).encode("utf-8"))
+
+
+@pytest.mark.parametrize("mutation", ["truncated", "trailing", "domain"])
+def test_protected_record_binary_parser_rejects_malformed_input(mutation: str) -> None:
+    with ProtectedSession(b"k" * 32, _context()) as session:
+        encoded = session.encrypt(
+            b"payload",
+            direction=DataPlaneDirection.ALICE_TO_BOB,
+        ).canonical_bytes()
+    if mutation == "truncated":
+        changed = encoded[:-1]
+    elif mutation == "trailing":
+        changed = encoded + b"unexpected"
+    else:
+        changed = bytearray(encoded)
+        changed[8] ^= 1
+        changed = bytes(changed)
+    with pytest.raises(ValueError):
+        ProtectedRecord.from_bytes(changed)

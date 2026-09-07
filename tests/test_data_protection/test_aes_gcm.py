@@ -57,3 +57,26 @@ def test_aes_256_gcm_rejects_truncated_tag_before_decryption() -> None:
     ciphertext, tag = encrypt_aes_256_gcm(b"k" * 32, b"n" * 12, b"payload", b"")
     with pytest.raises(ValueError, match="16 bytes"):
         decrypt_aes_256_gcm(b"k" * 32, b"n" * 12, ciphertext, tag[:-1], b"")
+
+
+@pytest.mark.parametrize("payload_size", [15, 16, 17, 31, 32, 1024, 65_536])
+def test_aes_256_gcm_round_trips_block_boundaries_and_large_payloads(payload_size: int) -> None:
+    plaintext = bytes(index % 251 for index in range(payload_size))
+    ciphertext, tag = encrypt_aes_256_gcm(
+        b"k" * 32,
+        b"n" * 12,
+        plaintext,
+        b"payload-size-boundary",
+    )
+    assert len(ciphertext) == payload_size
+    assert len(tag) == 16
+    assert (
+        decrypt_aes_256_gcm(
+            b"k" * 32,
+            b"n" * 12,
+            ciphertext,
+            tag,
+            b"payload-size-boundary",
+        )
+        == plaintext
+    )
