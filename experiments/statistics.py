@@ -87,6 +87,8 @@ def wilson_interval(
         trials=trials,
         confidence=clean_confidence,
         estimate=estimate,
-        lower=max(0.0, center - radius),
-        upper=min(1.0, center + radius),
+        # Cancellation at the boundaries must not put an endpoint on the
+        # wrong side of its own point estimate.
+        lower=max(0.0, min(estimate, center - radius)),
+        upper=min(1.0, max(estimate, center + radius)),
     )

@@ -39,7 +39,14 @@ def _pqc_metrics(
     server = artifacts.signed_server_offer
     client = artifacts.signed_client_exchange
     definition = profile_definition(transcript.profile)
+    operation = artifacts.operation_timer.snapshot()
     signature_bytes = len(server.signature) + len(client.signature)
+    kem_public_key_bytes = len(server.offer.ml_kem_public_key) + (
+        len(server.offer.hqc_public_key) if server.offer.hqc_public_key is not None else 0
+    )
+    kem_ciphertext_bytes = len(client.exchange.ml_kem_ciphertext) + (
+        len(client.exchange.hqc_ciphertext) if client.exchange.hqc_ciphertext is not None else 0
+    )
     canonical_protocol_bytes = len(server.offer.canonical_bytes()) + len(client.exchange.canonical_bytes())
     phase_total = (
         artifacts.server_offer_time_ns
@@ -61,11 +68,30 @@ def _pqc_metrics(
             key_schedule_time_ns=key_schedule_time_ns,
             confirmation_time_ns=confirmation_time_ns,
             crypto_software_time_ns=phase_total,
+            ml_kem_keygen_time_ns=operation.ml_kem_keygen_time_ns,
+            hqc_keygen_time_ns=operation.hqc_keygen_time_ns,
+            server_offer_sign_time_ns=operation.server_offer_sign_time_ns,
+            server_offer_verify_time_ns=operation.server_offer_verify_time_ns,
+            ml_kem_encapsulate_time_ns=operation.ml_kem_encapsulate_time_ns,
+            hqc_encapsulate_time_ns=operation.hqc_encapsulate_time_ns,
+            client_exchange_sign_time_ns=operation.client_exchange_sign_time_ns,
+            client_exchange_verify_time_ns=operation.client_exchange_verify_time_ns,
+            ml_kem_decapsulate_time_ns=operation.ml_kem_decapsulate_time_ns,
+            hqc_decapsulate_time_ns=operation.hqc_decapsulate_time_ns,
+            transcript_construction_hash_time_ns=(operation.transcript_construction_hash_time_ns),
+            kem_combiner_encoding_time_ns=operation.kem_combiner_encoding_time_ns,
+            hkdf_session_time_ns=operation.hkdf_session_time_ns,
+            hkdf_confirmation_time_ns=operation.hkdf_confirmation_time_ns,
+            finished_generation_time_ns=operation.finished_generation_time_ns,
+            finished_verification_time_ns=operation.finished_verification_time_ns,
+            kem_public_key_bytes=kem_public_key_bytes,
+            kem_ciphertext_bytes=kem_ciphertext_bytes,
             canonical_protocol_bytes=canonical_protocol_bytes,
             transcript_bytes=len(transcript.canonical_bytes()),
             signature_bytes=signature_bytes,
             finished_bytes=finished_bytes,
             public_key_provisioning_bytes=public_key_provisioning_bytes,
+            serialized_transport_bytes=None,
         ),
         PQCAuthenticationMetrics(
             mechanism="mutual digital signatures",
@@ -127,11 +153,13 @@ def run_pqc_session(config: SessionConfig, context: SessionExecutionContext) -> 
             processed_server_offer=exchange.processed_server_offer,
             signed_server_offer=exchange.signed_server_offer,
             signed_client_exchange=exchange.signed_client_exchange,
+            operation_observer=exchange.operation_timer.observe,
         )
         bob_key = key_deriver.derive_responder(
             processed_client_exchange=exchange.processed_client_exchange,
             signed_server_offer=exchange.signed_server_offer,
             signed_client_exchange=exchange.signed_client_exchange,
+            operation_observer=exchange.operation_timer.observe,
         )
         key_time = perf_counter_ns() - start
         trace.append(
@@ -148,25 +176,32 @@ def run_pqc_session(config: SessionConfig, context: SessionExecutionContext) -> 
             session_key_state=alice_key,
             signed_server_offer=exchange.signed_server_offer,
             signed_client_exchange=exchange.signed_client_exchange,
+            operation_observer=exchange.operation_timer.observe,
         )
         bob_confirmation = confirmation_deriver.derive_responder(
             processed_client_exchange=exchange.processed_client_exchange,
             session_key_state=bob_key,
             signed_server_offer=exchange.signed_server_offer,
             signed_client_exchange=exchange.signed_client_exchange,
+            operation_observer=exchange.operation_timer.observe,
         )
-        responder_finished = PQCKeyConfirmation.create_responder_finished(bob_confirmation)
+        responder_finished = PQCKeyConfirmation.create_responder_finished(
+            bob_confirmation,
+            operation_observer=exchange.operation_timer.observe,
+        )
         if context.pqc_finished_transport_hook is not None:
             responder_finished = context.pqc_finished_transport_hook(responder_finished)
         initiator_finished = PQCKeyConfirmation.verify_responder_and_create_initiator(
             alice_confirmation,
             responder_finished,
+            operation_observer=exchange.operation_timer.observe,
         )
         if context.pqc_finished_transport_hook is not None:
             initiator_finished = context.pqc_finished_transport_hook(initiator_finished)
         confirmed = PQCKeyConfirmation.verify_initiator_and_confirm(
             bob_confirmation,
             initiator_finished,
+            operation_observer=exchange.operation_timer.observe,
         )
         alice_session = PQCKeyConfirmation.establish_local_session(confirmed, alice_confirmation)
         bob_session = PQCKeyConfirmation.establish_local_session(confirmed, bob_confirmation)

@@ -5,12 +5,18 @@ import secrets
 from dataclasses import dataclass, field
 from enum import StrEnum
 from hashlib import sha384
+from time import perf_counter_ns
 
 from pqc.errors import UnknownTrustedPeerError
 from pqc.profiles import PQCProfile, profile_definition
 from pqc.protocol._shared_secret_state import _KEMSharedSecretStateBase
 from pqc.protocol.identity import _validated_identity_name
 from pqc.protocol.initiator import ProcessedServerOffer
+from pqc.protocol.instrumentation import (
+    PQCOperation,
+    PQCOperationObserver,
+    validate_operation_observer,
+)
 from pqc.protocol.messages import (
     CLIENT_KEY_EXCHANGE_NONCE_LENGTH,
     CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION,
@@ -112,6 +118,7 @@ class ClientKeyExchangeFactory:
         initiator: PQCParty,
         signed_server_offer: SignedServerKeyOffer,
         processed_offer: ProcessedServerOffer,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> SignedClientKeyExchange:
         """Bind a successful Phase 3 response to Bob's exact offer and sign it as Alice."""
 
@@ -126,6 +133,7 @@ class ClientKeyExchangeFactory:
             raise TypeError(
                 f"processed_offer must be a ProcessedServerOffer. Got {type(processed_offer).__name__}."
             )
+        validate_operation_observer(operation_observer)
         if not processed_offer.authenticated:
             raise ValueError("ClientKeyExchange requires an authenticated Phase 3 result.")
         if processed_offer.initiator_state is None or processed_offer.public_encapsulation is None:
@@ -158,22 +166,34 @@ class ClientKeyExchangeFactory:
             raise ValueError("Encapsulation algorithms do not match the signed server offer.")
 
         definition = profile_definition(offer.profile)
+        started = perf_counter_ns()
+        server_offer_hash = sha384(offer.canonical_bytes()).digest()
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
         exchange = ClientKeyExchange(
             protocol_version=CLIENT_KEY_EXCHANGE_PROTOCOL_VERSION,
             session_id=response.session_id,
             profile=response.profile,
             client_nonce=secrets.token_bytes(CLIENT_KEY_EXCHANGE_NONCE_LENGTH),
-            server_offer_hash=sha384(offer.canonical_bytes()).digest(),
+            server_offer_hash=server_offer_hash,
             ml_kem_algorithm=response.ml_kem_algorithm,
             ml_kem_ciphertext=response.ml_kem_ciphertext,
             hqc_algorithm=response.hqc_algorithm,
             hqc_ciphertext=response.hqc_ciphertext,
         )
+        canonical_exchange = exchange.canonical_bytes()
+        started = perf_counter_ns()
+        signature = initiator.sign(canonical_exchange)
+        if operation_observer is not None:
+            operation_observer(PQCOperation.CLIENT_EXCHANGE_SIGN, perf_counter_ns() - started)
         return SignedClientKeyExchange(
             exchange=exchange,
             signer=initiator.name,
             signature_algorithm=definition.signature_algorithm,
-            signature=initiator.sign(exchange.canonical_bytes()),
+            signature=signature,
         )
 
 
@@ -187,6 +207,7 @@ class ClientKeyExchangeProcessor:
         responder_state: ResponderKEMState,
         server_offer: SignedServerKeyOffer,
         signed_exchange: SignedClientKeyExchange,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> ProcessedClientKeyExchange:
         """Verify Alice's response and only then recover Bob's matching KEM secrets."""
 
@@ -204,6 +225,7 @@ class ClientKeyExchangeProcessor:
             raise TypeError(
                 f"signed_exchange must be a SignedClientKeyExchange. Got {type(signed_exchange).__name__}."
             )
+        validate_operation_observer(operation_observer)
 
         exchange = signed_exchange.exchange
         offer = server_offer.offer
@@ -235,7 +257,13 @@ class ClientKeyExchangeProcessor:
                 reason="The original server offer does not match Bob's local responder state.",
             )
 
+        started = perf_counter_ns()
         expected_offer_hash = sha384(offer.canonical_bytes()).digest()
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
         if not hmac.compare_digest(expected_offer_hash, exchange.server_offer_hash):
             return self._rejected(
                 signed_exchange,
@@ -270,19 +298,30 @@ class ClientKeyExchangeProcessor:
                 status=ClientKeyExchangeProcessingStatus.ALGORITHM_MISMATCH,
                 reason="The trusted identity algorithm does not match the signed client exchange.",
             )
-        if not trusted_initiator.verify(exchange.canonical_bytes(), signed_exchange.signature):
+        canonical_exchange = exchange.canonical_bytes()
+        started = perf_counter_ns()
+        verified = trusted_initiator.verify(canonical_exchange, signed_exchange.signature)
+        if operation_observer is not None:
+            operation_observer(PQCOperation.CLIENT_EXCHANGE_VERIFY, perf_counter_ns() - started)
+        if not verified:
             return self._rejected(
                 signed_exchange,
                 status=ClientKeyExchangeProcessingStatus.INVALID_SIGNATURE,
                 reason="The client exchange signature is invalid for the trusted initiator identity.",
             )
 
+        started = perf_counter_ns()
         ml_kem_shared_secret = responder_state.decapsulate_ml_kem(exchange.ml_kem_ciphertext)
+        if operation_observer is not None:
+            operation_observer(PQCOperation.ML_KEM_DECAPSULATE, perf_counter_ns() - started)
         hqc_shared_secret = None
         if exchange.profile is PQCProfile.HIGH:
             if exchange.hqc_ciphertext is None:
                 raise ValueError("Authenticated HIGH client exchange is missing its HQC-3 ciphertext.")
+            started = perf_counter_ns()
             hqc_shared_secret = responder_state.decapsulate_hqc(exchange.hqc_ciphertext)
+            if operation_observer is not None:
+                operation_observer(PQCOperation.HQC_DECAPSULATE, perf_counter_ns() - started)
 
         shared_secret_state = ResponderSharedSecretState(
             session_id=exchange.session_id,

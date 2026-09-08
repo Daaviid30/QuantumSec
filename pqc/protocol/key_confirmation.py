@@ -4,6 +4,7 @@ import hmac
 from dataclasses import dataclass, field
 from hashlib import sha384
 from struct import pack
+from time import perf_counter_ns
 from types import TracebackType
 from typing import Final, Self
 
@@ -13,6 +14,11 @@ from pqc.profiles import PQCProfile
 from pqc.protocol._shared_secret_state import _KEMSharedSecretStateBase
 from pqc.protocol.client_exchange import ProcessedClientKeyExchange
 from pqc.protocol.initiator import ProcessedServerOffer
+from pqc.protocol.instrumentation import (
+    PQCOperation,
+    PQCOperationObserver,
+    validate_operation_observer,
+)
 from pqc.protocol.key_schedule import (
     DerivedSessionKeyState,
     _key_schedule_info,
@@ -326,6 +332,7 @@ class PQCConfirmationKeyDeriver:
         session_key_state: DerivedSessionKeyState,
         signed_server_offer: SignedServerKeyOffer,
         signed_client_exchange: SignedClientKeyExchange,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> PQCConfirmationKeyState:
         """Derive Alice's confirmation state and retire her KEM secret state."""
 
@@ -334,16 +341,24 @@ class PQCConfirmationKeyDeriver:
                 "processed_server_offer must be a ProcessedServerOffer. "
                 f"Got {type(processed_server_offer).__name__}."
             )
+        validate_operation_observer(operation_observer)
+        started = perf_counter_ns()
         transcript = PQCHandshakeTranscript.from_messages(
             signed_server_offer,
             signed_client_exchange,
         )
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
         secret_state = _validated_initiator_secret_state(processed_server_offer, transcript)
         return self._derive(
             secret_state=secret_state,
             session_key_state=session_key_state,
             transcript=transcript,
             role=PQCFinishedRole.INITIATOR,
+            operation_observer=operation_observer,
         )
 
     def derive_responder(
@@ -353,6 +368,7 @@ class PQCConfirmationKeyDeriver:
         session_key_state: DerivedSessionKeyState,
         signed_server_offer: SignedServerKeyOffer,
         signed_client_exchange: SignedClientKeyExchange,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> PQCConfirmationKeyState:
         """Derive Bob's confirmation state and retire his KEM secret state."""
 
@@ -361,16 +377,24 @@ class PQCConfirmationKeyDeriver:
                 "processed_client_exchange must be a ProcessedClientKeyExchange. "
                 f"Got {type(processed_client_exchange).__name__}."
             )
+        validate_operation_observer(operation_observer)
+        started = perf_counter_ns()
         transcript = PQCHandshakeTranscript.from_messages(
             signed_server_offer,
             signed_client_exchange,
         )
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
         secret_state = _validated_responder_secret_state(processed_client_exchange, transcript)
         return self._derive(
             secret_state=secret_state,
             session_key_state=session_key_state,
             transcript=transcript,
             role=PQCFinishedRole.RESPONDER,
+            operation_observer=operation_observer,
         )
 
     @staticmethod
@@ -380,6 +404,7 @@ class PQCConfirmationKeyDeriver:
         session_key_state: DerivedSessionKeyState,
         transcript: PQCHandshakeTranscript,
         role: PQCFinishedRole,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> PQCConfirmationKeyState:
         if secret_state.session_id != transcript.session_id:
             raise ValueError("KEM secret-state session does not match the handshake transcript.")
@@ -387,19 +412,33 @@ class PQCConfirmationKeyDeriver:
             raise ValueError("KEM secret-state profile does not match the handshake transcript.")
         live_session_key_state = _validated_session_key_state(session_key_state, transcript)
 
+        started = perf_counter_ns()
+        key_material = secret_state._build_kdf_input()
+        if operation_observer is not None:
+            operation_observer(PQCOperation.KEM_COMBINER_ENCODING, perf_counter_ns() - started)
+        started = perf_counter_ns()
+        transcript_hash = transcript.transcript_hash
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
+        started = perf_counter_ns()
         confirmation_key = derive_hkdf_sha384(
-            key_material=secret_state._build_kdf_input(),
-            salt=transcript.transcript_hash,
+            key_material=key_material,
+            salt=transcript_hash,
             info=_confirmation_key_info(
                 protocol_version=transcript.protocol_version,
                 profile=transcript.profile,
             ),
             length=PQC_CONFIRMATION_KEY_LENGTH,
         )
+        if operation_observer is not None:
+            operation_observer(PQCOperation.HKDF_CONFIRMATION, perf_counter_ns() - started)
         confirmation_state = PQCConfirmationKeyState(
             session_id=transcript.session_id,
             profile=transcript.profile,
-            transcript_hash=transcript.transcript_hash,
+            transcript_hash=transcript_hash,
             role=role,
             _session_key_state=live_session_key_state,
             _confirmation_key=confirmation_key,
@@ -576,16 +615,22 @@ class PQCKeyConfirmation:
     @staticmethod
     def create_responder_finished(
         responder_state: PQCConfirmationKeyState,
+        *,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> PQCFinishedMessage:
         """Create Bob's first Finished flight exactly once."""
 
+        validate_operation_observer(operation_observer)
         state = PQCKeyConfirmation._require_state(
             responder_state,
             expected_role=PQCFinishedRole.RESPONDER,
         )
         if state._peer_finished is not None:
             raise RuntimeError("Responder confirmation state has already verified its peer.")
+        started = perf_counter_ns()
         message = state._build_local_finished()
+        if operation_observer is not None:
+            operation_observer(PQCOperation.FINISHED_GENERATION, perf_counter_ns() - started)
         state._local_finished = message
         return message
 
@@ -593,22 +638,31 @@ class PQCKeyConfirmation:
     def verify_responder_and_create_initiator(
         initiator_state: PQCConfirmationKeyState,
         responder_finished: PQCFinishedMessage,
+        *,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> PQCFinishedMessage:
         """Verify Bob before creating Alice's chained Finished response."""
 
+        validate_operation_observer(operation_observer)
         state = PQCKeyConfirmation._require_state(
             initiator_state,
             expected_role=PQCFinishedRole.INITIATOR,
         )
         if state._peer_finished is not None:
             raise RuntimeError("Initiator confirmation state has already verified its peer.")
+        started = perf_counter_ns()
         state._verify_peer_finished(
             responder_finished,
             expected_role=PQCFinishedRole.RESPONDER,
         )
+        if operation_observer is not None:
+            operation_observer(PQCOperation.FINISHED_VERIFICATION, perf_counter_ns() - started)
+        started = perf_counter_ns()
         message = state._build_local_finished(
             responder_verify_data=responder_finished.verify_data,
         )
+        if operation_observer is not None:
+            operation_observer(PQCOperation.FINISHED_GENERATION, perf_counter_ns() - started)
         state._peer_finished = responder_finished
         state._local_finished = message
         state.close()
@@ -618,9 +672,12 @@ class PQCKeyConfirmation:
     def verify_initiator_and_confirm(
         responder_state: PQCConfirmationKeyState,
         initiator_finished: PQCFinishedMessage,
+        *,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> ConfirmedPQCHandshake:
         """Verify Alice's chained Finished and produce mutual-confirmation proof."""
 
+        validate_operation_observer(operation_observer)
         state = PQCKeyConfirmation._require_state(
             responder_state,
             expected_role=PQCFinishedRole.RESPONDER,
@@ -629,11 +686,14 @@ class PQCKeyConfirmation:
             raise RuntimeError("Responder Finished must be created before verifying Alice.")
         if state._peer_finished is not None:
             raise RuntimeError("Responder confirmation state has already verified its peer.")
+        started = perf_counter_ns()
         state._verify_peer_finished(
             initiator_finished,
             expected_role=PQCFinishedRole.INITIATOR,
             responder_verify_data=state._local_finished.verify_data,
         )
+        if operation_observer is not None:
+            operation_observer(PQCOperation.FINISHED_VERIFICATION, perf_counter_ns() - started)
         confirmed = ConfirmedPQCHandshake._from_verified(
             responder_finished=state._local_finished,
             initiator_finished=initiator_finished,

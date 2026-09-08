@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from uuid import uuid4
 
 from experiments.config import ExperimentConfig, ExperimentKind
@@ -60,6 +60,8 @@ def run_batch(
     shuffle: bool = False,
     order_seed: int | None = None,
     warmup_runs: int = 0,
+    warmup_configs: Iterable[ExperimentConfig] = (),
+    progress: Callable[[int, int, ExperimentRecord], None] | None = None,
 ) -> tuple[ExperimentRecord, ...]:
     """Run ordered configurations sequentially, optionally shuffling reproducibly.
 
@@ -81,20 +83,30 @@ def run_batch(
         raise ValueError("order_seed is only meaningful when shuffle=True.")
     if isinstance(warmup_runs, bool) or not isinstance(warmup_runs, int) or warmup_runs < 0:
         raise ValueError("warmup_runs must be a non-negative integer.")
+    clean_warmups = tuple(warmup_configs)
+    if not all(isinstance(config, ExperimentConfig) for config in clean_warmups):
+        raise TypeError("warmup_configs must contain only ExperimentConfig values.")
+    if progress is not None and not callable(progress):
+        raise TypeError("progress must be callable or None.")
 
     active_runner = runner or ExperimentRunner(ExperimentRuntimeFactory())
     ordered = list(clean_configs)
     if shuffle:
         random.Random(order_seed).shuffle(ordered)
+    for config in clean_warmups:
+        active_runner.run(config)
     for index in range(warmup_runs):
         active_runner.run(ordered[index % len(ordered)])
     batch = BatchProvenance(
         batch_run_id=str(uuid4()),
         shuffle=shuffle,
         order_seed=order_seed,
-        warmup_runs=warmup_runs,
+        warmup_runs=len(clean_warmups) + warmup_runs,
     )
-    return tuple(
-        active_runner.run(config, batch=batch, execution_order_index=index)
-        for index, config in enumerate(ordered)
-    )
+    records: list[ExperimentRecord] = []
+    for index, config in enumerate(ordered):
+        record = active_runner.run(config, batch=batch, execution_order_index=index)
+        records.append(record)
+        if progress is not None:
+            progress(index + 1, len(ordered), record)
+    return tuple(records)

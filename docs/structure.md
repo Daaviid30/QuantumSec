@@ -81,7 +81,7 @@ QuantumSec/
 |-- pqc/                        # CURRENT: standalone authenticated PQC handshakes
 |-- orchestration/              # CURRENT: session layer and data-plane adapter
 |-- data_protection/            # CURRENT: session-bound AES-256-GCM payload protection
-|-- experiments/                # CURRENT: reproducible config/runtime/record/export engine V1
+|-- experiments/                # CURRENT: engine plus thesis-v1 campaign/record-only analysis
 |-- ui/
 |   |-- backend/                # CURRENT: BB84 HTTP adapter only
 |   `-- frontend/               # CURRENT/PARTIAL: BB84 laboratory
@@ -407,7 +407,7 @@ ExperimentConfig
             -> public SessionResult + ordered Trace + categorized SessionMetrics
                 -> immutable ExperimentRecord
                     -> versioned JSON/analysis-ready CSV
-                        -> later analysis and figures
+                        -> record-only summaries, figures, report, and integrity audit
 ```
 
 The five required experiments and D1 are specified in
@@ -422,6 +422,12 @@ applicable timings, QKD protocol estimates/diagnostics, and outcome. It never se
 values and closes each generic `SessionResult` after copying public evidence. Its exact contracts,
 CLI, seed policy, batch behavior, and export schemas are documented in
 [`EXPERIMENTS.md`](EXPERIMENTS.md).
+
+`experiments/campaigns/thesis_v1.py` owns only the fixed campaign matrix and execution workflow;
+`experiments/analysis/thesis_v1.py` and `plots.py` read the exported raw records and never import or
+execute cryptographic sessions. The THESIS dataset was executed as `thesis-v1.0.1` under
+`results/thesis_v1/` with 1,111 records and 13 required figures. The dependency direction remains
+`analysis/campaigns -> experiments -> orchestration -> domains`.
 
 ## 12. Web Laboratory V1
 

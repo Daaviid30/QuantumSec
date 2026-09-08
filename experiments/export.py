@@ -194,6 +194,10 @@ _PROVISIONING_COLUMNS = (
     "provisioning.pqc_identities",
     "provisioning.qkd_authentication_material",
     "provisioning.qkd_authentication_material_bytes_per_direction",
+    "provisioning.pqc_alice_identity_generation_time_ns",
+    "provisioning.pqc_bob_identity_generation_time_ns",
+    "provisioning.pqc_total_identity_generation_time_ns",
+    "provisioning.pqc_public_identity_bytes",
     "provisioning.included_in_session_timings",
 )
 _RESULT_COLUMNS = (

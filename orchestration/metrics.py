@@ -23,6 +23,12 @@ class QKDSessionMetrics:
     estimated_qber_z: float | None
     estimated_qber_x: float | None
     estimated_qber_aggregated: float | None
+    estimated_z_errors: int | None
+    estimated_z_trials: int | None
+    estimated_x_errors: int | None
+    estimated_x_trials: int | None
+    estimated_aggregate_errors: int | None
+    estimated_aggregate_trials: int | None
     phase_error_bound: float | None
     diagnostic_full_sifted_qber: float | None
     diagnostic_qber_z: float | None
@@ -42,11 +48,30 @@ class PQCSessionMetrics:
     key_schedule_time_ns: int
     confirmation_time_ns: int
     crypto_software_time_ns: int
+    ml_kem_keygen_time_ns: int
+    hqc_keygen_time_ns: int | None
+    server_offer_sign_time_ns: int
+    server_offer_verify_time_ns: int
+    ml_kem_encapsulate_time_ns: int
+    hqc_encapsulate_time_ns: int | None
+    client_exchange_sign_time_ns: int
+    client_exchange_verify_time_ns: int
+    ml_kem_decapsulate_time_ns: int
+    hqc_decapsulate_time_ns: int | None
+    transcript_construction_hash_time_ns: int
+    kem_combiner_encoding_time_ns: int
+    hkdf_session_time_ns: int
+    hkdf_confirmation_time_ns: int
+    finished_generation_time_ns: int
+    finished_verification_time_ns: int
+    kem_public_key_bytes: int
+    kem_ciphertext_bytes: int
     canonical_protocol_bytes: int
     transcript_bytes: int
     signature_bytes: int
     finished_bytes: int
     public_key_provisioning_bytes: int
+    serialized_transport_bytes: int | None
 
 
 @dataclass(frozen=True, slots=True)

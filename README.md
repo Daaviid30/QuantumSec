@@ -30,7 +30,7 @@ simulator, or a demonstration that QKD and PQC can merely be combined.
 | Intercept-resend Eve | **CURRENT** | Seeded, configurable adversary stage with diagnostics and analytical `QBER ~= 0.25 f` validation |
 | Hybrid QKD–PQC | **CURRENT** | Authenticated raw QKD/KEM contributions, canonical encoding, independent HKDF keys, and bilateral hybrid Finished |
 | AES-256-GCM data protection | **CURRENT** | Session-bound payload protection with 96-bit direction/counter nonces, full 128-bit tags, canonical AAD, and explicit tamper failure |
-| Experiment engine | **CURRENT V1** | Versioned secret-free config/runtime/record contracts, seven-profile execution, batch order/warm-up, JSON/CSV, median/IQR, and Wilson intervals; E1–E5 campaign not yet run |
+| Experiment campaign | **CURRENT, EXECUTED** | Versioned secret-free engine plus `thesis-v1.0.1`: SMOKE and 1,111-record THESIS E1–E5/D1 campaign, raw hashes, summaries, 13 PDF/PNG figures, and report |
 | Web laboratory | **CURRENT, PARTIAL** | Working BB84 builder/results view; target Builder, Run, and two-run Compare screens are not complete |
 
 ## Research focus
@@ -198,8 +198,11 @@ The fundamental measurement rule is defined once in
 [`TFM_GOAL.md §12`](TFM_GOAL.md#12-experimental-methodology): numerical BB84 runtime is not physical
 QKD performance and is never compared temporally with real liboqs operations.
 
-The reusable V1 engine is implemented; the campaign itself has deliberately not been executed.
-See [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) for exact record/export schemas and CLI usage.
+The reusable engine and definitive `thesis-v1.0.1` campaign are implemented and executed. The
+local ignored dataset is in `results/thesis_v1/`; its manifest records the exact environment,
+methodology, expected counts, seeds, warm-ups, order seeds, raw SHA-256 values, completeness, and
+secret-audit status. See [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) for schemas and reproducible
+execution/analysis commands.
 
 ## Web Laboratory V1
 
@@ -264,6 +267,10 @@ Run the secret-free experiment examples from the repository root:
 ```bash
 uv run python -m experiments.cli run examples/experiments/qkd_eve_example.json --output experiments/output/qkd-eve.json
 uv run python -m experiments.cli run examples/experiments/pqc_base_example.json --output experiments/output/pqc-base.json
+
+uv run python -m experiments.campaigns.thesis_v1 --preset smoke --output results/thesis_v1_smoke
+uv run python -m experiments.campaigns.thesis_v1 --preset thesis --output results/thesis_v1
+uv run python -m experiments.analysis.thesis_v1 results/thesis_v1
 ```
 
 ## Verification
@@ -285,6 +292,7 @@ npm run build
 - [`docs/structure.md`](docs/structure.md) — current and target architecture.
 - [`docs/tasks.md`](docs/tasks.md) — exact implementation order.
 - [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) — current experiment config, runtime, record, export, and CLI contracts.
+- [`docs/THESIS_CAMPAIGN.md`](docs/THESIS_CAMPAIGN.md) — executed campaign inventory and reproduction boundary.
 - [`ui/README.md`](ui/README.md) — current UI/API and three-screen target.
 - [`DEPLOYMENT.md`](DEPLOYMENT.md) — local and research-hosting setup.
 - [`docs/reviews/`](docs/reviews/) and [`reports/`](reports/) — historical snapshots, not current

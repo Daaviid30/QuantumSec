@@ -19,7 +19,7 @@ from experiments.record import (
     ExperimentRecord,
 )
 from experiments.runner import ExperimentRunner, run_batch
-from experiments.runtime import ExperimentRuntimeFactory, RuntimeProvisioning
+from experiments.runtime import ExperimentRuntimeFactory, PQCIdentityProvisioning, RuntimeProvisioning
 from experiments.statistics import TimingSummary, WilsonInterval, median_iqr, wilson_interval
 
 __all__ = [
@@ -33,6 +33,7 @@ __all__ = [
     "ExperimentRecord",
     "ExperimentRunner",
     "ExperimentRuntimeFactory",
+    "PQCIdentityProvisioning",
     "RuntimeProvisioning",
     "TimingSummary",
     "WilsonInterval",

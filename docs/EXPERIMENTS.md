@@ -16,7 +16,7 @@ run_session() -> SessionResult
 ExperimentRecord (copied public result + trace + categorized metrics)
       |
       +--> JSON
-      `--> CSV --> later E1-E5/D1 analysis
+      `--> CSV --> record-only E1-E5/D1 analysis, figures, and report
 ```
 
 ## Configuration
@@ -44,7 +44,9 @@ reused by a factory. This happens before the session stopwatches. A QKD ML-DSA r
 identities but gets a fresh anti-replay registry. A Wegman-Carter run receives fresh pre-shared
 authentication material for each run. The factory uses a conservative capacity scaled by signal
 count and Cascade passes, while storing PSK bytes in packed form; the public provisioning metadata
-records only bytes provisioned per direction and `secret_bits_consumed`, never the material.
+records only bytes provisioned per direction and `secret_bits_consumed`, never the material. For
+PQC, the one-time Alice/Bob ML-DSA identity-generation durations and public identity bytes are
+recorded explicitly as provisioning metadata and remain outside session handshake timing.
 
 The generic runner never exports an established key. It copies `SessionResult.to_public_dict()`,
 separates its result, trace, and metrics sections, freezes those copies, and closes the live
@@ -77,15 +79,20 @@ Non-finite floats and explicitly secret-bearing field names are rejected as a se
 Metrics remain in separate `qkd`, `pqc`, `qkd_authentication`, `pqc_authentication`, and `hybrid`
 sections. QKD exports protocol estimates (`estimated_qber_z`, `estimated_qber_x`, aggregate and
 phase-error bound), explicitly named simulator diagnostics, all material counts, sifting
-efficiency, final secret fraction, transcript bytes, and simulation software time. QKD simulation
+efficiency, final secret fraction, exact Z/X/aggregate error and trial counts, transcript bytes,
+and simulation software time. QKD simulation
 runtime is not physical QKD performance and is never summed, ranked, or compared with PQC
 cryptographic software time.
 
 JSON is UTF-8, versioned, and pretty-printed. CSV has one row per run, a fixed union schema across
 profiles, dotted numeric metric columns, and canonical JSON cells for config, ordered stages,
 provenance, authentication, public context, and trace. Non-applicable metrics are empty, never zero.
-The recorded PQC timing names preserve the actual current handshake phase granularity; they are not
-relabeled as primitive timings.
+The PQC record preserves phase totals and separately exposes narrow direct timings around actual
+ML-KEM/HQC key generation, encapsulation and decapsulation, ML-DSA sign/verify, transcript/hash,
+canonical KEM input, both HKDF derivations, and Finished generation/verification. No primitive
+timing is inferred by subtracting phase totals. Raw cryptographic, canonical protocol, and actual
+hybrid Finished-message sizes remain separate; serialized transport is `null` because no transport
+serialization is defined.
 
 ## Batch and statistics
 
@@ -114,8 +121,29 @@ uv run python -m experiments.cli batch configs.json \
 ```
 
 Generated `experiments/output/` and `results/` trees are ignored. Selected thesis datasets can be
-archived later by an explicit decision. The V1 engine is ready to produce E1-E5 establishment
-records and includes the D1 label/config foundation. As specified by the lifecycle boundary, a
-future specialized D1 runner must transfer `K_SESSION` into the existing data plane before close;
-the generic runner rejects D1 explicitly and never exports its key. V1 does not execute campaigns or provide plotting,
-hypothesis testing, dashboards, workers, or a database.
+archived later by an explicit decision. The specialized D1 runner transfers the live established
+key directly into the existing data plane, closes the session capability, and exports only public
+sizes/outcomes. The generic runner still rejects D1 and never exports a key.
+
+## Definitive campaign
+
+`experiments.campaigns.thesis_v1` provides fixed `smoke` and `thesis` presets. Version
+`thesis-v1.0.1` executed 100 E1, 250 E2, 550 E3, 90 E4, 120 E5, and one D1 record. The manifest is
+written before execution and then sealed with raw JSON/CSV SHA-256 digests, expected/actual
+completeness, figure inventory, and secret-audit status. PQC timing orders are randomized with
+fixed order seeds; warm-ups and persistent identity provisioning are discarded/excluded from
+session timings as declared.
+
+```bash
+uv run python -m experiments.campaigns.thesis_v1 \
+  --preset smoke --output results/thesis_v1_smoke
+
+uv run python -m experiments.campaigns.thesis_v1 \
+  --preset thesis --output results/thesis_v1
+
+uv run python -m experiments.analysis.thesis_v1 results/thesis_v1
+```
+
+The analysis command reads only `records.json`/`records.csv`, verifies their manifest hashes and
+counts, and regenerates summaries, 13 figures in PDF/PNG, the E2 regression note, E4 security table,
+D1 tamper matrix, and `campaign_report.md`. It never reruns cryptography or mutates raw records.

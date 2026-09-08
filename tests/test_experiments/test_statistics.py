@@ -47,6 +47,13 @@ def test_wilson_interval_accepts_one_trial() -> None:
     assert interval.upper == 1.0
 
 
+def test_wilson_interval_contains_large_boundary_estimates_exactly() -> None:
+    zero = wilson_interval(0, 20_000)
+    one = wilson_interval(20_000, 20_000)
+    assert zero.estimate == zero.lower == 0.0
+    assert one.estimate == one.upper == 1.0
+
+
 @pytest.mark.parametrize("arguments", [(-1, 10), (11, 10), (0, 0)])
 def test_wilson_interval_rejects_invalid_counts(arguments) -> None:
     with pytest.raises(ValueError):

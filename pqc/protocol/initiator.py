@@ -2,12 +2,18 @@
 
 from dataclasses import dataclass, field
 from enum import StrEnum
+from time import perf_counter_ns
 
 from pqc.errors import UnknownTrustedPeerError
 from pqc.kem import HQC3, MLKEM768
 from pqc.profiles import PQCProfile, profile_definition
 from pqc.protocol._shared_secret_state import _KEMSharedSecretStateBase
 from pqc.protocol.identity import _validated_identity_name
+from pqc.protocol.instrumentation import (
+    PQCOperation,
+    PQCOperationObserver,
+    validate_operation_observer,
+)
 from pqc.protocol.messages import (
     EncapsulationResponse,
     ServerKeyOffer,
@@ -108,6 +114,7 @@ class ServerKeyOfferProcessor:
         *,
         initiator: PQCParty,
         signed_offer: SignedServerKeyOffer,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> ProcessedServerOffer:
         """Verify a trusted responder and encapsulate only after authentication."""
 
@@ -117,6 +124,7 @@ class ServerKeyOfferProcessor:
             raise TypeError(
                 f"signed_offer must be a SignedServerKeyOffer. Got {type(signed_offer).__name__}."
             )
+        validate_operation_observer(operation_observer)
 
         offer = signed_offer.offer
         definition = profile_definition(offer.profile)
@@ -147,14 +155,19 @@ class ServerKeyOfferProcessor:
                 status=ServerOfferProcessingStatus.ALGORITHM_MISMATCH,
                 reason="The trusted identity algorithm does not match the signed offer.",
             )
-        if not trusted_responder.verify(offer.canonical_bytes(), signed_offer.signature):
+        canonical_offer = offer.canonical_bytes()
+        started = perf_counter_ns()
+        verified = trusted_responder.verify(canonical_offer, signed_offer.signature)
+        if operation_observer is not None:
+            operation_observer(PQCOperation.SERVER_OFFER_VERIFY, perf_counter_ns() - started)
+        if not verified:
             return self._rejected(
                 signed_offer,
                 status=ServerOfferProcessingStatus.INVALID_SIGNATURE,
                 reason="The server offer signature is invalid for the trusted responder identity.",
             )
 
-        return self._encapsulate_authenticated(signed_offer)
+        return self._encapsulate_authenticated(signed_offer, operation_observer=operation_observer)
 
     @staticmethod
     def _offer_algorithms_match_profile(offer: ServerKeyOffer) -> bool:
@@ -180,14 +193,24 @@ class ServerKeyOfferProcessor:
         )
 
     @staticmethod
-    def _encapsulate_authenticated(signed_offer: SignedServerKeyOffer) -> ProcessedServerOffer:
+    def _encapsulate_authenticated(
+        signed_offer: SignedServerKeyOffer,
+        *,
+        operation_observer: PQCOperationObserver | None = None,
+    ) -> ProcessedServerOffer:
         offer = signed_offer.offer
+        started = perf_counter_ns()
         ml_kem = MLKEM768.encapsulate(offer.ml_kem_public_key)
+        if operation_observer is not None:
+            operation_observer(PQCOperation.ML_KEM_ENCAPSULATE, perf_counter_ns() - started)
         hqc = None
         if offer.profile is PQCProfile.HIGH:
             if offer.hqc_public_key is None:
                 raise ValueError("Authenticated HIGH offer is missing its HQC-3 public key.")
+            started = perf_counter_ns()
             hqc = HQC3.encapsulate(offer.hqc_public_key)
+            if operation_observer is not None:
+                operation_observer(PQCOperation.HQC_ENCAPSULATE, perf_counter_ns() - started)
 
         initiator_state = InitiatorKEMState(
             session_id=offer.session_id,

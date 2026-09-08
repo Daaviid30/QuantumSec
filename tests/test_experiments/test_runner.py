@@ -30,6 +30,12 @@ def test_e3_record_exposes_protocol_estimates_without_secret_inspection(experime
     assert qkd["estimated_qber_z"] is not None
     assert qkd["estimated_qber_x"] is not None
     assert qkd["estimated_qber_aggregated"] is not None
+    assert qkd["estimated_z_errors"] is not None
+    assert qkd["estimated_z_trials"] is not None
+    assert qkd["estimated_x_errors"] is not None
+    assert qkd["estimated_x_trials"] is not None
+    assert qkd["estimated_aggregate_errors"] == qkd["estimated_z_errors"] + qkd["estimated_x_errors"]
+    assert qkd["estimated_aggregate_trials"] == qkd["estimated_z_trials"] + qkd["estimated_x_trials"]
     assert qkd["phase_error_bound"] is not None
     assert qkd["n_final"] >= 0
     assert record.result["status"] in {"established", "aborted"}
@@ -82,6 +88,13 @@ def test_e1_and_e5_keep_metric_categories_separate(experiment_runner) -> None:
     hybrid = experiment_runner.run(_hybrid_config())
     assert pqc.metrics["qkd"] is None
     assert isinstance(pqc.metrics["pqc"], Mapping)
+    pqc_metrics = pqc.metrics["pqc"]
+    assert pqc_metrics["ml_kem_keygen_time_ns"] > 0
+    assert pqc_metrics["server_offer_sign_time_ns"] > 0
+    assert pqc_metrics["server_offer_verify_time_ns"] > 0
+    assert pqc_metrics["ml_kem_encapsulate_time_ns"] > 0
+    assert pqc_metrics["ml_kem_decapsulate_time_ns"] > 0
+    assert pqc_metrics["serialized_transport_bytes"] is None
     assert pqc.result["status"] == "established"
     assert isinstance(hybrid.metrics["qkd"], Mapping)
     assert isinstance(hybrid.metrics["pqc"], Mapping)

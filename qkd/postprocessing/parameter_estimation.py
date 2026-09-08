@@ -179,6 +179,28 @@ class ParameterEstimationResult:
         return self.disclosed_bases.count(Basis.X)
 
     @property
+    def estimated_z_errors(self) -> int:
+        """Return the exact disclosed Z-basis disagreement count."""
+
+        basis_array = np.asarray(self.disclosed_bases, dtype=object)
+        mask = basis_array == Basis.Z
+        return int(np.count_nonzero(self.alice_disclosed_bits[mask] != self.bob_disclosed_bits[mask]))
+
+    @property
+    def estimated_x_errors(self) -> int:
+        """Return the exact disclosed X-basis disagreement count."""
+
+        basis_array = np.asarray(self.disclosed_bases, dtype=object)
+        mask = basis_array == Basis.X
+        return int(np.count_nonzero(self.alice_disclosed_bits[mask] != self.bob_disclosed_bits[mask]))
+
+    @property
+    def estimated_aggregate_errors(self) -> int:
+        """Return the exact disclosed disagreement count across both bases."""
+
+        return int(np.count_nonzero(self.alice_disclosed_bits != self.bob_disclosed_bits))
+
+    @property
     def n_candidate_z(self) -> int:
         return self.candidate_bases.count(Basis.Z)
 

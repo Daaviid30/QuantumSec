@@ -136,22 +136,25 @@ Exit condition: D1 demonstrates the establishment/data-plane boundary and all ta
 - [x] Preserve available raw/canonical categories and record public JSON artifact size without
   fabricating unavailable transport sizes.
 
-Exit condition met: the V1 engine and D1 label can execute all seven profiles from saved configs;
-the full E1-E5 campaign remains phase 9 and has not been run.
+Exit condition met: the V1 engine and specialized D1 runner execute all seven profiles from saved
+configs and preserve exact operation/count evidence.
 
 ### 9. Execute the experimental campaign
 
-- [ ] **E1 — PQC Cost Decomposition:** `PQC-BASE` versus `PQC-DIVERSE`, minimum 30 and preferably
+- [x] **E1 — PQC Cost Decomposition:** `PQC-BASE` versus `PQC-DIVERSE`, minimum 30 and preferably
   50 runs; persistent identity provisioning separate.
-- [ ] **E2 — BB84 Model Validation:** analytical versus simulated per-basis/aggregate error,
+- [x] **E2 — BB84 Model Validation:** analytical versus simulated per-basis/aggregate error,
   sifting, final material, and abort behavior.
-- [ ] **E3 — Eve / Intercept-Resend:** vary `f`; measure QBER, per-basis error, abort probability,
+- [x] **E3 — Eve / Intercept-Resend:** vary `f`; measure QBER, per-basis error, abort probability,
   and final material.
-- [ ] **E4 — QKD Authentication Cost:** assumed baseline versus correctly executed authentication
+- [x] **E4 — QKD Authentication Cost:** assumed baseline versus correctly executed authentication
   profiles.
-- [ ] **E5 — Hybrid Marginal Overhead:** provenance, component sizes, orchestration bytes,
+- [x] **E5 — Hybrid Marginal Overhead:** provenance, component sizes, orchestration bytes,
   combiner/HKDF/confirmation cost, outcome, and negative tests.
-- [ ] **D1 — Protected Session:** capture successful AES-GCM flow and tamper-rejection matrix.
+- [x] **D1 — Protected Session:** capture successful AES-GCM flow and tamper-rejection matrix.
+
+Exit condition met by campaign `thesis-v1.0.1`: SMOKE passed; THESIS produced E1=100, E2=250,
+E3=550, E4=90, E5=120, and D1=1 records, with raw hashes and a passing secret audit.
 
 The measurement-category and statistics rules are centralized in
 [`../TFM_GOAL.md §12`](../TFM_GOAL.md#12-experimental-methodology).
@@ -174,11 +177,11 @@ Exit condition: Builder, Run, and Compare render actual backend records without 
 
 ### 11. Thesis analysis and freeze
 
-- [ ] Freeze experiment/config/schema versions and the reference environment.
-- [ ] Generate tables and figures from exported records.
-- [ ] Accept, reject, or qualify H1–H5.
+- [x] Freeze experiment/config/schema versions and the reference environment.
+- [x] Generate tables and figures from exported records.
+- [x] Accept, reject, or qualify H1–H5.
 - [ ] Answer every research question with evidence or an explicit limitation.
-- [ ] Document threats to validity, security boundaries, and non-claims.
+- [x] Document threats to validity, security boundaries, and non-claims.
 - [ ] Confirm that the provisional title still matches the results before finalizing it.
 
 ## Final documentation audit

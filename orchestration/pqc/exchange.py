@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from time import perf_counter_ns
 
 from orchestration.context import SessionExecutionContext
+from orchestration.pqc.instrumentation import PQCOperationTimer
 from orchestration.trace import SessionTraceBuilder, SessionTraceSource
 from pqc import PQCProfile
 from pqc.errors import PQCError
@@ -21,6 +22,7 @@ from pqc.protocol import (
     SignedServerKeyOffer,
 )
 from pqc.protocol.initiator import InitiatorKEMState
+from pqc.protocol.instrumentation import PQCOperation
 
 
 @dataclass(slots=True, repr=False)
@@ -34,6 +36,7 @@ class PQCExchangeArtifacts:
     server_processing_time_ns: int
     client_exchange_time_ns: int
     client_processing_time_ns: int
+    operation_timer: PQCOperationTimer
 
     @property
     def initiator_state(self) -> InitiatorKEMState:
@@ -85,11 +88,13 @@ def execute_authenticated_pqc_exchange(
         raise TypeError("PQC initiator and responder must be PQCParty instances.")
     if alice.name == bob.name:
         raise ValueError("PQC initiator and responder identities must be distinct.")
+    operation_timer = PQCOperationTimer(hqc_enabled=profile is PQCProfile.HIGH)
 
     start = perf_counter_ns()
     responder_kem_state, signed_offer = ServerKeyOfferFactory().create(
         responder=bob,
         profile=profile,
+        operation_observer=operation_timer.observe,
     )
     offer_time = perf_counter_ns() - start
     trace.append(SessionTraceSource.PQC, "server_offer", "created", "Responder KEM offer signed.")
@@ -111,6 +116,7 @@ def execute_authenticated_pqc_exchange(
         processed_offer = ServerKeyOfferProcessor().process(
             initiator=alice,
             signed_offer=transported_offer,
+            operation_observer=operation_timer.observe,
         )
     except PQCError as exc:
         offer_processing_time = perf_counter_ns() - start
@@ -147,6 +153,7 @@ def execute_authenticated_pqc_exchange(
             initiator=alice,
             signed_server_offer=transported_offer,
             processed_offer=processed_offer,
+            operation_observer=operation_timer.observe,
         )
     except PQCError as exc:
         exchange_time = perf_counter_ns() - start
@@ -193,6 +200,7 @@ def execute_authenticated_pqc_exchange(
             responder_state=responder_kem_state,
             server_offer=transported_offer,
             signed_exchange=transported_exchange,
+            operation_observer=operation_timer.observe,
         )
     except PQCError as exc:
         processing_time = perf_counter_ns() - start
@@ -232,7 +240,10 @@ def execute_authenticated_pqc_exchange(
     trace.append(
         SessionTraceSource.PQC, "client_exchange_authentication", "verified", "Initiator identity verified."
     )
+    start = perf_counter_ns()
     transcript = PQCHandshakeTranscript.from_messages(transported_offer, transported_exchange)
+    _ = transcript.transcript_hash
+    operation_timer.observe(PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH, perf_counter_ns() - start)
     return PQCExchangeArtifacts(
         transported_offer,
         processed_offer,
@@ -243,4 +254,5 @@ def execute_authenticated_pqc_exchange(
         offer_processing_time,
         exchange_time,
         processing_time,
+        operation_timer,
     )

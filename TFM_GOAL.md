@@ -211,8 +211,9 @@ count, and execution index. Source provenance records both Git commit and dirty-
 
 The V1 implementation of this flow is **CURRENT** in `experiments/`; its concrete schemas, runtime
 provisioning boundary, CLI, and export behavior are documented in
-[`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md). The E1-E5 campaign and final figures have not yet been
-executed.
+[`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md). Campaign `thesis-v1.0.1` is **CURRENT and EXECUTED**:
+SMOKE passed and the definitive local dataset contains 1,111 E1-E5/D1 records, raw SHA-256
+digests, generated summaries, 13 figures in PDF and PNG, and a campaign report.
 
 For PQC timing, discard warm-up, randomize condition order, use at least 30 runs and preferably 50,
 and report distributions with median and IQR; p10/p90 may supplement them. Persistent identity

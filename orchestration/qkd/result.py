@@ -34,6 +34,12 @@ class QKDSessionSummary:
     estimated_qber_z: float | None
     estimated_qber_x: float | None
     estimated_qber_aggregated: float | None
+    estimated_z_errors: int | None
+    estimated_z_trials: int | None
+    estimated_x_errors: int | None
+    estimated_x_trials: int | None
+    estimated_aggregate_errors: int | None
+    estimated_aggregate_trials: int | None
     phase_error_bound: float | None
     diagnostic_full_sifted_qber: float | None
     diagnostic_qber_z: float | None
@@ -59,6 +65,14 @@ class QKDSessionSummary:
             estimated_qber_aggregated=(
                 estimation.estimated_qber_aggregated if estimation is not None else None
             ),
+            estimated_z_errors=(estimation.estimated_z_errors if estimation is not None else None),
+            estimated_z_trials=(estimation.sample_size_z if estimation is not None else None),
+            estimated_x_errors=(estimation.estimated_x_errors if estimation is not None else None),
+            estimated_x_trials=(estimation.sample_size_x if estimation is not None else None),
+            estimated_aggregate_errors=(
+                estimation.estimated_aggregate_errors if estimation is not None else None
+            ),
+            estimated_aggregate_trials=(estimation.sample_size if estimation is not None else None),
             phase_error_bound=(estimation.phase_error_bound if estimation is not None else None),
             diagnostic_full_sifted_qber=session.diagnostic_full_sifted_qber,
             diagnostic_qber_z=session.diagnostic_qber_z,
@@ -187,6 +201,12 @@ class AuthenticatedQKDSessionResult:
                 "estimated_qber_z": self.qkd.estimated_qber_z,
                 "estimated_qber_x": self.qkd.estimated_qber_x,
                 "estimated_qber_aggregated": self.qkd.estimated_qber_aggregated,
+                "estimated_z_errors": self.qkd.estimated_z_errors,
+                "estimated_z_trials": self.qkd.estimated_z_trials,
+                "estimated_x_errors": self.qkd.estimated_x_errors,
+                "estimated_x_trials": self.qkd.estimated_x_trials,
+                "estimated_aggregate_errors": self.qkd.estimated_aggregate_errors,
+                "estimated_aggregate_trials": self.qkd.estimated_aggregate_trials,
                 "phase_error_bound": self.qkd.phase_error_bound,
                 "diagnostic_full_sifted_qber": self.qkd.diagnostic_full_sifted_qber,
                 "diagnostic_qber_z": self.qkd.diagnostic_qber_z,

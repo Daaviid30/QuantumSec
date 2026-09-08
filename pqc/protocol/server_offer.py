@@ -2,11 +2,17 @@
 
 import secrets
 from dataclasses import dataclass, field
+from time import perf_counter_ns
 from types import TracebackType
 from typing import Self
 
 from pqc.kem import HQC3, MLKEM768
 from pqc.profiles import PQCProfile, profile_definition
+from pqc.protocol.instrumentation import (
+    PQCOperation,
+    PQCOperationObserver,
+    validate_operation_observer,
+)
 from pqc.protocol.messages import (
     SERVER_KEY_OFFER_NONCE_LENGTH,
     SERVER_KEY_OFFER_PROTOCOL_VERSION,
@@ -130,16 +136,26 @@ class ServerKeyOfferFactory:
         *,
         responder: PQCParty,
         profile: PQCProfile,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> tuple[ResponderKEMState, SignedServerKeyOffer]:
         """Generate fresh ephemeral KEM keys and create a signed server offer for a new session."""
 
         if not isinstance(responder, PQCParty):
             raise TypeError(f"responder must be a PQCParty. Got {type(responder).__name__}.")
+        validate_operation_observer(operation_observer)
         definition = profile_definition(profile)
 
         session_id = secrets.token_bytes(SERVER_KEY_OFFER_SESSION_ID_LENGTH)
+        started = perf_counter_ns()
         ml_kem = MLKEM768.generate()
-        hqc = HQC3.generate() if profile is PQCProfile.HIGH else None
+        if operation_observer is not None:
+            operation_observer(PQCOperation.ML_KEM_KEYGEN, perf_counter_ns() - started)
+        hqc = None
+        if profile is PQCProfile.HIGH:
+            started = perf_counter_ns()
+            hqc = HQC3.generate()
+            if operation_observer is not None:
+                operation_observer(PQCOperation.HQC_KEYGEN, perf_counter_ns() - started)
         state = ResponderKEMState(session_id=session_id, profile=profile, _ml_kem=ml_kem, _hqc=hqc)
         offer = ServerKeyOffer(
             protocol_version=SERVER_KEY_OFFER_PROTOCOL_VERSION,
@@ -151,10 +167,15 @@ class ServerKeyOfferFactory:
             hqc_algorithm=definition.hqc_algorithm,
             hqc_public_key=state.hqc_public_key,
         )
+        canonical_offer = offer.canonical_bytes()
+        started = perf_counter_ns()
+        signature = responder.sign(canonical_offer)
+        if operation_observer is not None:
+            operation_observer(PQCOperation.SERVER_OFFER_SIGN, perf_counter_ns() - started)
         signed_offer = SignedServerKeyOffer(
             offer=offer,
             signer=responder.name,
             signature_algorithm=definition.signature_algorithm,
-            signature=responder.sign(offer.canonical_bytes()),
+            signature=signature,
         )
         return state, signed_offer

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from struct import pack
+from time import perf_counter_ns
 from types import TracebackType
 from typing import Final, Self
 
@@ -11,6 +12,11 @@ from pqc.profiles import PQCProfile
 from pqc.protocol._shared_secret_state import _KEMSharedSecretStateBase
 from pqc.protocol.client_exchange import ProcessedClientKeyExchange, ResponderSharedSecretState
 from pqc.protocol.initiator import InitiatorKEMState, ProcessedServerOffer
+from pqc.protocol.instrumentation import (
+    PQCOperation,
+    PQCOperationObserver,
+    validate_operation_observer,
+)
 from pqc.protocol.messages import (
     SERVER_KEY_OFFER_SESSION_ID_LENGTH,
     SignedClientKeyExchange,
@@ -189,6 +195,7 @@ class PQCSessionKeyDeriver:
         processed_server_offer: ProcessedServerOffer,
         signed_server_offer: SignedServerKeyOffer,
         signed_client_exchange: SignedClientKeyExchange,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> DerivedSessionKeyState:
         """Derive Alice's key only from a successful authenticated Phase 3 result."""
 
@@ -197,12 +204,19 @@ class PQCSessionKeyDeriver:
                 "processed_server_offer must be a ProcessedServerOffer. "
                 f"Got {type(processed_server_offer).__name__}."
             )
+        validate_operation_observer(operation_observer)
+        started = perf_counter_ns()
         transcript = PQCHandshakeTranscript.from_messages(
             signed_server_offer,
             signed_client_exchange,
         )
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
         state = _validated_initiator_secret_state(processed_server_offer, transcript)
-        return self._derive(state, transcript)
+        return self._derive(state, transcript, operation_observer=operation_observer)
 
     def derive_responder(
         self,
@@ -210,6 +224,7 @@ class PQCSessionKeyDeriver:
         processed_client_exchange: ProcessedClientKeyExchange,
         signed_server_offer: SignedServerKeyOffer,
         signed_client_exchange: SignedClientKeyExchange,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> DerivedSessionKeyState:
         """Derive Bob's key only from a successful authenticated Phase 4 result."""
 
@@ -218,35 +233,58 @@ class PQCSessionKeyDeriver:
                 "processed_client_exchange must be a ProcessedClientKeyExchange. "
                 f"Got {type(processed_client_exchange).__name__}."
             )
+        validate_operation_observer(operation_observer)
+        started = perf_counter_ns()
         transcript = PQCHandshakeTranscript.from_messages(
             signed_server_offer,
             signed_client_exchange,
         )
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
         state = _validated_responder_secret_state(processed_client_exchange, transcript)
-        return self._derive(state, transcript)
+        return self._derive(state, transcript, operation_observer=operation_observer)
 
     @staticmethod
     def _derive(
         secret_state: _KEMSharedSecretStateBase,
         transcript: PQCHandshakeTranscript,
+        *,
+        operation_observer: PQCOperationObserver | None = None,
     ) -> DerivedSessionKeyState:
         if secret_state.profile is not transcript.profile:
             raise ValueError("KEM secret-state profile does not match the handshake transcript.")
         if secret_state.session_id != transcript.session_id:
             raise ValueError("KEM secret-state session does not match the handshake transcript.")
 
+        started = perf_counter_ns()
+        key_material = secret_state._build_kdf_input()
+        if operation_observer is not None:
+            operation_observer(PQCOperation.KEM_COMBINER_ENCODING, perf_counter_ns() - started)
+        started = perf_counter_ns()
+        transcript_hash = transcript.transcript_hash
+        if operation_observer is not None:
+            operation_observer(
+                PQCOperation.TRANSCRIPT_CONSTRUCTION_HASH,
+                perf_counter_ns() - started,
+            )
+        started = perf_counter_ns()
         session_key = derive_hkdf_sha384(
-            key_material=secret_state._build_kdf_input(),
-            salt=transcript.transcript_hash,
+            key_material=key_material,
+            salt=transcript_hash,
             info=_session_key_info(
                 protocol_version=transcript.protocol_version,
                 profile=transcript.profile,
             ),
             length=PQC_SESSION_KEY_LENGTH,
         )
+        if operation_observer is not None:
+            operation_observer(PQCOperation.HKDF_SESSION, perf_counter_ns() - started)
         return DerivedSessionKeyState(
             session_id=transcript.session_id,
             profile=transcript.profile,
-            transcript_hash=transcript.transcript_hash,
+            transcript_hash=transcript_hash,
             _session_key=session_key,
         )
