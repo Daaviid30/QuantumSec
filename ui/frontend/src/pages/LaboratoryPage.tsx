@@ -61,6 +61,7 @@ export function LaboratoryPage({ capabilities, preset, currentRun, onRunComplete
   const allStages = useMemo(() => [...capabilities.channels, ...capabilities.adversaries], [capabilities])
   const [selectedStage, setSelectedStage] = useState(allStages.find((item) => item.id === 'depolarizing')?.id ?? allStages[0]?.id ?? '')
   const nextStageId = useRef(initialStages.length + 1)
+  const outcomeHeading = useRef<HTMLHeadingElement>(null)
   const session = useSessionRun()
   const selectedProfile = capabilities.profiles.find((item) => item.id === profile) ?? capabilities.profiles[0]
   const usesQkd = profileUsesQkd(profile)
@@ -119,7 +120,17 @@ export function LaboratoryPage({ capabilities, preset, currentRun, onRunComplete
       } : {}),
     }
     const response = await session.run(request)
-    if (response) onRunComplete(response)
+    if (!response) return
+    onRunComplete(response)
+    // Configure -> Run -> Observe: bring the real terminal outcome into view and move the reader to
+    // it. Without this the result renders below the fold and the only feedback is the button label.
+    requestAnimationFrame(() => {
+      const heading = outcomeHeading.current
+      if (!heading) return
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      heading.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
+      heading.focus({ preventScroll: true })
+    })
   }
 
   const displayedRun = session.result ?? currentRun
@@ -129,7 +140,7 @@ export function LaboratoryPage({ capabilities, preset, currentRun, onRunComplete
     <div className="page-stack">
       <div className="laboratory-header">
         <div><p className="section-kicker">Primary product surface</p><h2>Build a quantum-safe session</h2><p>Select a supported profile, configure only valid inputs, and inspect the public evidence emitted by the engine.</p></div>
-        <div className="mode-switch" aria-label="Configuration mode">
+        <div className="mode-switch" role="group" aria-label="Configuration mode">
           <button type="button" onClick={() => setMode('guided')} aria-pressed={mode === 'guided'}>Guided</button>
           <button type="button" onClick={() => setMode('research')} aria-pressed={mode === 'research'}>Research</button>
         </div>
@@ -178,7 +189,7 @@ export function LaboratoryPage({ capabilities, preset, currentRun, onRunComplete
         {selectedProfile ? <CompositionSummary profile={selectedProfile} qkdStages={mode === 'research' ? serializeChannels(stages) : guidedChannels} /> : null}
       </div>
 
-      {displayedRun ? <RunWorkspace run={displayedRun} /> : (
+      {displayedRun ? <RunWorkspace run={displayedRun} outcomeHeadingRef={outcomeHeading} /> : (
         <section className="empty-workspace"><span className="empty-workspace__mark">QS</span><p className="section-kicker">Awaiting execution</p><h2>The session trace will appear here</h2><p>No protocol events are fabricated before the backend returns a real terminal result.</p></section>
       )}
     </div>

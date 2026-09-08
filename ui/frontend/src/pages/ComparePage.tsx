@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, BarChart3, Check, Scale } from 'lucide-react'
+import { AlertTriangle, ArrowRight, BarChart3, Check, Info, Minus, Scale } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { compareRuns } from '../api/client'
@@ -14,6 +14,49 @@ interface ComparePageProps {
 function ComparisonRow({ label, left, right }: { label: string; left: string; right: string }) {
   const differs = left !== right
   return <div className={`comparison-row ${differs ? 'comparison-row--different' : ''}`}><span>{label}</span><strong>{left}</strong><i>{differs ? 'differs' : 'same'}</i><strong>{right}</strong></div>
+}
+
+/**
+ * A metric category is in one of three states, which the UI must not conflate:
+ *
+ * - `comparable`     — the backend compatibility policy allows the comparison;
+ * - `inapplicable`   — neither record produced the category at all (e.g. QKD metrics for two
+ *                      PQC-only runs), which is not a warning about anything;
+ * - `incomparable`   — at least one record has the category but the policy declines to rank them.
+ *
+ * The backend flag remains the sole authority over whether a metrics section renders. Only the
+ * explanation is derived here.
+ */
+type CompatibilityState = 'comparable' | 'inapplicable' | 'incomparable'
+
+function compatibilityState(allowed: boolean, presentOnEither: boolean): CompatibilityState {
+  if (allowed) return 'comparable'
+  return presentOnEither ? 'incomparable' : 'inapplicable'
+}
+
+const STATE_COPY: Record<CompatibilityState, string> = {
+  comparable: 'Comparable',
+  inapplicable: 'Not applicable to this pair',
+  incomparable: 'Present, but not comparable',
+}
+
+function CompatibilityFlag({ label, state }: { label: string; state: CompatibilityState }) {
+  const modifier = state === 'comparable' ? 'yes' : state === 'inapplicable' ? 'neutral' : 'no'
+  return (
+    <div className={`compatibility-flag compatibility-flag--${modifier}`}>
+      {state === 'comparable' ? (
+        <Check size={15} aria-hidden="true" />
+      ) : state === 'inapplicable' ? (
+        <Minus size={15} aria-hidden="true" />
+      ) : (
+        <AlertTriangle size={15} aria-hidden="true" />
+      )}
+      <span>
+        <strong>{label}</strong>
+        <small>{STATE_COPY[state]}</small>
+      </span>
+    </div>
+  )
 }
 
 function authLabel(run: SessionRunResponse): string {
@@ -84,12 +127,39 @@ export function ComparePage({ refreshKey, initialIds }: ComparePageProps) {
           </section>
 
           <section className="surface compatibility-panel">
-            <div className="section-heading"><div><p className="section-kicker">Compatibility decision</p><h2>Allowed measurement comparisons</h2></div><BarChart3 size={18} /></div>
+            <div className="section-heading"><div><p className="section-kicker">Compatibility decision</p><h2>Allowed measurement comparisons</h2></div><BarChart3 size={18} aria-hidden="true" /></div>
             <div className="compatibility-flags">
-              <span className={comparison.compatibility.qkd_metrics ? 'is-compatible' : ''}>{comparison.compatibility.qkd_metrics ? <Check size={13} /> : <AlertTriangle size={13} />} QKD metrics</span>
-              <span className={comparison.compatibility.pqc_timing ? 'is-compatible' : ''}>{comparison.compatibility.pqc_timing ? <Check size={13} /> : <AlertTriangle size={13} />} PQC timing</span>
-              <span className={comparison.compatibility.same_environment ? 'is-compatible' : ''}>{comparison.compatibility.same_environment ? <Check size={13} /> : <AlertTriangle size={13} />} Same environment</span>
+              <CompatibilityFlag
+                label="BB84 result metrics"
+                state={compatibilityState(
+                  comparison.compatibility.qkd_metrics,
+                  Boolean(left.metrics.qkd || right.metrics.qkd),
+                )}
+              />
+              <CompatibilityFlag
+                label="PQC software timing"
+                state={compatibilityState(
+                  comparison.compatibility.pqc_timing,
+                  Boolean(left.metrics.pqc || right.metrics.pqc),
+                )}
+              />
+              <CompatibilityFlag
+                label="Same reported environment"
+                state={comparison.compatibility.same_environment ? 'comparable' : 'incomparable'}
+              />
             </div>
+            {!comparison.compatibility.qkd_metrics && !comparison.compatibility.pqc_timing ? (
+              <div className="compatibility-empty">
+                <Info size={16} aria-hidden="true" />
+                <p>
+                  <strong>No metric category can be compared for this pair.</strong>
+                  Configuration, composition, authentication, provenance, and terminal outcome remain
+                  comparable above. Measurements are not: BB84 simulator runtime and real liboqs
+                  operation timing are separate categories and are never placed on a common
+                  performance axis.
+                </p>
+              </div>
+            ) : null}
             <ul>{comparison.compatibility.notes.map((note) => <li key={note}>{note}</li>)}</ul>
           </section>
 

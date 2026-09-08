@@ -5,6 +5,11 @@ import type { SessionMetrics } from '../../types/api'
 
 interface SessionMetricsViewProps {
   metrics: SessionMetrics
+  /**
+   * Configured asymptotic abort threshold from the run's own record, shown beside the phase-error
+   * bound it was tested against. Read from the record; never computed or inferred here.
+   */
+  phaseErrorAbortThreshold?: number | null
 }
 
 function MetricRow({ label, value, note }: { label: string; value: string; note?: string }) {
@@ -16,10 +21,14 @@ function MetricRow({ label, value, note }: { label: string; value: string; note?
   )
 }
 
-export function SessionMetricsView({ metrics }: SessionMetricsViewProps) {
+export function SessionMetricsView({ metrics, phaseErrorAbortThreshold }: SessionMetricsViewProps) {
   const qkd = metrics.qkd
   const pqc = metrics.pqc
   const hybrid = metrics.hybrid
+  const phaseErrorNote =
+    phaseErrorAbortThreshold == null
+      ? 'Security decision'
+      : `Security decision · abort above ${formatPercent(phaseErrorAbortThreshold)}`
 
   return (
     <section className="surface metrics-panel">
@@ -58,7 +67,7 @@ export function SessionMetricsView({ metrics }: SessionMetricsViewProps) {
               <MetricRow label="Estimated e_Z" value={formatPercent(qkd.estimated_qber_z)} />
               <MetricRow label="Estimated e_X" value={formatPercent(qkd.estimated_qber_x)} />
               <MetricRow label="Aggregate bit QBER" value={formatPercent(qkd.estimated_qber_aggregated)} note="Cascade input" />
-              <MetricRow label="Phase-error bound" value={formatPercent(qkd.phase_error_bound)} note="Security decision" />
+              <MetricRow label="Phase-error bound" value={formatPercent(qkd.phase_error_bound)} note={phaseErrorNote} />
               <MetricRow label="Final secret fraction" value={formatPercent(qkd.final_secret_fraction)} />
               <MetricRow label="Simulator software runtime" value={formatDurationNs(qkd.simulation_time_ns)} />
             </div>
@@ -71,10 +80,15 @@ export function SessionMetricsView({ metrics }: SessionMetricsViewProps) {
             <h3><Boxes size={15} aria-hidden="true" /> Executed PQC operations</h3>
             <div className="metric-table">
               <MetricRow label="Cryptographic software time" value={formatDurationNs(pqc.crypto_software_time_ns)} />
-              <MetricRow label="Server offer" value={formatDurationNs(Number(pqc.server_offer_time_ns))} />
-              <MetricRow label="Client exchange" value={formatDurationNs(Number(pqc.client_exchange_time_ns))} />
-              <MetricRow label="Key schedule" value={formatDurationNs(Number(pqc.key_schedule_time_ns))} />
-              <MetricRow label="Finished confirmation" value={formatDurationNs(Number(pqc.confirmation_time_ns))} />
+              {/*
+                Not wrapped in Number(): these fields are `number | null`, and Number(null) is 0,
+                which would render an absent measurement as a confident "0 ns". formatDurationNs
+                already reports null as "Not available".
+              */}
+              <MetricRow label="Server offer" value={formatDurationNs(pqc.server_offer_time_ns)} />
+              <MetricRow label="Client exchange" value={formatDurationNs(pqc.client_exchange_time_ns)} />
+              <MetricRow label="Key schedule" value={formatDurationNs(pqc.key_schedule_time_ns)} />
+              <MetricRow label="Finished confirmation" value={formatDurationNs(pqc.confirmation_time_ns)} />
             </div>
             <h4>Communication layers</h4>
             <div className="metric-table">

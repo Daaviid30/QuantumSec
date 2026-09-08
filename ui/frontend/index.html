@@ -3,12 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#071016" />
+    <meta name="theme-color" content="#0c0e10" />
+    <!--
+      Not "simulation laboratory": BB84 is a numerical simulation, but the PQC and data-plane
+      operations are real liboqs/AES-GCM executions. Naming the whole product "simulation" would
+      contradict the measurement boundary the interface maintains everywhere else.
+    -->
     <meta
       name="description"
-      content="QuantumSec — a reproducible quantum-security simulation laboratory."
+      content="QuantumSec — an interactive, reproducible quantum-safe security laboratory for QKD, PQC, and hybrid session profiles."
     />
-    <title>QuantumSec · Simulation Laboratory</title>
+    <title>QuantumSec · Security Laboratory</title>
   </head>
   <body>
     <div id="root"></div>

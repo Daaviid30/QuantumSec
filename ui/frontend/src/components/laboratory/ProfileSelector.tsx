@@ -52,7 +52,9 @@ export function ProfileSelector({ profiles, selected, onSelect }: ProfileSelecto
                         <strong>{profile.name}</strong>
                         <small>{PROFILE_SHORT_LABELS[profile.id]}</small>
                       </span>
-                      <span className="profile-option__state">{profile.implemented ? 'Current' : profile.status}</span>
+                      {profile.implemented ? null : (
+                        <span className="status-note status-note--attention">{profile.status}</span>
+                      )}
                     </button>
                   ))}
               </div>

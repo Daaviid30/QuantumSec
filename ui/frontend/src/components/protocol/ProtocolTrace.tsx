@@ -1,17 +1,30 @@
-import { Check, CircleDot, X } from 'lucide-react'
+import { Check, CircleDot, TriangleAlert, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { formatIdentifier, formatSource } from '../../lib/labels'
 import type { SessionTraceEvent } from '../../types/api'
 
 interface ProtocolTraceProps {
   events: SessionTraceEvent[]
 }
 
-function eventTone(state: string): 'success' | 'danger' | 'neutral' {
+type EventTone = 'success' | 'warning' | 'danger' | 'neutral'
+
+function eventTone(state: string): EventTone {
   const normalized = state.toLowerCase()
   if (normalized.includes('abort') || normalized.includes('fail') || normalized.includes('withheld')) return 'danger'
+  // `assumed_not_executed` is a first-class distinction in this thesis and is rendered with the same
+  // weight the security-evidence panel gives it, rather than as a neutral procedural step.
+  if (normalized.includes('assumed')) return 'warning'
   if (normalized.includes('verified') || normalized.includes('established') || normalized.includes('released') || normalized.includes('completed')) return 'success'
   return 'neutral'
+}
+
+function ToneIcon({ tone }: { tone: EventTone }) {
+  if (tone === 'success') return <Check size={14} aria-hidden="true" />
+  if (tone === 'danger') return <X size={14} aria-hidden="true" />
+  if (tone === 'warning') return <TriangleAlert size={13} aria-hidden="true" />
+  return <CircleDot size={12} aria-hidden="true" />
 }
 
 export function ProtocolTrace({ events }: ProtocolTraceProps) {
@@ -43,14 +56,14 @@ export function ProtocolTrace({ events }: ProtocolTraceProps) {
                   aria-pressed={selectedSequence === event.sequence}
                 >
                   <span className="trace-event__marker">
-                    {tone === 'success' ? <Check size={12} /> : tone === 'danger' ? <X size={12} /> : <CircleDot size={11} />}
+                    <ToneIcon tone={tone} />
                   </span>
                   <span className="trace-event__sequence">{String(event.sequence + 1).padStart(2, '0')}</span>
                   <span className="trace-event__copy">
-                    <strong>{event.stage.replaceAll('_', ' ')}</strong>
+                    <strong>{formatIdentifier(event.stage)}</strong>
                     <small>{event.detail}</small>
                   </span>
-                  <span className="trace-event__state">{event.state.replaceAll('_', ' ')}</span>
+                  <span className="trace-event__state">{formatIdentifier(event.state)}</span>
                 </button>
               </li>
             )
@@ -60,11 +73,11 @@ export function ProtocolTrace({ events }: ProtocolTraceProps) {
         {selected ? (
           <aside className="event-inspector">
             <p className="section-kicker">Event inspector</p>
-            <h3>{selected.stage.replaceAll('_', ' ')}</h3>
+            <h3>{formatIdentifier(selected.stage)}</h3>
             <dl>
               <div><dt>Sequence</dt><dd>{selected.sequence + 1}</dd></div>
-              <div><dt>Source</dt><dd>{selected.source}</dd></div>
-              <div><dt>State</dt><dd>{selected.state.replaceAll('_', ' ')}</dd></div>
+              <div><dt>Source</dt><dd>{formatSource(selected.source)}</dd></div>
+              <div><dt>State</dt><dd>{formatIdentifier(selected.state)}</dd></div>
             </dl>
             <div className="event-inspector__detail">
               <strong>Recorded detail</strong>

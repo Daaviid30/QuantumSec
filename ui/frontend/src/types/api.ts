@@ -170,6 +170,16 @@ export interface PQCSessionMetrics {
   internal_profile: string
   algorithms: string[]
   crypto_software_time_ns: number
+  /**
+   * Per-phase software timings. Declared explicitly (rather than reaching them through the index
+   * signature and casting with Number()) so that absent values cannot be coerced to a misleading 0.
+   * `orchestration.metrics` types these as non-optional ints; the hybrid runner reports 0 for the
+   * phases the hybrid layer owns instead of the PQC sibling.
+   */
+  server_offer_time_ns: number
+  client_exchange_time_ns: number
+  key_schedule_time_ns: number
+  confirmation_time_ns: number
   kem_public_key_bytes: number
   kem_ciphertext_bytes: number
   canonical_protocol_bytes: number

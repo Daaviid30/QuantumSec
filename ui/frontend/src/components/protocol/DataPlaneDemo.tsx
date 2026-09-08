@@ -28,6 +28,14 @@ export function DataPlaneDemo({ runId }: DataPlaneDemoProps) {
 
   return (
     <section className="surface data-plane">
+      <div className="section-heading">
+        <div>
+          <p className="section-kicker">Protected data plane</p>
+          <h2>Using the established key</h2>
+          <p>The backend holds the established 256-bit session key and performs one AES-256-GCM protect/verify round trip with a tamper check. Only public sizes, status, and a ciphertext preview are returned.</p>
+        </div>
+        <LockKeyhole size={18} aria-hidden="true" />
+      </div>
       <div className="data-plane__path">
         <span><small>Establishment plane</small><strong>256-bit K_SESSION retained by backend</strong></span>
         <span className="data-plane__arrow">→</span>

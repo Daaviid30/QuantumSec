@@ -47,8 +47,20 @@ export function RunsPage({ refreshKey, onRerun, onCompare }: RunsPageProps) {
                   const checked = selected.includes(record.run_id)
                   const disabled = selected.length === 2 && !checked
                   return (
-                    <tr key={record.run_id}>
-                      <td><button className="select-run" type="button" onClick={() => toggle(record.run_id)} disabled={disabled} aria-label={`${checked ? 'Remove' : 'Add'} ${record.run_id} ${checked ? 'from' : 'to'} comparison`}>{checked ? <CheckSquare size={16} /> : <Square size={16} />}</button></td>
+                    <tr key={record.run_id} className={checked ? 'is-selected' : undefined}>
+                      <td>
+                        <button
+                          className="select-run"
+                          type="button"
+                          role="checkbox"
+                          aria-checked={checked}
+                          onClick={() => toggle(record.run_id)}
+                          disabled={disabled}
+                          aria-label={`${checked ? 'Remove' : 'Add'} run ${record.run_id.slice(0, 8)} (${record.profile}) ${checked ? 'from' : 'to'} comparison`}
+                        >
+                          {checked ? <CheckSquare size={16} aria-hidden="true" /> : <Square size={16} aria-hidden="true" />}
+                        </button>
+                      </td>
                       <td><code>{record.run_id.slice(0, 8)}</code><small>{record.result.session_id.slice(0, 12)}</small></td>
                       <td><strong>{record.profile}</strong><small>{record.experiment_kind}</small></td>
                       <td><span className={`outcome-label outcome-label--${record.result.status}`}>{record.result.status}</span>{run.data_plane_available ? <small>Data plane ready</small> : null}</td>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 
 import type { SessionRunResponse } from '../../types/api'
 import { RunWorkspace } from './RunWorkspace'
@@ -36,4 +36,46 @@ test('renders real Eve evidence, per-basis QBER, trace, and explicit assumed aut
   expect(screen.getAllByText('10.00%').length).toBeGreaterThan(0)
   expect(screen.getAllByText(/Authentication is externally assumed/i).length).toBeGreaterThan(0)
   expect(screen.queryByText(/[01]{40,}/)).not.toBeInTheDocument()
+})
+
+test('trace stages and sources keep canonical protocol spelling', () => {
+  render(<RunWorkspace run={run} />)
+
+  // Previously these were lower-case identifiers styled with CSS `text-transform: capitalize`,
+  // which rendered "Bb84" and "Qkd".
+  expect(screen.getAllByText('BB84').length).toBeGreaterThan(0)
+  expect(screen.queryByText(/\bBb84\b/)).not.toBeInTheDocument()
+  expect(screen.queryByText(/\bQkd\b/)).not.toBeInTheDocument()
+  expect(screen.getByText('Classical authentication')).toBeInTheDocument()
+})
+
+test('an aborted run leads with its reason and reports no accepted material', () => {
+  const aborted: SessionRunResponse = {
+    ...run,
+    record: {
+      ...run.record,
+      result: {
+        ...run.record.result,
+        status: 'aborted',
+        abort_reason:
+          'BB84 security abort: Per-basis errors Z=0.231481, X=0.208333 give phase-error bound 0.231481, above the configured asymptotic threshold 0.110000.',
+        established_key: { type: null, bit_length: 0 },
+        provenance: [],
+      },
+    },
+  }
+
+  render(<RunWorkspace run={aborted} />)
+
+  const outcome = screen.getByRole('heading', { name: /QKD-ASSUMED — Session securely aborted/i })
+  expect(outcome).toBeInTheDocument()
+  // Scoped to the banner: the reason also occurs inside the public JSON record.
+  const banner = outcome.closest('.run-outcome') as HTMLElement
+  expect(banner).toHaveClass('run-outcome--aborted')
+  expect(within(banner).getByText('Abort reason')).toBeInTheDocument()
+  expect(within(banner).getByText(/above the configured asymptotic threshold 0\.110000/)).toBeInTheDocument()
+  expect(screen.getByText('None accepted')).toBeInTheDocument()
+  expect(screen.queryByText('0 bit')).not.toBeInTheDocument()
+  // The configured abort threshold is shown beside the bound it was tested against.
+  expect(screen.getByText(/abort above 11\.00%/i)).toBeInTheDocument()
 })

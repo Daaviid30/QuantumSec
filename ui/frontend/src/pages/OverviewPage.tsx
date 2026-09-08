@@ -54,7 +54,17 @@ export function OverviewPage({ capabilities, onStart }: OverviewPageProps) {
               <h3>{familyLabels[family]}</h3>
               {capabilities.profiles.filter((profile) => profile.family === family).map((profile) => (
                 <article key={profile.id}>
-                  <div><strong>{profile.name}</strong><span>{profile.status}</span></div>
+                  {/*
+                    All seven profiles report status "current", so a success-coloured badge here would
+                    spend the success colour on "this profile exists". Success is reserved for run
+                    outcomes; anything other than "current" is what actually deserves attention.
+                  */}
+                  <div>
+                    <strong>{profile.name}</strong>
+                    <span className={`status-note ${profile.implemented ? '' : 'status-note--attention'}`}>
+                      {profile.status}
+                    </span>
+                  </div>
                   <p>{profile.description}</p>
                   <small>{profile.algorithms.join(' · ')}</small>
                 </article>
