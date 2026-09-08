@@ -2,7 +2,12 @@ import type {
   BB84SimulationRequest,
   BB84SimulationResponse,
   CapabilitiesResponse,
+  CompareResponse,
   HealthResponse,
+  ProtectedMessageResponse,
+  RunListResponse,
+  SessionRunRequest,
+  SessionRunResponse,
 } from '../types/api'
 
 export class QuantumSecApiError extends Error {
@@ -61,5 +66,37 @@ export function runBB84Simulation(request: BB84SimulationRequest): Promise<BB84S
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
+  })
+}
+
+export function runSession(request: SessionRunRequest): Promise<SessionRunResponse> {
+  return requestJson<SessionRunResponse>('/api/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  })
+}
+
+export function getRuns(): Promise<RunListResponse> {
+  return requestJson<RunListResponse>('/api/runs')
+}
+
+export function compareRuns(runIds: [string, string]): Promise<CompareResponse> {
+  return requestJson<CompareResponse>('/api/compare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ run_ids: runIds }),
+  })
+}
+
+export function protectMessage(
+  runId: string,
+  plaintext: string,
+  aad: string,
+): Promise<ProtectedMessageResponse> {
+  return requestJson<ProtectedMessageResponse>(`/api/runs/${encodeURIComponent(runId)}/protect`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plaintext, aad }),
   })
 }

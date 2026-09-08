@@ -35,6 +35,33 @@ class ProtocolCapability(StrictModel):
     description: str
 
 
+PublicSessionProfile = Literal[
+    "QKD-ASSUMED",
+    "QKD-CLASSICAL-AUTH",
+    "QKD-PQC-AUTH",
+    "PQC-BASE",
+    "PQC-DIVERSE",
+    "HYBRID",
+    "HYBRID-DIVERSE",
+]
+
+
+class ProfileCapability(StrictModel):
+    id: PublicSessionProfile
+    name: str
+    family: Literal["qkd", "pqc", "hybrid"]
+    implemented: bool
+    status: Literal["current", "partial", "planned", "future"]
+    description: str
+    establishment: list[str]
+    authentication: list[str]
+    algorithms: list[str]
+    hybrid: bool
+    diversified: bool
+    supports_qkd: bool
+    supports_data_plane: bool
+
+
 class ChannelCapability(StrictModel):
     id: str
     name: str
@@ -60,6 +87,7 @@ class FeatureCapability(StrictModel):
 
 class CapabilitiesResponse(StrictModel):
     version: str
+    profiles: list[ProfileCapability]
     protocols: list[ProtocolCapability]
     channels: list[ChannelCapability]
     adversaries: list[AdversaryCapability]
@@ -128,6 +156,39 @@ class BB84SimulationRequest(StrictModel):
     channels: list[ChannelConfiguration] = Field(default_factory=list, max_length=12)
 
 
+class QKDPostprocessingRequest(StrictModel):
+    sample_fraction: float = Field(default=0.2, gt=0.0, lt=1.0)
+    phase_error_abort_threshold: float = Field(default=0.11, ge=0.0, le=1.0)
+    cascade_passes: int = Field(default=4, ge=1, le=16)
+    cascade_initial_block_factor: float = Field(default=0.73, gt=0.0, le=10.0)
+    verification_tag_length: int = Field(default=32, ge=1, le=512)
+    security_margin_bits: int = Field(default=0, ge=0, le=100_000)
+
+
+class SessionRunRequest(StrictModel):
+    profile: PublicSessionProfile
+    qkd_authentication_profile: Literal["QKD-ASSUMED", "QKD-CLASSICAL-AUTH", "QKD-PQC-AUTH"] | None = None
+    n_signals: int | None = Field(default=None, ge=1, le=100_000)
+    seed: int | None = Field(default=None, ge=0, le=4_294_967_295)
+    channels: list[ChannelConfiguration] = Field(default_factory=list, max_length=12)
+    postprocessing: QKDPostprocessingRequest = Field(default_factory=QKDPostprocessingRequest)
+
+    @model_validator(mode="after")
+    def validate_profile_configuration(self) -> SessionRunRequest:
+        uses_qkd = self.profile.startswith("QKD-") or self.profile.startswith("HYBRID")
+        is_hybrid = self.profile.startswith("HYBRID")
+        if uses_qkd:
+            if self.n_signals is None or self.seed is None:
+                raise ValueError("QKD and hybrid profiles require n_signals and seed.")
+        elif self.n_signals is not None or self.seed is not None or self.channels:
+            raise ValueError("PQC-only profiles cannot configure QKD signals, seed, or channels.")
+        if is_hybrid and self.qkd_authentication_profile is None:
+            raise ValueError("Hybrid profiles require an explicit qkd_authentication_profile.")
+        if not is_hybrid and self.qkd_authentication_profile is not None:
+            raise ValueError("qkd_authentication_profile is configurable only for hybrid profiles.")
+        return self
+
+
 class ChannelSummary(StrictModel):
     stage_kind: Literal["channel", "adversary"]
     type: str
@@ -145,6 +206,76 @@ class AttackDiagnosticsSummary(StrictModel):
     eve_x_measurements: int
     eve_zero_outcomes: int
     eve_one_outcomes: int
+
+
+class RunRecord(StrictModel):
+    version: int
+    run_id: str
+    experiment_kind: str
+    condition_id: str
+    replicate_index: int
+    batch: dict[str, object] | None
+    execution_order_index: int | None
+    timestamp_utc: str
+    seed: int | None
+    profile: PublicSessionProfile
+    environment: dict[str, object]
+    config: dict[str, object]
+    provisioning: dict[str, object]
+    result: dict[str, object]
+    trace: dict[str, object]
+    metrics: dict[str, object]
+    artifact: dict[str, object]
+
+
+class SessionRunResponse(StrictModel):
+    record: RunRecord
+    attack_diagnostics: list[AttackDiagnosticsSummary]
+    data_plane_available: bool
+
+
+class RunListResponse(StrictModel):
+    runs: list[SessionRunResponse]
+
+
+class CompareRequest(StrictModel):
+    run_ids: list[str] = Field(min_length=2, max_length=2)
+
+    @model_validator(mode="after")
+    def validate_distinct_runs(self) -> CompareRequest:
+        if self.run_ids[0] == self.run_ids[1]:
+            raise ValueError("Comparison requires two distinct run IDs.")
+        return self
+
+
+class ComparisonCompatibility(StrictModel):
+    qkd_metrics: bool
+    pqc_timing: bool
+    same_environment: bool
+    notes: list[str]
+
+
+class CompareResponse(StrictModel):
+    left: SessionRunResponse
+    right: SessionRunResponse
+    compatibility: ComparisonCompatibility
+
+
+class ProtectedMessageRequest(StrictModel):
+    plaintext: str = Field(min_length=1, max_length=512)
+    aad: str = Field(default="QuantumSec/WebLab/v1", max_length=256)
+
+
+class ProtectedMessageResponse(StrictModel):
+    algorithm: Literal["AES-256-GCM"]
+    plaintext_bytes: int
+    ciphertext_bytes: int
+    nonce_bytes: int
+    tag_bytes: int
+    application_aad_bytes: int
+    round_trip_verified: bool
+    tamper_rejected: bool
+    ciphertext_preview: str
 
 
 class SimulationMetadata(StrictModel):
@@ -195,7 +326,6 @@ class PostprocessingSummary(StrictModel):
     n_final: int
     compression_ratio: float | None
     final_secret_fraction: float
-    final_key: str | None
 
 
 class BasisCounts(StrictModel):

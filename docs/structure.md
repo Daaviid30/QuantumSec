@@ -431,14 +431,19 @@ execute cryptographic sessions. The THESIS dataset was executed as `thesis-v1.0.
 
 ## 12. Web Laboratory V1
 
-The target is limited to three screens:
+The current implementation uses four restrained navigation surfaces while preserving the bounded
+Builder / Run / Compare thesis workflow:
 
-1. **Builder** — supported profile selector; QKD signal count, seed, channel/parameters, and Eve
-   fraction; profile-derived PQC components; small contextual/versioned cards.
-2. **Run** — real Alice/Bob/Eve timeline; explicit authentication state; KEM, combiner, HKDF,
-   Finished, compatible metrics, outcome, and protected-message strip when `K_SESSION` exists.
-3. **Compare** — exactly two run records; configuration diff, components, assumptions, compatible
-   metrics, bytes, outcome, and security notes.
+1. **Overview** — seven public profile summaries, implemented capability groups, backend readiness,
+   and the QKD/PQC measurement boundary.
+2. **Laboratory** — the profile-aware Builder and Run workflow: Guided/Research controls, QKD signal
+   count, seed, ordered channel/Eve stages, profile-derived PQC components, real ordered trace,
+   authentication, provenance, compatible metrics, outcome, and the protected-message strip when a
+   backend-held `K_SESSION` capability exists.
+3. **Runs** — bounded process-local public records, normalized configuration and environment
+   provenance, exact-configuration rerun, and two-record selection.
+4. **Compare** — exactly two run records; configuration diff, components, assumptions, compatible
+   metrics, byte layers, outcome, and security notes.
 
 For `QKD-ASSUMED`, Run must display:
 
@@ -447,8 +452,8 @@ CLASSICAL AUTHENTICATION
 ASSUMED — NOT EXECUTED
 ```
 
-There is no separate Quantum-Safe Explorer. Small contextual cards answer what a component is, its
-role, security assumption, profile contribution, and dated normative status, with a reference.
+There is no separate Quantum-Safe Explorer or campaign-scale web dashboard. Contextual profile
+content identifies component role, security assumption, profile contribution, and normative status.
 
 ## 13. Quality and maintenance
 

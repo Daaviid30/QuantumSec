@@ -1,64 +1,64 @@
 # Graph Report - QuantumSec  (2026-09-08)
 
 ## Corpus Check
-- 301 files · ~130,926 words
+- 307 files · ~135,584 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3136 nodes · 7588 edges · 148 communities (116 shown, 27 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 331 edges (avg confidence: 0.94)
+- 3233 nodes · 7867 edges · 145 communities (117 shown, 23 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 349 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ac46477b`
+- Built from commit: `e7b9b947`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - MLDSA65
-- adapters.py
-- IdentityChannel
+- main.py
+- BB84Protocol
 - QuantumSec Serena Root Memory
 - devDependencies
 - ProjectiveMeasurement Class
 - asymptotic_bb84_secret_length
-- PQCProfile
-- pqc/errors.py
+- test_client_exchange.py
+- BackendOperationError
 - Revisión final independiente — Fase 7: Motor Experimental Reproducible V1
 - compilerOptions
-- ResultsWorkspace.tsx
+- constants.py
 - test_measures.py
 - QuantumChannel
-- hybrid/runner.py
-- bb84.py
+- orchestration/__init__.py
+- reconcile_cascade
 - protocol/__init__.py
 - api.ts
-- campaigns/thesis_v1.py
-- BB84Protocol
+- QKDProfile
+- laboratory.py
 - 3. Análisis Detallado de Hallazgos
 - SeededRNG
 - estimate_qber_from_sample
-- runtime.py
+- WegmanCarterAuthenticationContext
 - BB84SessionResult
-- identity.py
+- registry.py
 - client.ts
 - compilerOptions
 - AppShell.tsx
 - test_key_confirmation.py
-- constants.py
-- SimulationConfigurator.tsx
-- test_key_schedule.py
+- test_states.py
+- AuthenticationEvidence
+- PQCProfile
 - dm_from_ket
-- DepolarizingChannel
+- AuthenticationFrame
 - Adaptive Agents for QKD
-- test_data_plane.py
-- Basis
+- ComparePage.tsx
+- bb84.py
 - BB84Result
 - _OQSKEM
-- HybridDerivedKeys
+- hybrid/runner.py
 - ProtectedSession
-- SimulatorPage.tsx
-- profile_definition
+- LaboratoryPage.tsx
+- .__enter__
 - qber_by_basis
 - sift_keys
 - Graphify Knowledge Graph Integration Rules
@@ -67,11 +67,11 @@
 - Q: y cuantos bits forman el bitstring del inicio?? porque nolo puedo marcar no? como configuro el panel de serena para que en la siguiente tarea optimices y trabajes como nunca??
 - schemas.py
 - ResizeObserverMock
-- ExperimentConfig
+- test_reproducibility.py
 - 3. Análisis Detallado de Hallazgos
 - quantum.information Module
 - QuantumSec Web UI Architecture
-- FeatureComingSoon.tsx
+- App.tsx
 - tsconfig.json
 - benchmarks/__init__.py
 - core/__init__.py
@@ -88,22 +88,22 @@
 - capabilities.py
 - amplify_privacy
 - quantumsec
-- information.py
+- validate_density_matrix
 - EXPERIMENTS.md
 - SessionConfig
-- orchestration/profiles.py
-- test_server_offer.py
+- qkd/runner.py
+- ServerKeyOfferFactory
 - Reproducible Experiment Engine V1
-- copy_binary_vector
+- postprocessing/__init__.py
 - experiments/record.py
 - MLDSAIdentity
-- _OQSSignature
+- oqs_backend.py
 - .__exit__
 - _require_bytes
 - SessionProfile
 - backends/__init__.py
 - 3. Análisis Detallado de Hallazgos
-- PQCOperationTimer
+- exchange.py
 - 13. Experiments
 - pqc/core.md
 - 3. Análisis Detallado de Hallazgos
@@ -112,62 +112,59 @@
 - Informe de Revisión de Código Independiente: Módulo `pqc` (Fase 6: Confirmación de Claves, Mensajes Finished y Establecimiento de Sesión)
 - QuantumSec TFM Goal
 - 3. Análisis Detallado de Hallazgos
-- ChannelPipeline
+- orchestration/profiles.py
 - QuantumSec Deployment Guide
 - BB84 security model
 - Informe de Revisión de Código Independiente: Módulo `pqc` (Fase 5: Derivación de Claves de Sesión con KDF y Transcript Canónico)
-- SignedServerKeyOffer
+- PQCParty
 - QuantumSec Web UI V1
-- PauliChannel
+- EstablishedKeyCapability
 - .__exit__
 - ui/core.md
 - 3. Análisis Detallado de Hallazgos
-- AuthenticationFrame
+- authentication/base.py
 - BaseRNG
 - 10. Security Model
-- export.py
+- ExperimentConfig
 - test_authentication.py
 - QuantumSec Conventions Memory
 - test_providers.py
 - qkd/transcript.py
 - .generate
 - analysis/thesis_v1.py
-- KrausChannel
+- encode_bb84_state
 - validation.py
 - _prepare_density_matrix
-- AuthenticatedKEMContributions
+- PreSharedAuthenticationMaterial
 - .__exit__
-- PQCParty
+- TrustedIdentityStore
 - .apply
-- .__enter__
+- create_phase5_flow
 - test_api.py
-- build_channel_stage
-- test_noise.py
-- .__exit__
+- QuantumSec Web Laboratory redesign
+- DepolarizingChannel
+- _KEMSharedSecretStateBase
 - campaigns/__init__.py
-- d1.py
+- campaigns/thesis_v1.py
 - analysis/__init__.py
-- BB84SessionStatus
+- StagePipelineEditor.tsx
 - experiments/config.py
 - verify_reconciled_keys
 - Thesis Campaign `thesis-v1.0.1`
-- health
-- .canonical_bytes
-- .from_dict
-- operations.py
-- _final_key_string
+- SessionRunRequest
+- PQCExchangeArtifacts
+- .apply
 - _top_level_imports
-- .__enter__
 
 ## God Nodes (most connected - your core abstractions)
 1. `SeededRNG` - 129 edges
 2. `PQCParty` - 80 edges
-3. `BB84Protocol` - 63 edges
-4. `SessionConfig` - 62 edges
+3. `SessionConfig` - 64 edges
+4. `BB84Protocol` - 63 edges
 5. `SignedServerKeyOffer` - 62 edges
 6. `PQCProfile` - 53 edges
-7. `ExperimentConfig` - 50 edges
-8. `SessionProfile` - 46 edges
+7. `ExperimentConfig` - 52 edges
+8. `SessionProfile` - 51 edges
 9. `IdentityChannel` - 45 edges
 10. `run_hybrid_session()` - 42 edges
 
@@ -195,19 +192,19 @@
 - **Two-Tier Web Laboratory Frontend-Backend Deployment** — deployment_architecture, readme_web_lab, deployment_production_systemd [EXTRACTED 1.00]
 - **Measurement and Sampling Test Suite** — reports_11_projector_tests_projector_tests, reports_12_projective_measurement_tests_measurement_tests, reports_13_projective_measurement_tests_class_tests, reports_14_sampling_tests_sampling_tests, reports_15_collapse_tests_collapse_tests [INFERRED 0.85]
 
-## Communities (148 total, 27 thin omitted)
+## Communities (145 total, 23 thin omitted)
 
 ### Community 0 - "MLDSA65"
-Cohesion: 0.06
-Nodes (48): Exception, MonkeyPatch, _ensure_signature_algorithm_enabled(), _load_oqs(), _new_signature(), OQSKeyPair, OQSRuntimeVersions, OQSSignatureBackend (+40 more)
+Cohesion: 0.08
+Nodes (28): MonkeyPatch, OQSSignatureBackend, Low-level adapter managing liboqs signature contexts, key generation, signing,…, MLDSA65, Self, Return a safe string representation with public key length without leaking…, Validate that the input value is a byte string, raising a TypeError if it is…, ML-DSA-65 (NIST FIPS 204) digital signature provider backed by liboqs. (+20 more)
 
-### Community 1 - "adapters.py"
-Cohesion: 0.14
-Nodes (22): ChannelSummary, post, _bb84_basis_value(), _channel_summary(), BB84SimulationRequest, BB84SimulationResponse, Adapters between typed HTTP data and the QuantumSec simulation domain., Narrow the general QKD Basis enum to BB84's two supported bases. (+14 more)
+### Community 1 - "main.py"
+Cohesion: 0.12
+Nodes (24): get, HealthResponse, post, compare_runs(), get_run(), health(), list_runs(), protect_message() (+16 more)
 
-### Community 2 - "IdentityChannel"
-Cohesion: 0.10
-Nodes (29): IdentityChannel, Channel that returns an independent copy of the input state., BB84PostprocessingConfig, Configuration for BB84 post-processing under assumed channel authentication.…, _InvalidOutputChannel, ArrayLike, ComplexArray, parametrize (+21 more)
+### Community 2 - "BB84Protocol"
+Cohesion: 0.08
+Nodes (50): Run BB84 and authenticate its public transcript according to ``profile``., run_qkd_profile(), _session_identifier(), IdentityChannel, Channel that returns an independent copy of the input state., BB84PostprocessingConfig, BB84Protocol, BB84SessionStatus (+42 more)
 
 ### Community 3 - "QuantumSec Serena Root Memory"
 Cohesion: 0.12
@@ -222,16 +219,16 @@ Cohesion: 0.07
 Nodes (34): MeasurementSample Dataclass, Report: MeasurementSample Data Structure, ProjectiveMeasurement Class, Report: ProjectiveMeasurement Class, measure_projective Function, Report: Refactor measure_projective, Born Probability Validation Order, Report: Born Probability Validation Order (+26 more)
 
 ### Community 6 - "asymptotic_bb84_secret_length"
-Cohesion: 0.20
-Nodes (15): QKD metric computations., asymptotic_bb84_secret_length(), binary_entropy(), _non_negative_int(), _probability(), Stateless security-length metrics for the current asymptotic BB84 model., Return binary Shannon entropy ``h2(p)`` with exact endpoint handling., Estimate extractable bits from an explicit asymptotic phase-error bound. The… (+7 more)
+Cohesion: 0.23
+Nodes (14): asymptotic_bb84_secret_length(), binary_entropy(), _non_negative_int(), _probability(), Stateless security-length metrics for the current asymptotic BB84 model., Return binary Shannon entropy ``h2(p)`` with exact endpoint handling., Estimate extractable bits from an explicit asymptotic phase-error bound. The…, parametrize (+6 more)
 
-### Community 7 - "PQCProfile"
-Cohesion: 0.12
-Nodes (36): PQCProfile, StrEnum, Enumeration of QuantumSec handshake profiles defining selected algorithm suites., Factory creating responder ephemeral KEM states and authenticated…, ServerKeyOfferFactory, _create_flow(), _Phase4Flow, _prepare_phase3() (+28 more)
+### Community 7 - "test_client_exchange.py"
+Cohesion: 0.09
+Nodes (40): InitiatorKEMState, Alice-local KEM secrets created only after authenticating the responder. Raw-…, _decode_base64_field(), Self, Restore and validate an offer from its JSON-compatible mapping., Deserialize a signed server key offer from a dictionary without verifying…, Restore and validate a client exchange from a transport mapping., Decode a Base64-encoded string into raw bytes, raising ValueError if the data… (+32 more)
 
-### Community 8 - "pqc/errors.py"
+### Community 8 - "BackendOperationError"
 Cohesion: 0.05
-Nodes (52): _new_kem(), OQSKEMBackend, OQSKEMDetails, OQSKEMEncapsulation, OQSKEMKeyPair, Adapter isolating the liboqs-python key-encapsulation API., Initialize and return a new liboqs KeyEncapsulation instance for the specified…, Extract and validate a required metadata field from the liboqs algorithm… (+44 more)
+Nodes (51): _new_kem(), OQSKEMBackend, OQSKEMDetails, OQSKEMEncapsulation, OQSKEMKeyPair, Adapter isolating the liboqs-python key-encapsulation API., Initialize and return a new liboqs KeyEncapsulation instance for the specified…, Extract and validate a required metadata field from the liboqs algorithm… (+43 more)
 
 ### Community 9 - "Revisión final independiente — Fase 7: Motor Experimental Reproducible V1"
 Cohesion: 0.04
@@ -241,41 +238,41 @@ Nodes (44): 10. Evidencia de validación, 11. Preparación por experimento, 12. 
 Cohesion: 0.08
 Nodes (25): DOM, DOM.Iterable, ES2022, src, @testing-library/jest-dom, vite/client, vitest/globals, compilerOptions (+17 more)
 
-### Community 11 - "ResultsWorkspace.tsx"
-Cohesion: 0.16
-Nodes (19): Panel(), PanelProps, SectionHeading(), SectionHeadingProps, StatusPill(), StatusPillProps, QubitInspector(), QubitInspectorProps (+11 more)
+### Community 11 - "constants.py"
+Cohesion: 0.14
+Nodes (27): Project-wide numerical constants with no domain-layer dependencies., as_ket(), inner_product(), normalize(), outer_product(), probabilities_from_ket(), ArrayLike, ComplexArray (+19 more)
 
 ### Community 12 - "test_measures.py"
-Cohesion: 0.07
-Nodes (41): Any, _elapsed(), main(), Benchmark safe and fast projective sampling paths for one-qubit signals., Print best-of-repeat wall times for the requested signal counts., run_benchmark(), _born_probabilities(), measure_projective() (+33 more)
+Cohesion: 0.06
+Nodes (40): Any, _elapsed(), main(), Benchmark safe and fast projective sampling paths for one-qubit signals., Print best-of-repeat wall times for the requested signal counts., run_benchmark(), _born_probabilities(), measure_projective() (+32 more)
 
 ### Community 13 - "QuantumChannel"
-Cohesion: 0.17
-Nodes (15): ABC, QuantumChannel, Base interface and shared input handling for quantum channels., Interface for composable channel stages acting on density matrices. A stage may…, build_channel_pipeline(), Public, Pydantic-free specifications for reproducible QKD channel pipelines., Build an ordered pipeline with domain-separated RNG streams for adversaries., _stage_seed() (+7 more)
+Cohesion: 0.06
+Nodes (48): ABC, QuantumChannel, Base interface and shared input handling for quantum channels., Interface for composable channel stages acting on density matrices. A stage may…, Return a finite scalar probability in the closed unit interval., _validate_probability(), build_channel_pipeline(), build_channel_stage() (+40 more)
 
-### Community 14 - "hybrid/runner.py"
-Cohesion: 0.05
-Nodes (54): Versioned public configuration for common QuantumSec session execution., Runtime-only capabilities kept separate from reproducible public configuration., Non-serializable provisioned parties, QKD engine, secrets, and test boundaries., SessionExecutionContext, Establishment-to-data-plane adapter with explicit session-key ownership…, _hybrid_public_context_entries(), _pqc_outcome(), _qkd_outcome() (+46 more)
-
-### Community 15 - "bb84.py"
+### Community 14 - "orchestration/__init__.py"
 Cohesion: 0.07
-Nodes (36): Classical QKD post-processing algorithms and immutable transcripts., CascadeConfig, CascadePassStatistics, CascadePublicEvent, _initial_block_size(), _parity(), _PassLayout, ArrayLike (+28 more)
+Nodes (39): Versioned public configuration for common QuantumSec session execution., Runtime-only capabilities kept separate from reproducible public configuration., Establishment-to-data-plane adapter with explicit session-key ownership…, Upper-layer composition of independent QKD and PQC domain modules., PQCAuthenticationMetrics, PQCSessionMetrics, QKDSessionMetrics, Profile-compatible metrics that keep unlike timing categories separate. (+31 more)
+
+### Community 15 - "reconcile_cascade"
+Cohesion: 0.08
+Nodes (29): CascadeConfig, CascadePassStatistics, CascadePublicEvent, _initial_block_size(), _parity(), _PassLayout, ArrayLike, intp (+21 more)
 
 ### Community 16 - "protocol/__init__.py"
-Cohesion: 0.05
-Nodes (70): Reusable execution of the existing mutually authenticated PQC phases 2--4., Runtime-only accumulation of exact PQC operation timings., Post-quantum identity, authentication, KEM, and key-establishment primitives., Central QuantumSec deployment profiles for PQC handshakes., ClientKeyExchangeFactory, ClientKeyExchangeProcessingStatus, ProcessedClientKeyExchange, StrEnum (+62 more)
+Cohesion: 0.04
+Nodes (52): Post-quantum identity, authentication, KEM, and key-establishment primitives., ClientKeyExchangeFactory, ClientKeyExchangeProcessingStatus, ClientKeyExchangeProcessor, ProcessedClientKeyExchange, PQCOperationObserver, StrEnum, Authenticated Alice-to-Bob KEM response processing for staged PQC handshakes. (+44 more)
 
 ### Community 17 - "api.ts"
+Cohesion: 0.09
+Nodes (27): eventTone(), ProtocolTrace(), ProtocolTraceProps, RunWorkspace(), RunWorkspaceProps, run, SecurityEvidence(), SecurityEvidenceProps (+19 more)
+
+### Community 18 - "QKDProfile"
+Cohesion: 0.09
+Nodes (33): analytical_qber(), AnalyticalQBER, Analytical BB84 error predictions for the E2 validation campaign., Expected Z-, X-, and uniform-basis aggregate QBER., Return the exact E2 prediction implied by the implemented channel., build_campaign_plan(), _config(), _e2_conditions() (+25 more)
+
+### Community 19 - "laboratory.py"
 Cohesion: 0.11
-Nodes (20): futureSteps, mainSteps, QuantumFlow(), QuantumFlowProps, labels, SimulationControls(), SimulationControlsProps, AdversaryCapability (+12 more)
-
-### Community 18 - "campaigns/thesis_v1.py"
-Cohesion: 0.10
-Nodes (36): analytical_qber(), AnalyticalQBER, Analytical BB84 error predictions for the E2 validation campaign., Expected Z-, X-, and uniform-basis aggregate QBER., Return the exact E2 prediction implied by the implemented channel., build_campaign_plan(), CampaignPlan, CampaignPreset (+28 more)
-
-### Community 19 - "BB84Protocol"
-Cohesion: 0.19
-Nodes (24): AuthenticationContext, AuthenticationTransportHook, Run BB84 and authenticate its public transcript according to ``profile``., run_qkd_profile(), _session_identifier(), BB84Protocol, Run BB84 with an injected random source and density-matrix channel. Alice's…, _imports_top_level() (+16 more)
+Nodes (21): AttackDiagnosticsSummary, RunRecord, _attack_diagnostics(), _experiment_config(), CompareResponse, ProtectedMessageResponse, RunListResponse, SessionRunRequest (+13 more)
 
 ### Community 20 - "3. Análisis Detallado de Hallazgos"
 Cohesion: 0.14
@@ -283,99 +280,99 @@ Nodes (13): 1. Resumen Ejecutivo y Alcance, 2. Tabla Resumen de Hallazgos, 3. An
 
 ### Community 21 - "SeededRNG"
 Cohesion: 0.12
-Nodes (29): QRNGSimulator, Generate binary choices using this simulator's bias/correlation model., Deterministic PRNG for reproducible simulations and tests., Return the generator initialized with this instance's seed., Simulate a physical QRNG with bias and Markovian correlation., Return the generator supplied by the base random source., Generate raw bits with the configured bias and temporal correlation., SeededRNG (+21 more)
+Nodes (30): QRNGSimulator, random_unitary(), Generate a Haar-distributed random unitary using QR decomposition., Deterministic PRNG for reproducible simulations and tests., Return the generator initialized with this instance's seed., Simulate a physical QRNG with bias and Markovian correlation., Return the generator supplied by the base random source., SeededRNG (+22 more)
 
 ### Community 22 - "estimate_qber_from_sample"
 Cohesion: 0.08
 Nodes (23): _copy_bb84_bases(), estimate_qber_from_sample(), ParameterEstimationResult, ArrayLike, ndarray, Return aggregate sampled QBER as a backwards-compatible alias., Return the aggregate sampled bit-error rate used to configure Cascade., Return the common asymptotic bound used for mixed-basis candidates. In the… (+15 more)
 
-### Community 23 - "runtime.py"
-Cohesion: 0.12
-Nodes (9): ExperimentRuntime, ExperimentRuntimeFactory, PQCIdentityProvisioning, Runtime-only provisioning for experiment configurations., Create per-run contexts while retaining persistent laboratory identities. ML-…, Provision and time persistent campaign identities exactly once., One-time ML-DSA identity-generation cost outside session timings., MLDSAAuthenticationContext (+1 more)
+### Community 23 - "WegmanCarterAuthenticationContext"
+Cohesion: 0.11
+Nodes (9): AuthenticationSessionRegistry, AuthenticationSessionReplayError, RuntimeError, Raised when a session identifier is reused within persistent authentication…, Thread-safe replay registry that contains identifiers, never authentication…, MLDSAAuthenticationContext, Pre-provisioned bilateral ML-DSA identities and peer trust stores., Bilateral, direction-separated PSK material for one or more QKD sessions. (+1 more)
 
 ### Community 24 - "BB84SessionResult"
-Cohesion: 0.06
-Nodes (12): BB84SessionResult, intp, NDArray, uint8, Return Bob's measured outcomes under the raw-key naming convention., Return raw positions where Alice and Bob selected the same basis., Return Alice's key after basis reconciliation., Return Bob's key after basis reconciliation. (+4 more)
-
-### Community 25 - "identity.py"
 Cohesion: 0.08
-Nodes (25): Private and public identities for PQC authentication., Verify a signature against the message using this public identity's algorithm…, ABC, Self, Backend-independent signature contracts and metadata., Immutable specification and buffer dimensions for a post-quantum digital…, Validate metadata text fields and ensure category and buffer sizes are positive…, Abstract base contract defining post-quantum digital signature operations. (+17 more)
+Nodes (5): BB84SessionResult, Stage-by-stage immutable result of a complete BB84 session., Return aggregate full-key QBER as a backwards-compatible alias., Return aggregate sampled QBER as a backwards-compatible alias., Return disclosed sample, reconciliation parities, and confirmation tag bits.…
+
+### Community 25 - "registry.py"
+Cohesion: 0.08
+Nodes (24): Validate owner, algorithm, and public key buffer dimensions, storing an…, Verify a signature against the message using this public identity's algorithm…, ABC, Self, Backend-independent signature contracts and metadata., Immutable specification and buffer dimensions for a post-quantum digital…, Validate metadata text fields and ensure category and buffer sizes are positive…, Abstract base contract defining post-quantum digital signature operations. (+16 more)
 
 ### Community 26 - "client.ts"
-Cohesion: 0.27
-Nodes (10): getCapabilities(), getHealth(), QuantumSecApiError, requestJson(), runBB84Simulation(), useCapabilities(), useSimulation(), SimulatorPageProps (+2 more)
+Cohesion: 0.16
+Nodes (17): compareRuns(), getCapabilities(), getHealth(), protectMessage(), QuantumSecApiError, requestJson(), runBB84Simulation(), runSession() (+9 more)
 
 ### Community 27 - "compilerOptions"
 Cohesion: 0.14
 Nodes (13): node, vite.config.ts, vitest.config.ts, compilerOptions, allowImportingTsExtensions, composite, module, moduleResolution (+5 more)
 
 ### Community 28 - "AppShell.tsx"
-Cohesion: 0.16
-Nodes (12): App(), AppShell(), AppShellProps, Header(), HeaderProps, QuantumMark(), NavigationItem, NavigationSection (+4 more)
+Cohesion: 0.20
+Nodes (13): AppView, viewFromHash(), views, viewTitles, AppShell(), AppShellProps, Header(), HeaderProps (+5 more)
 
 ### Community 29 - "test_key_confirmation.py"
 Cohesion: 0.07
-Nodes (53): _compute_finished_verify_data(), ConfirmedPQCHandshake, _finished_mac_input(), PQCConfirmationKeyState, PQCKeyConfirmation, PQCOperationObserver, Compute one Finished value with the standard-library HMAC-SHA-384 primitive., Private role-local Phase 6 key and Finished state machine. (+45 more)
+Nodes (51): _compute_finished_verify_data(), ConfirmedPQCHandshake, _finished_mac_input(), PQCConfirmationKeyState, PQCKeyConfirmation, Compute one Finished value with the standard-library HMAC-SHA-384 primitive., Private role-local Phase 6 key and Finished state machine., Return whether the private confirmation-key reference was released. (+43 more)
 
-### Community 30 - "constants.py"
-Cohesion: 0.24
-Nodes (7): Project-wide numerical constants with no domain-layer dependencies., Linear-algebra helpers for finite-dimensional quantum systems., parametrize, test_dm_from_ensemble(), test_dm_from_ensemble_rejects_invalid_inputs(), test_dm_from_ket(), test_dm_from_ket_rejects_invalid_quantum_states()
+### Community 30 - "test_states.py"
+Cohesion: 0.43
+Nodes (5): parametrize, test_dm_from_ensemble(), test_dm_from_ensemble_rejects_invalid_inputs(), test_dm_from_ket(), test_dm_from_ket_rejects_invalid_quantum_states()
 
-### Community 31 - "SimulationConfigurator.tsx"
-Cohesion: 0.24
-Nodes (8): ResultsWorkspace(), ProtocolSelector(), ProtocolSelectorProps, SimulationConfigurator(), SimulationConfiguratorProps, capabilitiesFixture, resultFixture, ProtocolCapability
+### Community 31 - "AuthenticationEvidence"
+Cohesion: 0.15
+Nodes (9): AuthenticationEvidence, AuthenticationVerification, AuthenticatorMetadata, DirectionalAuthenticator, ABC, Generate and verify evidence for one authenticated communication direction., MLDSADirectionalAuthenticator, ML-DSA-65 authentication of canonical QKD classical transcript checkpoints. (+1 more)
 
-### Community 32 - "test_key_schedule.py"
+### Community 32 - "PQCProfile"
 Cohesion: 0.06
-Nodes (61): _length_prefixed(), Internal canonical binary encoding primitives shared across PQC domains., Prefix bytes with an unsigned 32-bit big-endian length., canonical_kem_secret_input(), Unambiguous profile-aware encoding of independently established KEM secrets., Encode LOW/HIGH KEM secrets with fixed algorithm order and explicit boundaries.…, _validated_secret(), derive_hkdf_sha384() (+53 more)
+Nodes (69): _length_prefixed(), Internal canonical binary encoding primitives shared across PQC domains., Prefix bytes with an unsigned 32-bit big-endian length., canonical_kem_secret_input(), Unambiguous profile-aware encoding of independently established KEM secrets., Encode LOW/HIGH KEM secrets with fixed algorithm order and explicit boundaries.…, _validated_secret(), derive_hkdf_sha384() (+61 more)
 
 ### Community 33 - "dm_from_ket"
-Cohesion: 0.08
-Nodes (31): Explicit adversarial stages for ordered QKD channel pipelines., AttackDiagnostics, _immutable_density(), InterceptResendAttack, ArrayLike, ComplexArray, Seeded stochastic intercept-resend attack for logical-qubit BB84 signals., Return an immutable simulator-only snapshot of cumulative counters. (+23 more)
+Cohesion: 0.06
+Nodes (47): Explicit adversarial stages for ordered QKD channel pipelines., AttackDiagnostics, InterceptResendAttack, Seeded stochastic intercept-resend attack for logical-qubit BB84 signals., Return an immutable simulator-only snapshot of cumulative counters., Reset aggregate counters without rewinding the injected RNG stream., Small immutable snapshot of simulator-only attack observations., Measure selected signals in a random BB84 basis and resend fresh states. The… (+39 more)
 
-### Community 34 - "DepolarizingChannel"
-Cohesion: 0.12
-Nodes (16): DepolarizingChannel, ArrayLike, ComplexArray, Single-qubit channel ``E(rho) = (1 - p) rho + p I/2``. The parameter satisfies…, Apply depolarizing noise to a single-qubit density matrix., parametrize, test_supported_channels_match_analytical_per_basis_qber(), test_bb84_accepts_existing_noisy_quantum_channel_without_statistical_exactness() (+8 more)
+### Community 34 - "AuthenticationFrame"
+Cohesion: 0.19
+Nodes (9): AuthenticationFrame, Canonical authentication unit binding payload to anti-replay context., _frame_bits(), NDArray, uint8, Authenticate one direction with fresh Toeplitz-selector and mask bits., Atomically reserve fresh bits for one unique authenticated frame context., WegmanCarterDirectionalAuthenticator (+1 more)
 
 ### Community 35 - "Adaptive Agents for QKD"
 Cohesion: 0.36
 Nodes (10): Adaptive Agents for QKD, Adaptive Channel Agent, Experiment Orchestrator Agent, Layer-Local Agent Placement, Multi-Agent QKDN Coordination, Observe-Decide-Act Loop, Protocol Controller Agent, QKDN Routing Agent (+2 more)
 
-### Community 36 - "test_data_plane.py"
-Cohesion: 0.16
-Nodes (16): Self, Bilateral, direction-separated PSK material for one or more QKD sessions., Provision matching but independent copies for each communication direction., WegmanCarterAuthenticationContext, open_data_plane(), Transfer one established 256-bit session key into an AES-GCM runtime capability., test_wegman_carter_context_enforces_directional_key_separation(), _establish() (+8 more)
+### Community 36 - "ComparePage.tsx"
+Cohesion: 0.21
+Nodes (12): getRuns(), SessionMetricsView(), SessionMetricsViewProps, useRuns(), formatBytes(), formatDurationNs(), formatPercent(), authLabel() (+4 more)
 
-### Community 37 - "Basis"
-Cohesion: 0.11
-Nodes (22): bases_from_bits(), Basis, basis_from_bit(), ndarray, Standard single-qubit measurement bases., Map the QKD random-bit convention 0/1 to the Z/X basis., Map a one-dimensional sequence of random bits to QKD bases., QKD-specific states, operations, bases, and standard measurements. (+14 more)
+### Community 37 - "bb84.py"
+Cohesion: 0.15
+Nodes (17): Enum, bases_from_bits(), Basis, basis_from_bit(), ndarray, Named basis conventions used by QKD protocols., Standard single-qubit measurement bases., Map the QKD random-bit convention 0/1 to the Z/X basis. (+9 more)
 
 ### Community 38 - "BB84Result"
-Cohesion: 0.11
-Nodes (8): BB84Result, Return Alice's BB84 bases aligned with the sifted key., Return the number of quantum signals sent by Alice., Return the number of positions retained after sifting., Return the fraction of raw positions retained after sifting., Return aggregate simulator-diagnostic QBER over the complete sifted key. This…, Return simulator-only Z, X, and aggregate full-sifted QBER., Immutable raw and sifted material produced by one complete BB84 run.
+Cohesion: 0.08
+Nodes (15): BB84Result, intp, NDArray, uint8, Return Bob's measured outcomes under the raw-key naming convention., Return raw positions where Alice and Bob selected the same basis., Return Alice's key after basis reconciliation., Return Bob's key after basis reconciliation. (+7 more)
 
 ### Community 39 - "_OQSKEM"
 Cohesion: 0.10
 Nodes (14): _ensure_kem_algorithm_enabled(), _KEMFactory, _load_oqs(), _OQSKEM, _OQSModule, BaseException, Protocol, Self (+6 more)
 
+### Community 40 - "hybrid/runner.py"
+Cohesion: 0.10
+Nodes (25): AuthenticationOutcome, HybridPublicContext, create_finished(), HybridFinishedMessage, HybridFinishedRole, _mac_input(), StrEnum, verify_finished() (+17 more)
+
 ### Community 41 - "ProtectedSession"
 Cohesion: 0.05
 Nodes (64): decrypt_aes_256_gcm(), encrypt_aes_256_gcm(), Strict AES-256-GCM primitive adapter backed by pyca/cryptography., Encrypt bytes and return ciphertext and the full 128-bit GCM tag separately., Authenticate then decrypt, propagating cryptography.exceptions.InvalidTag…, _validated_inputs(), canonical_data_plane_aad(), DataPlaneContext (+56 more)
 
-### Community 42 - "SimulatorPage.tsx"
-Cohesion: 0.32
-Nodes (10): ChannelCard(), ChannelCardProps, ChannelPipeline(), ChannelPipelineProps, createChannelDraft(), serializeChannels(), validateChannels(), SimulatorPage() (+2 more)
-
-### Community 43 - "profile_definition"
-Cohesion: 0.05
-Nodes (32): PQCProfileDefinition, profile_definition(), Immutable algorithm suite specification for a QuantumSec PQC profile., Return the configured KEM names in canonical protocol order., Retrieve the immutable algorithm suite definition for the specified QuantumSec…, ClientKeyExchangeProcessor, PQCOperationObserver, Authenticate Alice and validate session binding before Bob decapsulates. (+24 more)
+### Community 42 - "LaboratoryPage.tsx"
+Cohesion: 0.14
+Nodes (25): CompositionSummary(), CompositionSummaryProps, familyMeta, ProfileSelector(), ProfileSelectorProps, LaboratoryMode, QKDControls(), QKDControlsProps (+17 more)
 
 ### Community 44 - "qber_by_basis"
-Cohesion: 0.16
-Nodes (18): _optional_probability(), ArrayLike, ndarray, qber(), qber_by_basis(), QBERByBasis, Aggregate and per-basis quantum bit error rate metrics., Immutable aggregate and BB84 basis-conditioned error metrics. (+10 more)
+Cohesion: 0.15
+Nodes (19): QKD metric computations., _optional_probability(), ArrayLike, ndarray, qber(), qber_by_basis(), QBERByBasis, Aggregate and per-basis quantum bit error rate metrics. (+11 more)
 
 ### Community 45 - "sift_keys"
-Cohesion: 0.22
-Nodes (14): _basis_vector(), ArrayLike, ndarray, Validate a one-dimensional sequence of named QKD bases., Keep aligned raw bits whose named preparation and measurement bases match., sift_keys(), parametrize, test_empty_sifting_is_valid_but_efficiency_is_undefined() (+6 more)
+Cohesion: 0.14
+Nodes (18): _basis_vector(), ArrayLike, ndarray, Validate a one-dimensional sequence of named QKD bases., Aligned sifted keys and the raw positions retained by reconciliation., Return the number of positions retained after basis reconciliation., Return the fraction of raw positions retained after sifting., Keep aligned raw bits whose named preparation and measurement bases match. (+10 more)
 
 ### Community 46 - "Graphify Knowledge Graph Integration Rules"
 Cohesion: 0.40
@@ -394,12 +391,12 @@ Cohesion: 0.40
 Nodes (4): Answer, Outcome, Q: y cuantos bits forman el bitstring del inicio?? porque nolo puedo marcar no? como configuro el panel de serena para que en la siguiente tarea optimices y trabajes como nunca??, Source Nodes
 
 ### Community 50 - "schemas.py"
-Cohesion: 0.18
-Nodes (16): BaseModel, model_validator, AmplitudeDampingChannelConfiguration, ApiError, AttackDiagnosticsSummary, BitFlipChannelConfiguration, DepolarizingChannelConfiguration, IdentityChannelConfiguration (+8 more)
+Cohesion: 0.14
+Nodes (29): BaseModel, _bb84_basis_value(), _channel_summary(), BB84SimulationRequest, BB84SimulationResponse, Adapters between typed HTTP data and the QuantumSec simulation domain., Narrow the general QKD Basis enum to BB84's two supported bases., Execute BB84 with the engine's seeded RNG and adapt its immutable result. (+21 more)
 
-### Community 52 - "ExperimentConfig"
-Cohesion: 0.13
-Nodes (17): ExperimentConfig, One normalized instruction for an experimental session execution., Run ordered configurations sequentially, optionally shuffling reproducibly.…, run_batch(), e3_config(), experiment_runner(), fixture, qkd_config() (+9 more)
+### Community 52 - "test_reproducibility.py"
+Cohesion: 0.67
+Nodes (3): _qkd_protocol_values(), test_pqc_reproducibility_preserves_method_not_random_artifacts(), test_same_qkd_config_and_seed_reproduce_protocol_outcome()
 
 ### Community 53 - "3. Análisis Detallado de Hallazgos"
 Cohesion: 0.11
@@ -413,53 +410,57 @@ Nodes (4): quantum.information Module, Report: Quantum Information Measures, Qua
 Cohesion: 0.67
 Nodes (4): QuantumSec UI HTML Entry Point, BB84 Simulation REST API, QuantumSec Web UI V1 Documentation, QuantumSec Web UI Architecture
 
+### Community 56 - "App.tsx"
+Cohesion: 0.21
+Nodes (12): App(), requestFromRecord(), root, LaboratoryPageProps, familyLabels, OverviewPage(), OverviewPageProps, RunsPage() (+4 more)
+
 ### Community 70 - "capabilities.py"
-Cohesion: 0.18
-Nodes (16): ParameterCapability, get_capabilities(), _probability(), project_version(), CapabilitiesResponse, Capability discovery backed by the features that exist in the repository., Return the installed project version with a source-tree fallback., Describe implemented and planned features without implying future support. (+8 more)
+Cohesion: 0.14
+Nodes (22): Return all executable profiles in stable public-enum order., session_capabilities(), ParameterCapability, ProfileCapability, test_all_seven_public_capabilities_are_current_and_stably_ordered(), get_capabilities(), _probability(), _profile_capability() (+14 more)
 
 ### Community 71 - "amplify_privacy"
 Cohesion: 0.21
 Nodes (10): amplify_privacy(), PrivacyAmplificationResult, ArrayLike, Immutable final keys and public Toeplitz seed metadata., Hash both reconciled keys to an explicitly derived target length., parametrize, test_privacy_amplification_agrees_and_respects_target_length(), test_privacy_amplification_handles_zero_target_explicitly() (+2 more)
 
-### Community 73 - "information.py"
-Cohesion: 0.16
-Nodes (23): _as_square_matrix(), fidelity(), _prepare_pair(), _psd_matrix_sqrt(), purity(), ArrayLike, ComplexArray, Quantum-information metrics for density matrices. (+15 more)
+### Community 73 - "validate_density_matrix"
+Cohesion: 0.15
+Nodes (25): _as_square_matrix(), fidelity(), _prepare_pair(), _psd_matrix_sqrt(), purity(), ArrayLike, ComplexArray, Quantum-information metrics for density matrices. (+17 more)
 
 ### Community 74 - "EXPERIMENTS.md"
 Cohesion: 0.18
 Nodes (14): BB84 Classical Post-Processing Pipeline Spec, CPTP Noise vs Optical Loss Architectural Separation, QuantumSec Project Structure and Architectural Blueprint, ProjectiveMeasurement & Sampling Refactor Spec, Quantum Channel & BB84 Foundation Milestone, Quantum Information Metrics Specification, QuantumSec Development Task Roadmap, Query: Initial Bitstring Length & BB84 Signals (+6 more)
 
 ### Community 75 - "SessionConfig"
-Cohesion: 0.17
-Nodes (28): Normalized public configuration; runtime secrets belong in a separate context., SessionConfig, Dispatch a normalized session config to its domain-specific adapter., run_session(), test_generic_runner_closes_live_session_result(), test_generic_runner_rejects_d1_until_the_data_plane_runner_exists(), _context(), parametrize (+20 more)
+Cohesion: 0.11
+Nodes (42): Self, Provision matching but independent copies for each communication direction., Normalized public configuration; runtime secrets belong in a separate context., SessionConfig, Non-serializable provisioned parties, QKD engine, secrets, and test boundaries., SessionExecutionContext, open_data_plane(), Transfer one established 256-bit session key into an AES-GCM runtime capability. (+34 more)
 
-### Community 79 - "orchestration/profiles.py"
-Cohesion: 0.07
-Nodes (31): Enum, CapabilityStatus, EstablishmentSource, StrEnum, qkd_profile_definition(), QKDProfile, QKDProfileDefinition, Public session profiles with orthogonal establishment and authentication… (+23 more)
+### Community 79 - "qkd/runner.py"
+Cohesion: 0.10
+Nodes (19): AuthenticationContext, QKD session orchestration and canonical public transcript contracts., AuthenticatedQKDSessionResult, _optional_key_copy(), NDArray, uint8, QKDSessionSummary, QKDTraceEvent (+11 more)
 
-### Community 80 - "test_server_offer.py"
-Cohesion: 0.14
-Nodes (22): OfferCreation, bob(), high_creation(), low_creation(), fixture, FixtureRequest, parametrize, Tests for ephemeral responder state and authenticated ServerKeyOffer messages. (+14 more)
+### Community 80 - "ServerKeyOfferFactory"
+Cohesion: 0.12
+Nodes (26): OfferCreation, PQCOperationObserver, Factory creating responder ephemeral KEM states and authenticated…, Generate fresh ephemeral KEM keys and create a signed server offer for a new…, ServerKeyOfferFactory, bob(), high_creation(), low_creation() (+18 more)
 
 ### Community 81 - "Reproducible Experiment Engine V1"
 Cohesion: 0.25
 Nodes (8): Batch and statistics, CLI, Configuration, Definitive campaign, Environment and record schema, Metrics and exports, Reproducible Experiment Engine V1, Runtime and secret lifecycle
 
-### Community 82 - "copy_binary_vector"
-Cohesion: 0.09
-Nodes (32): Sampled QBER estimation with mandatory removal of disclosed key positions., Toeplitz-universal privacy amplification for reconciled QKD keys., generate_toeplitz_seed(), ArrayLike, NDArray, uint8, Efficient binary Toeplitz universal hashing for QKD post-processing., Generate the public Toeplitz diagonal seed through the injected RNG. (+24 more)
+### Community 82 - "postprocessing/__init__.py"
+Cohesion: 0.08
+Nodes (39): Classical QKD post-processing algorithms and immutable transcripts., Sampled QBER estimation with mandatory removal of disclosed key positions., Toeplitz-universal privacy amplification for reconciled QKD keys., Deterministic basis reconciliation for QKD raw keys., generate_toeplitz_seed(), ArrayLike, NDArray, uint8 (+31 more)
 
 ### Community 83 - "experiments/record.py"
 Cohesion: 0.11
 Nodes (13): BatchProvenance, ExperimentRecord, _freeze(), _freeze_mapping(), Immutable, versioned public evidence produced by one experiment run., Copy public evidence before the caller closes the live session capability., Public, versioned provenance shared by every retained run in one batch., _thaw() (+5 more)
 
 ### Community 84 - "MLDSAIdentity"
-Cohesion: 0.06
-Nodes (29): MLDSAIdentity, Self, Generate a new named private ML-DSA-65 signing identity with fresh…, Return public algorithm metadata and key lengths for this identity's ML-DSA-65…, Export the non-secret public identity suitable for peer trust stores., Generate an ML-DSA-65 signature over message bytes using this identity's…, Verify a message signature against an explicitly provided public identity., Return a safe string representation showing owner and algorithm without… (+21 more)
+Cohesion: 0.08
+Nodes (25): MLDSAIdentity, Self, Generate a new named private ML-DSA-65 signing identity with fresh…, Return public algorithm metadata and key lengths for this identity's ML-DSA-65…, Export the non-secret public identity suitable for peer trust stores., Generate an ML-DSA-65 signature over message bytes using this identity's…, Verify a message signature against an explicitly provided public identity., Return a safe string representation showing owner and algorithm without… (+17 more)
 
-### Community 85 - "_OQSSignature"
-Cohesion: 0.11
-Nodes (10): _OQSModule, _OQSSignature, BaseException, Protocol, Self, TracebackType, Protocol defining the interface for a liboqs signature context manager., Protocol for the liboqs Signature constructor callable. (+2 more)
+### Community 85 - "oqs_backend.py"
+Cohesion: 0.06
+Nodes (26): _ensure_signature_algorithm_enabled(), _load_oqs(), _new_signature(), oqs_runtime_versions(), OQSKeyPair, _OQSModule, OQSRuntimeVersions, _OQSSignature (+18 more)
 
 ### Community 86 - ".__exit__"
 Cohesion: 0.33
@@ -467,19 +468,19 @@ Nodes (4): BaseException, TracebackType, Release the session-key reference idemp
 
 ### Community 87 - "_require_bytes"
 Cohesion: 0.07
-Nodes (13): EstablishedPQCSession, Self, Enter a managed lifetime for this private confirmation-key state., Role-local session-key handle available only after mutual Finished verification., Return true because this type exists only after mutual confirmation., Return whether the owned session-key state was closed., Explicitly export the established role-local symmetric session key., Enter a managed lifetime for this established local session. (+5 more)
+Nodes (15): Validate that the given identity name is a non-empty string and return its…, _validated_identity_name(), EstablishedPQCSession, Self, Enter a managed lifetime for this private confirmation-key state., Role-local session-key handle available only after mutual Finished verification., Return true because this type exists only after mutual confirmation., Return whether the owned session-key state was closed. (+7 more)
 
 ### Community 88 - "SessionProfile"
-Cohesion: 0.09
-Nodes (44): Canonical binary encoding helpers for upper-layer session protocols., HybridPublicContext, Authenticated public context binding every hybrid session input., canonical_hybrid_secret_input(), _expected_algorithms(), hybrid_component_metadata_bytes(), hybrid_kem_label(), HybridSecretComponent (+36 more)
+Cohesion: 0.15
+Nodes (27): canonical_hybrid_secret_input(), _expected_algorithms(), hybrid_component_metadata_bytes(), hybrid_kem_label(), HybridSecretComponent, Unambiguous encoding of independently established QKD and KEM contributions., Return encoded bytes attributable to one component's non-secret…, Return the canonical hybrid label for a supported KEM algorithm. (+19 more)
 
 ### Community 90 - "3. Análisis Detallado de Hallazgos"
 Cohesion: 0.12
 Nodes (16): 1. Resumen Ejecutivo y Alcance, 2. Tabla Resumen de Hallazgos, 3. Análisis Detallado de Hallazgos, 4. Evaluación de Invariantes y Principios de Diseño, 5. Conclusiones y Recomendaciones de Priorización, [H-01] Acoplamiento de la verificación de firmas a identidades privadas con material secreto, [H-02] Acoplamiento rígido de algoritmo en `TrustedIdentityStore`, Informe de Revisión de Código Independiente: Módulo `pqc` (Firmas Digitales y Autenticación Post-Cuántica) (+8 more)
 
-### Community 91 - "PQCOperationTimer"
-Cohesion: 0.29
-Nodes (4): PQCOperationTimer, PQCOperationTimings, Accumulate successful direct timings without observing secret values., test_e1_operation_timer_accumulates_only_direct_observations()
+### Community 91 - "exchange.py"
+Cohesion: 0.09
+Nodes (14): execute_authenticated_pqc_exchange(), PQCExchangeRejected, Reusable execution of the existing mutually authenticated PQC phases 2--4., Execute signed offer/encapsulation/exchange/decapsulation without deriving keys., PQCOperationTimer, PQCOperationTimings, Runtime-only accumulation of exact PQC operation timings., Accumulate successful direct timings without observing secret values. (+6 more)
 
 ### Community 92 - "13. Experiments"
 Cohesion: 0.29
@@ -509,9 +510,9 @@ Nodes (20): 11. Profiles, 12. Experimental Methodology, 14. Metrics, 15. Deliver
 Cohesion: 0.11
 Nodes (17): 1. Resumen Ejecutivo y Alcance, 2. Tabla Resumen de Hallazgos, 3. Análisis Detallado de Hallazgos, 4. Aspectos Positivos y Fortalezas del Diseño, 5. Recomendaciones de Testing y Calidad, [H-01] Manejador de excepciones no parentizado en `ml_dsa.py` incompatible con Python $\le 3.13$, [H-02] Captura excesivamente restrictiva (`except ValueError:`) que deja escapar excepciones criptográficas y operativas del backend, Informe de Revisión de Código Independiente: Orquestación de Sesiones, Runners PQC/QKD y Composición Híbrida (Fases 4 y 5) (+9 more)
 
-### Community 100 - "ChannelPipeline"
-Cohesion: 0.24
-Nodes (12): BitFlipChannel, Single-qubit channel that applies Pauli X with probability ``p``., ChannelPipeline, Apply an immutable sequence of channels in order. An empty pipeline is defined…, test_bit_flip_channel_extremes(), test_empty_pipeline_is_an_identity_without_aliasing_input(), test_pipeline_composes_bit_and_phase_flips_in_order(), test_pipeline_composes_identity_channels() (+4 more)
+### Community 100 - "orchestration/profiles.py"
+Cohesion: 0.19
+Nodes (8): CapabilityStatus, EstablishmentSource, StrEnum, qkd_profile_definition(), QKDProfileDefinition, Public session profiles with orthogonal establishment and authentication…, Return explicit, public authentication duties for capability discovery., SessionProfileDefinition
 
 ### Community 101 - "QuantumSec Deployment Guide"
 Cohesion: 0.40
@@ -525,17 +526,17 @@ Nodes (13): AES-256-GCM data plane, Analytical channel expectations, BB84 securi
 Cohesion: 0.18
 Nodes (10): 1. Resumen Ejecutivo y Alcance, 2. Tabla Resumen de Hallazgos, 3. Análisis Detallado de Hallazgos, 4. Evaluación de Invariantes y Principios de Diseño Criptográfico, 5. Conclusiones y Recomendaciones de Priorización, Informe de Revisión de Código Independiente: Módulo `pqc` (Fase 5: Derivación de Claves de Sesión con KDF y Transcript Canónico), [L-01] Ausencia de serialización `to_dict` / `from_dict` en `PQCHandshakeTranscript`, [L-02] Restricción indebida de sal no vacía en el adaptador genérico HKDF (+2 more)
 
-### Community 104 - "SignedServerKeyOffer"
-Cohesion: 0.11
-Nodes (33): InitiatorKEMState, PQCOperationObserver, StrEnum, Authenticate Bob's offer before producing Alice's KEM encapsulations., Verify a trusted responder and encapsulate only after authentication., Authentication outcome produced before any Alice-side response is sent., Alice-local KEM secrets created only after authenticating the responder. Raw-…, ServerKeyOfferProcessor (+25 more)
+### Community 104 - "PQCParty"
+Cohesion: 0.06
+Nodes (55): ProcessedServerOffer, PQCOperationObserver, StrEnum, Authenticate Bob's offer before producing Alice's KEM encapsulations., Verify a trusted responder and encapsulate only after authentication., Authentication outcome produced before any Alice-side response is sent., Alice-side authentication outcome and optional private/public KEM outputs., Return whether Bob was authenticated and encapsulation completed. (+47 more)
 
 ### Community 105 - "QuantumSec Web UI V1"
 Cohesion: 0.33
 Nodes (6): API, Development, Extension points, QuantumSec Web UI V1, Supported V1 features, Verification
 
-### Community 106 - "PauliChannel"
-Cohesion: 0.19
-Nodes (8): Single-qubit CPTP noise models., PauliChannel, PhaseFlipChannel, Single-qubit Pauli noise channels., Apply an incoherent mixture of the single-qubit Pauli operators. The identity…, Return the implied identity probability., Single-qubit channel that applies Pauli Z with probability ``p``., test_phase_flip_maps_plus_to_minus()
+### Community 106 - "EstablishedKeyCapability"
+Cohesion: 0.17
+Nodes (3): EstablishedKeyCapability, Self, Private export boundary for accepted key bytes with exact bit-length metadata.
 
 ### Community 107 - ".__exit__"
 Cohesion: 0.33
@@ -545,126 +546,126 @@ Nodes (4): BaseException, TracebackType, Release references to ephemeral private
 Cohesion: 0.13
 Nodes (14): 1. Resumen Ejecutivo y Alcance, 2. Tabla Resumen de Hallazgos, 3. Análisis Detallado de Hallazgos, 4. Aspectos Positivos y Fortalezas del Diseño, 5. Recomendaciones de Calidad, Informe de Revisión de Código Independiente: Plano de Protección de Datos AES-256-GCM (Fase 6), [L-01] Condición potencialmente defectuosa en `ProtectedRecord.__post_init__`, [L-02] Validación tardía de `session.is_closed` en `open_data_plane` (+6 more)
 
-### Community 110 - "AuthenticationFrame"
-Cohesion: 0.06
-Nodes (48): assumed_authentication_result(), Explicit non-executed authentication result for the QKD baseline profile., AuthenticationEvidence, AuthenticationFrame, AuthenticationMetrics, AuthenticationSessionRegistry, AuthenticationSessionReplayError, AuthenticationState (+40 more)
+### Community 110 - "authentication/base.py"
+Cohesion: 0.15
+Nodes (23): assumed_authentication_result(), Explicit non-executed authentication result for the QKD baseline profile., AuthenticationMetrics, AuthenticationState, ClassicalAuthenticationResult, StrEnum, Common contracts for executed or explicitly assumed QKD classical…, authenticate_transcript_checkpoints() (+15 more)
 
 ### Community 111 - "BaseRNG"
-Cohesion: 0.10
-Nodes (20): BaseRNG, GlobalRNG, ABC, ndarray, random_basis(), random_bit(), random_unitary(), Injectable random-number sources for reproducible simulations. (+12 more)
+Cohesion: 0.09
+Nodes (22): BaseRNG, GlobalRNG, ABC, ndarray, random_basis(), random_bit(), Injectable random-number sources for reproducible simulations., Generate binary choices using this simulator's bias/correlation model. (+14 more)
 
 ### Community 112 - "10. Security Model"
 Cohesion: 0.40
 Nodes (5): 10. Security Model, Adversary boundary, PQC and hybrid boundary, QBER and secret-length model, QKD boundary
 
-### Community 113 - "export.py"
-Cohesion: 0.15
-Nodes (29): ArgumentParser, main(), _parser(), Minimal command-line interface for reproducible QuantumSec runs., _canonical_cell(), config_from_json(), configs_from_json(), _csv_value() (+21 more)
+### Community 113 - "ExperimentConfig"
+Cohesion: 0.09
+Nodes (42): ArgumentParser, main(), _parser(), Minimal command-line interface for reproducible QuantumSec runs., ExperimentConfig, One normalized instruction for an experimental session execution., _canonical_cell(), config_from_json() (+34 more)
 
 ### Community 114 - "test_authentication.py"
-Cohesion: 0.15
-Nodes (20): PreSharedAuthenticationMaterial, Consumable PSK bit stream whose contents are never exposed or serialized., _frame(), _ml_dsa_authenticator(), parametrize, test_ml_dsa_rejects_missing_signature(), test_ml_dsa_rejects_modified_or_cross_context_frame(), test_ml_dsa_rejects_modified_signature() (+12 more)
+Cohesion: 0.30
+Nodes (16): _frame(), _ml_dsa_authenticator(), parametrize, test_ml_dsa_rejects_missing_signature(), test_ml_dsa_rejects_modified_or_cross_context_frame(), test_ml_dsa_rejects_modified_signature(), test_ml_dsa_rejects_unknown_identity(), test_ml_dsa_rejects_wrong_public_identity() (+8 more)
 
 ### Community 115 - "QuantumSec Conventions Memory"
 Cohesion: 0.20
 Nodes (10): Cryptographic Helper Functions, RNG Architecture Design Principles, QuantumSec RNG Architecture Manual, Core Design Principles and Boundary Rules, QuantumSec Conventions Memory, Layered Dependency Discipline, Injected RNG Convention, Validation Policy and Error Types (+2 more)
 
 ### Community 116 - "test_providers.py"
-Cohesion: 0.12
-Nodes (19): HQC3, Ephemeral HQC-3 key encapsulation provider backed by liboqs for NIST Category 3…, Return cached algorithm metadata and expected key/ciphertext dimensions for…, MLKEM768, Ephemeral ML-KEM-768 key encapsulation provider backed by liboqs., Return cached algorithm metadata and expected key/ciphertext dimensions for ML-…, hqc(), ml_kem() (+11 more)
+Cohesion: 0.10
+Nodes (21): HQC3, Ephemeral HQC-3 key encapsulation provider backed by liboqs for NIST Category 3…, Return cached algorithm metadata and expected key/ciphertext dimensions for…, MLKEM768, Ephemeral ML-KEM-768 key encapsulation provider backed by liboqs., Return cached algorithm metadata and expected key/ciphertext dimensions for ML-…, Return the active HQC provider instance required by a HIGH-profile session., Decapsulate an HQC ciphertext with this HIGH-profile session's private key. (+13 more)
 
 ### Community 117 - "qkd/transcript.py"
-Cohesion: 0.13
-Nodes (18): Encode replay-relevant context without the authenticated payload., length_prefixed(), Encode a non-negative integer at a fixed width., Encode bytes with an unsigned 64-bit big-endian length., unsigned(), _bases_payload(), _binary_payload(), build_qkd_classical_transcript() (+10 more)
+Cohesion: 0.11
+Nodes (20): Encode replay-relevant context without the authenticated payload., length_prefixed(), Canonical binary encoding helpers for upper-layer session protocols., Encode a non-negative integer at a fixed width., Encode bytes with an unsigned 64-bit big-endian length., unsigned(), Authenticated public context binding every hybrid session input., Versioned, role-separated HMAC-SHA-384 Finished exchange for hybrid keys. (+12 more)
 
 ### Community 119 - "analysis/thesis_v1.py"
 Cohesion: 0.07
 Nodes (73): generate_all(), _number(), _numbers(), _plot_e1(), _plot_e2(), _plot_e3(), _plot_e4(), _plot_e5() (+65 more)
 
-### Community 120 - "KrausChannel"
-Cohesion: 0.12
-Nodes (16): Return a finite scalar probability in the closed unit interval., _validate_probability(), KrausChannel, ArrayLike, ComplexArray, A completely positive trace-preserving map validated at construction., Build a channel from a non-empty complete set of Kraus operators., Return the Hilbert-space dimension acted on by the channel. (+8 more)
+### Community 120 - "encode_bb84_state"
+Cohesion: 0.20
+Nodes (11): encode_bb84_state(), ArrayLike, ComplexArray, Build an immutable density matrix for a validated named BB84 state., Return an independent density matrix for one BB84 bit/basis symbol. The…, _trusted_density_matrix(), _validate_bit(), parametrize (+3 more)
 
 ### Community 122 - "validation.py"
-Cohesion: 0.05
-Nodes (77): as_ket(), inner_product(), normalize(), outer_product(), probabilities_from_ket(), ArrayLike, ComplexArray, RealArray (+69 more)
+Cohesion: 0.09
+Nodes (48): _error_density_matrix(), _error_normalized_state(), _error_probability_state(), _error_projective_measurement(), _error_projector(), _error_unitary(), is_density_matrix(), is_normalized_state() (+40 more)
 
 ### Community 123 - "_prepare_density_matrix"
-Cohesion: 0.15
-Nodes (11): _prepare_density_matrix(), ArrayLike, ComplexArray, Apply the channel to a density matrix., Convert a channel input and enforce cheap structural invariants., ArrayLike, ComplexArray, Return the same physical state without aliasing the input array. (+3 more)
+Cohesion: 0.09
+Nodes (19): _immutable_density(), ArrayLike, ComplexArray, Possibly intercept one qubit, then return a fresh transmitted state., _prepare_density_matrix(), ArrayLike, ComplexArray, Apply the channel to a density matrix. (+11 more)
 
-### Community 124 - "AuthenticatedKEMContributions"
-Cohesion: 0.22
-Nodes (4): AuthenticatedKEMContributions, Consumable capability issued only for an authenticated exact PQC transcript., Return defensive secret copies once and retire the capability., test_contribution_capability_cannot_be_claimed_without_protocol_proof()
+### Community 124 - "PreSharedAuthenticationMaterial"
+Cohesion: 0.20
+Nodes (4): PreSharedAuthenticationMaterial, Consumable PSK bit stream whose contents are never exposed or serialized., test_pre_shared_material_consumes_packed_bits_across_byte_boundaries(), test_psk_representation_never_contains_secret()
 
 ### Community 125 - ".__exit__"
 Cohesion: 0.32
 Nodes (5): BaseException, TracebackType, Release the confirmation key when leaving its managed lifetime., Close the owned session-key state idempotently., Close the session key when leaving the managed lifetime.
 
-### Community 126 - "PQCParty"
-Cohesion: 0.05
-Nodes (49): Raised when an operation requires an identity from a peer not found in the…, Raised when adding an identity for an existing peer without overwrite…, TrustedIdentityConflictError, UnknownTrustedPeerError, PublicIdentity, Immutable public verification identity associating an owner name with public…, Serialize this public identity into a JSON-compatible dictionary with…, PQCParty (+41 more)
+### Community 126 - "TrustedIdentityStore"
+Cohesion: 0.06
+Nodes (39): Exception, BackendUnavailableError, PQCError, Domain errors for post-quantum cryptographic operations., Raised when a requested post-quantum algorithm is unsupported or disabled in…, Raised when an operation requires an identity from a peer not found in the…, Raised when adding an identity for an existing peer without overwrite…, Base exception class for all post-quantum cryptography domain errors in… (+31 more)
 
 ### Community 127 - ".apply"
 Cohesion: 0.32
 Nodes (5): ArrayLike, ComplexArray, Apply phase-flip noise to a single-qubit density matrix., Apply Pauli noise to a single-qubit density matrix., Apply bit-flip noise to a single-qubit density matrix.
 
-### Community 130 - "build_channel_stage"
-Cohesion: 0.29
-Nodes (7): build_channel_stage(), _optional_number(), Build one domain channel from a validated neutral stage specification., parametrize, test_every_public_qkd_stage_builds_the_expected_channel(), build_channel(), Map one validated API channel configuration to the public channel API.
+### Community 128 - "create_phase5_flow"
+Cohesion: 0.07
+Nodes (41): PQCOperationObserver, validate_operation_observer(), PQCConfirmationKeyDeriver, PQCOperationObserver, Require a live Phase 5 key state bound to the exact Phase 6 transcript., Derive a private role-local confirmation key from authenticated Phase 5 state., Derive Alice's confirmation state and retire her KEM secret state., Derive Bob's confirmation state and retire his KEM secret state. (+33 more)
 
-### Community 131 - "test_noise.py"
-Cohesion: 0.14
-Nodes (19): AmplitudeDampingChannel, ArrayLike, ComplexArray, Standard single-qubit amplitude damping with ``0 <= gamma <= 1``. This CPTP…, Apply amplitude damping to a single-qubit density matrix., assert_valid_qubit_density_matrix(), parametrize, test_amplitude_damping_extremes_and_fixed_ground_state() (+11 more)
+### Community 129 - "test_api.py"
+Cohesion: 0.12
+Nodes (3): parametrize, test_intercept_resend_configuration_rejects_invalid_fraction(), test_session_api_executes_every_current_public_profile()
 
-### Community 132 - ".__exit__"
-Cohesion: 0.25
-Nodes (5): BaseException, TracebackType, Release secret references when leaving a managed lifetime., Release secret references idempotently without claiming memory zeroization., Transfer raw KEM contributions once to the domain-owned hybrid capability.
+### Community 130 - "QuantumSec Web Laboratory redesign"
+Cohesion: 0.22
+Nodes (8): Backend/API changes, Current-state audit, Event and data flow, Explicit non-goals, Implementation phases, Information architecture, QuantumSec Web Laboratory redesign, Retained and replaced
 
-### Community 134 - "d1.py"
-Cohesion: 0.13
-Nodes (16): D1Record, _expect_invalid_tag(), _flip_first(), Secret-free executable D1 protected-session demonstration., Establish HYBRID-DIVERSE, transfer its key, and test AES-GCM rejection., run_d1(), TamperOutcome, _distribution_version() (+8 more)
+### Community 131 - "DepolarizingChannel"
+Cohesion: 0.11
+Nodes (24): DepolarizingChannel, ArrayLike, ComplexArray, Single-qubit channel ``E(rho) = (1 - p) rho + p I/2``. The parameter satisfies…, Apply depolarizing noise to a single-qubit density matrix., test_bb84_accepts_existing_noisy_quantum_channel_without_statistical_exactness(), test_excessive_sampled_qber_aborts_before_reconciliation(), test_symmetric_channel_can_complete_with_matching_per_basis_estimates() (+16 more)
 
-### Community 136 - "BB84SessionStatus"
-Cohesion: 0.25
-Nodes (6): BB84SessionStatus, StrEnum, Terminal state of a complete BB84 session., QKD protocol implementations., A basis average must not authorize extraction on an asymmetric channel., test_asymmetric_phase_flip_does_not_use_aggregate_qber_as_phase_error()
+### Community 132 - "_KEMSharedSecretStateBase"
+Cohesion: 0.12
+Nodes (11): _KEMSharedSecretStateBase, BaseException, Self, TracebackType, Release secret references when leaving a managed lifetime., Internal validated storage shared by initiator and responder secret states., Return whether the private shared-secret references were released., Release secret references idempotently without claiming memory zeroization. (+3 more)
+
+### Community 134 - "campaigns/thesis_v1.py"
+Cohesion: 0.11
+Nodes (28): CampaignPlan, CampaignPreset, execute_campaign(), _experiment_manifest(), finalize_campaign(), _main(), _manifest(), _progress() (+20 more)
+
+### Community 136 - "StagePipelineEditor.tsx"
+Cohesion: 0.36
+Nodes (6): GuidedChannelControls(), GuidedChannelControlsProps, StagePipelineEditor(), StagePipelineEditorProps, ChannelCapability, ChannelDraft
 
 ### Community 137 - "experiments/config.py"
 Cohesion: 0.18
 Nodes (16): _integer(), _invalid_stage(), _number(), _optional_integer(), _postprocessing_from_public_dict(), Strict, versioned, secret-free experiment configuration., _reject_unknown(), _session_from_public_dict() (+8 more)
 
 ### Community 138 - "verify_reconciled_keys"
-Cohesion: 0.17
-Nodes (11): ArrayLike, Immutable public key-agreement verification data and protocol decision., Return the number of public Alice tag bits., Verify reconciled-key agreement using public Toeplitz-universal hash tags. The…, VerificationResult, verify_reconciled_keys(), Run BB84 through estimation, Cascade, verification, and extraction. Legitimate…, test_different_keys_fail_for_deterministic_hash_setup() (+3 more)
+Cohesion: 0.29
+Nodes (8): ArrayLike, Verify reconciled-key agreement using public Toeplitz-universal hash tags. The…, verify_reconciled_keys(), Run BB84 through estimation, Cascade, verification, and extraction. Legitimate…, test_different_keys_fail_for_deterministic_hash_setup(), test_equal_keys_verify_and_tag_leakage_is_tracked(), test_verification_default_tag_tracks_32_bits_of_public_leakage(), test_verification_seed_and_tags_reproduce_with_equal_rng_state()
 
 ### Community 139 - "Thesis Campaign `thesis-v1.0.1`"
 Cohesion: 0.40
 Nodes (4): Interpretation boundary, Reproduction, Status, Thesis Campaign `thesis-v1.0.1`
 
-### Community 140 - "health"
-Cohesion: 0.50
-Nodes (4): get, HealthResponse, health(), HealthResponse
+### Community 140 - "SessionRunRequest"
+Cohesion: 0.29
+Nodes (4): model_validator, CompareRequest, PauliChannelConfiguration, SessionRunRequest
 
-### Community 142 - ".from_dict"
-Cohesion: 0.16
-Nodes (14): _decode_base64_field(), Self, Restore and validate an offer from its JSON-compatible mapping., Deserialize a signed server key offer from a dictionary without verifying…, Restore and validate a public response from a transport mapping., Restore and validate a client exchange from a transport mapping., Decode a Base64-encoded string into raw bytes, raising ValueError if the data…, Deserialize a signed client exchange without authenticating its signature. (+6 more)
-
-### Community 143 - "operations.py"
+### Community 142 - ".apply"
 Cohesion: 0.50
-Nodes (3): _immutable(), ndarray, Named single-qubit operators commonly used by QKD protocols.
-
-### Community 144 - "_final_key_string"
-Cohesion: 0.50
-Nodes (4): _final_key_string(), NDArray, uint8, Serialize a completed simulator key as a binary string for inspection.
+Nodes (3): ArrayLike, ComplexArray, Apply amplitude damping to a single-qubit density matrix.
 
 ### Community 145 - "_top_level_imports"
 Cohesion: 0.80
 Nodes (4): Path, test_data_protection_is_independent_from_establishment_domains(), test_qkd_and_pqc_remain_independent_lower_domains(), _top_level_imports()
 
 ## Knowledge Gaps
-- **332 isolated node(s):** `quantumsec`, `name`, `private`, `version`, `type` (+327 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1278 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **340 isolated node(s):** `quantumsec`, `name`, `private`, `version`, `type` (+335 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1300 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Work-memory lessons
 
@@ -678,17 +679,17 @@ Nodes (4): Path, test_data_protection_is_independent_from_establishment_domains(
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SeededRNG` connect `SeededRNG` to `test_api.py`, `build_channel_stage`, `IdentityChannel`, `adapters.py`, `BB84SessionStatus`, `experiments/config.py`, `verify_reconciled_keys`, `test_measures.py`, `QuantumChannel`, `bb84.py`, `BB84Protocol`, `estimate_qber_from_sample`, `runtime.py`, `dm_from_ket`, `DepolarizingChannel`, `test_data_plane.py`, `amplify_privacy`, `SessionConfig`, `copy_binary_vector`, `BaseRNG`?**
+- **Why does `SeededRNG` connect `SeededRNG` to `dm_from_ket`, `BB84Protocol`, `DepolarizingChannel`, `test_api.py`, `amplify_privacy`, `experiments/config.py`, `verify_reconciled_keys`, `SessionConfig`, `test_measures.py`, `QuantumChannel`, `BaseRNG`, `reconcile_cascade`, `ExperimentConfig`, `postprocessing/__init__.py`, `schemas.py`, `estimate_qber_from_sample`?**
   _High betweenness centrality (0.069) - this node is a cross-community bridge._
-- **Why does `PQCParty` connect `PQCParty` to `test_key_schedule.py`, `test_data_plane.py`, `PQCProfile`, `SignedServerKeyOffer`, `profile_definition`, `SessionConfig`, `hybrid/runner.py`, `protocol/__init__.py`, `test_server_offer.py`, `MLDSAIdentity`, `runtime.py`, `test_key_confirmation.py`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `PQCParty` connect `PQCParty` to `PQCProfile`, `create_phase5_flow`, `test_client_exchange.py`, `SessionConfig`, `orchestration/__init__.py`, `protocol/__init__.py`, `ExperimentConfig`, `ServerKeyOfferFactory`, `MLDSAIdentity`, `exchange.py`, `test_key_confirmation.py`, `TrustedIdentityStore`?**
+  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `QuantumSec Project Overview & README` connect `EXPERIMENTS.md` to `Thesis Campaign `thesis-v1.0.1``, `QuantumSec Deployment Guide`, `BB84 security model`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Are the 18 inferred relationships involving `SeededRNG` (e.g. with `ExperimentRuntimeFactory` and `build_channel_pipeline()`) actually correct?**
   _`SeededRNG` has 18 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `PQCParty` (e.g. with `ClientKeyExchangeFactory` and `ClientKeyExchangeProcessor`) actually correct?**
   _`PQCParty` has 7 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 2 inferred relationships involving `BB84Protocol` (e.g. with `BaseRNG` and `Basis`) actually correct?**
-  _`BB84Protocol` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `SessionConfig` (e.g. with `QKDProfile` and `SessionProfile`) actually correct?**
   _`SessionConfig` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `SignedServerKeyOffer` (e.g. with `ClientKeyExchangeFactory` and `ClientKeyExchangeProcessor`) actually correct?**
-  _`SignedServerKeyOffer` has 11 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 2 inferred relationships involving `BB84Protocol` (e.g. with `BaseRNG` and `Basis`) actually correct?**
+  _`BB84Protocol` has 2 INFERRED edges - model-reasoned connections that need verification._

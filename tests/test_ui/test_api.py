@@ -27,6 +27,7 @@ def test_capabilities_expose_real_and_planned_features_distinctly():
     channels = {channel["id"]: channel for channel in body["channels"]}
     adversaries = {adversary["id"]: adversary for adversary in body["adversaries"]}
     features = {feature["id"]: feature for feature in body["features"]}
+    profiles = {profile["id"]: profile for profile in body["profiles"]}
 
     assert protocols["bb84"]["implemented"] is True
     assert protocols["e91"]["implemented"] is False
@@ -46,6 +47,18 @@ def test_capabilities_expose_real_and_planned_features_distinctly():
     assert features["verification"]["implemented"] is True
     assert features["privacy_amplification"]["implemented"] is True
     assert features["intercept_resend"]["implemented"] is True
+    assert set(profiles) == {
+        "QKD-ASSUMED",
+        "QKD-CLASSICAL-AUTH",
+        "QKD-PQC-AUTH",
+        "PQC-BASE",
+        "PQC-DIVERSE",
+        "HYBRID",
+        "HYBRID-DIVERSE",
+    }
+    assert all(profile["implemented"] for profile in profiles.values())
+    assert profiles["QKD-ASSUMED"]["supports_data_plane"] is False
+    assert profiles["HYBRID-DIVERSE"]["supports_data_plane"] is True
 
 
 def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
@@ -89,7 +102,7 @@ def test_bb84_endpoint_is_reproducible_and_returns_real_result_data():
     assert first_body["attack_diagnostics"] == []
 
 
-def test_completed_bb84_response_exposes_the_exact_final_simulator_key():
+def test_completed_bb84_response_exposes_length_but_withholds_final_simulator_key():
     response = client.post(
         "/api/simulations/bb84",
         json={"protocol": "bb84", "n_signals": 256, "seed": 2026, "channels": []},
@@ -98,11 +111,11 @@ def test_completed_bb84_response_exposes_the_exact_final_simulator_key():
     assert response.status_code == 200
     postprocessing = response.json()["postprocessing"]
     assert postprocessing["status"] == "completed"
-    assert len(postprocessing["final_key"]) == postprocessing["n_final"]
-    assert set(postprocessing["final_key"]) <= {"0", "1"}
+    assert postprocessing["n_final"] > 0
+    assert "final_key" not in postprocessing
 
 
-def test_aborted_bb84_response_exposes_reason_and_no_final_key():
+def test_aborted_bb84_response_exposes_reason_and_no_secret_material():
     response = client.post(
         "/api/simulations/bb84",
         json={"protocol": "bb84", "n_signals": 1, "seed": 3, "channels": []},
@@ -112,7 +125,7 @@ def test_aborted_bb84_response_exposes_reason_and_no_final_key():
     postprocessing = response.json()["postprocessing"]
     assert postprocessing["status"] == "aborted"
     assert postprocessing["abort_reason"]
-    assert postprocessing["final_key"] is None
+    assert "final_key" not in postprocessing
 
 
 def test_bb84_request_validation_rejects_invalid_signal_count():
@@ -295,3 +308,104 @@ def test_attack_and_noise_order_is_preserved_in_response_and_diagnostics():
         "channel",
     ]
     assert body["attack_diagnostics"][0]["stage_index"] == 1
+
+
+def test_session_api_records_real_qkd_trace_metrics_and_eve_diagnostics():
+    response = client.post(
+        "/api/sessions",
+        json={
+            "profile": "QKD-ASSUMED",
+            "n_signals": 512,
+            "seed": 823,
+            "channels": [{"type": "intercept_resend", "intercept_fraction": 0.6}],
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    record = body["record"]
+    assert record["profile"] == "QKD-ASSUMED"
+    assert record["result"]["authentication"]["qkd_classical"]["executed"] is False
+    assert record["metrics"]["qkd"] is not None
+    assert record["metrics"]["pqc"] is None
+    assert [event["sequence"] for event in record["trace"]["events"]] == list(
+        range(len(record["trace"]["events"]))
+    )
+    assert body["data_plane_available"] is False
+    assert body["attack_diagnostics"][0]["n_intercepted"] > 0
+    serialized = response.text.casefold()
+    for forbidden in ("k_session", "k_confirm", "shared_secret", "private_key"):
+        assert forbidden not in serialized
+
+
+def test_run_list_and_compare_use_exactly_two_distinct_public_records():
+    first = client.post(
+        "/api/sessions",
+        json={"profile": "QKD-ASSUMED", "n_signals": 512, "seed": 2026},
+    ).json()
+    second = client.post(
+        "/api/sessions",
+        json={"profile": "QKD-ASSUMED", "n_signals": 512, "seed": 2027},
+    ).json()
+    first_id = first["record"]["run_id"]
+    second_id = second["record"]["run_id"]
+
+    runs = client.get("/api/runs")
+    comparison = client.post("/api/compare", json={"run_ids": [first_id, second_id]})
+    duplicate = client.post("/api/compare", json={"run_ids": [first_id, first_id]})
+
+    assert runs.status_code == 200
+    assert {run["record"]["run_id"] for run in runs.json()["runs"]} >= {first_id, second_id}
+    assert comparison.status_code == 200
+    assert comparison.json()["compatibility"]["qkd_metrics"] is True
+    assert comparison.json()["compatibility"]["pqc_timing"] is False
+    assert duplicate.status_code == 422
+
+
+def test_established_pqc_run_protects_payload_without_exporting_session_key():
+    session = client.post("/api/sessions", json={"profile": "PQC-BASE"})
+
+    assert session.status_code == 200
+    body = session.json()
+    assert body["record"]["result"]["status"] == "established"
+    assert body["data_plane_available"] is True
+    run_id = body["record"]["run_id"]
+    protected = client.post(
+        f"/api/runs/{run_id}/protect",
+        json={"plaintext": "thesis demonstration", "aad": "QuantumSec/test"},
+    )
+
+    assert protected.status_code == 200
+    result = protected.json()
+    assert result["algorithm"] == "AES-256-GCM"
+    assert result["round_trip_verified"] is True
+    assert result["tamper_rejected"] is True
+    assert "thesis demonstration" not in protected.text
+
+
+@pytest.mark.parametrize(
+    ("profile", "uses_qkd", "data_plane"),
+    [
+        ("QKD-ASSUMED", True, False),
+        ("QKD-CLASSICAL-AUTH", True, False),
+        ("QKD-PQC-AUTH", True, False),
+        ("PQC-BASE", False, True),
+        ("PQC-DIVERSE", False, True),
+        ("HYBRID", True, True),
+        ("HYBRID-DIVERSE", True, True),
+    ],
+)
+def test_session_api_executes_every_current_public_profile(profile, uses_qkd, data_plane):
+    payload = {"profile": profile}
+    if uses_qkd:
+        payload.update({"n_signals": 512, "seed": 2026})
+    if profile.startswith("HYBRID"):
+        payload["qkd_authentication_profile"] = "QKD-ASSUMED"
+
+    response = client.post("/api/sessions", json=payload)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["record"]["profile"] == profile
+    assert body["record"]["result"]["status"] == "established"
+    assert body["data_plane_available"] is data_plane

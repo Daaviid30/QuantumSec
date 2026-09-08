@@ -5,9 +5,6 @@ from time import perf_counter
 from typing import Literal
 from uuid import uuid4
 
-import numpy as np
-import numpy.typing as npt
-
 from core.rng import BaseRNG, SeededRNG
 from qkd.channel import (
     InterceptResendAttack,
@@ -73,21 +70,12 @@ def _channel_summary(configuration: ChannelConfiguration) -> ChannelSummary:
     )
 
 
-def _final_key_string(session_key: npt.NDArray[np.uint8] | None) -> str | None:
-    """Serialize a completed simulator key as a binary string for inspection."""
-
-    if session_key is None:
-        return None
-    return "".join(str(int(bit)) for bit in session_key)
-
-
 def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
     """Execute BB84 with the engine's seeded RNG and adapt its immutable result."""
 
     protocol_rng = SeededRNG(request.seed)
     stage_specs = tuple(
-        QKDChannelStageSpec.from_public_dict(configuration.model_dump())
-        for configuration in request.channels
+        QKDChannelStageSpec.from_public_dict(configuration.model_dump()) for configuration in request.channels
     )
     pipeline = build_channel_pipeline(
         stage_specs,
@@ -188,7 +176,6 @@ def run_bb84(request: BB84SimulationRequest) -> BB84SimulationResponse:
                 else None
             ),
             final_secret_fraction=session.final_secret_fraction,
-            final_key=_final_key_string(session.alice_final_key),
         ),
         alice_basis_counts=BasisCounts(Z=alice_basis_counts["Z"], X=alice_basis_counts["X"]),
         bob_basis_counts=BasisCounts(Z=bob_basis_counts["Z"], X=bob_basis_counts["X"]),

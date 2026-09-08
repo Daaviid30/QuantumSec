@@ -82,10 +82,10 @@ def test_cascade_forces_multilevel_lookback_across_three_passes():
     assert [item.corrected_errors for item in result.pass_statistics] == [1, 1, 2, 0]
     assert result.residual_mismatch_count == 0
     assert sum(event.event_type == "permutation" for event in result.public_events) == result.passes
-    assert sum(
-        event.sender == "alice" and event.event_type != "permutation"
-        for event in result.public_events
-    ) == result.parity_disclosures
+    assert (
+        sum(event.sender == "alice" and event.event_type != "permutation" for event in result.public_events)
+        == result.parity_disclosures
+    )
     assert any(event.event_type == "binary_parity" for event in result.public_events)
     assert any(event.active_pass_index != event.pass_index for event in result.public_events)
 

@@ -130,7 +130,7 @@ isolated QKD simulator, or demonstration that QKD and PQC can merely be combined
 - real PQC operations through liboqs;
 - current upper-layer QKD–PQC session composition with canonical provenance and confirmation;
 - a reproducible experiment method; and
-- a planned three-screen web interface to configure, observe, and compare runs.
+- a current web laboratory for configuring, observing, retaining, and comparing runs.
 
 ## 10. Security Model
 

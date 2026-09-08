@@ -11,9 +11,7 @@ def _qkd_protocol_values(record) -> dict[str, object]:
     return {key: value for key, value in qkd.items() if key not in excluded}
 
 
-def test_same_qkd_config_and_seed_reproduce_protocol_outcome(
-    experiment_runner, e3_config
-) -> None:
+def test_same_qkd_config_and_seed_reproduce_protocol_outcome(experiment_runner, e3_config) -> None:
     first = experiment_runner.run(e3_config)
     second = experiment_runner.run(e3_config)
     assert _qkd_protocol_values(first) == _qkd_protocol_values(second)

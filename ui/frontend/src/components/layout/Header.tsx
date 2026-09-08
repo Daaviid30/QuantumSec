@@ -1,32 +1,32 @@
-import { Activity, CircleHelp } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 
+import { viewTitles, type AppView } from '../../app/routes'
 import type { BackendStatus } from '../../hooks/useCapabilities'
 
 interface HeaderProps {
+  view: AppView
   status: BackendStatus
   version?: string
 }
 
-export function Header({ status, version }: HeaderProps) {
-  const statusLabel = status === 'online' ? 'Engine online' : status === 'offline' ? 'Offline' : 'Connecting'
+export function Header({ view, status, version }: HeaderProps) {
+  const heading = viewTitles[view]
+  const label = status === 'online' ? 'Backend ready' : status === 'offline' ? 'Backend offline' : 'Checking backend'
 
   return (
     <header className="app-header">
       <div>
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-400/80">
-          <Activity size={13} aria-hidden="true" /> Quantum security laboratory
-        </div>
-        <h1 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-white">QuantumSec</h1>
+        <p className="page-eyebrow">{heading.eyebrow}</p>
+        <h1>{heading.title}</h1>
       </div>
-
-      <div className="flex items-center gap-2.5">
-        <a className="header-icon-button" href="/docs" target="_blank" rel="noreferrer" aria-label="API docs">
-          <CircleHelp size={16} />
+      <div className="header-actions">
+        <a href="/docs" target="_blank" rel="noreferrer" className="icon-link" aria-label="Open API documentation">
+          <BookOpen size={16} aria-hidden="true" />
         </a>
-        <div className={`backend-status backend-status--${status}`}>
+        <div className={`backend-status backend-status--${status}`} role="status">
           <span className="backend-status__dot" />
-          <span>{statusLabel}</span>
-          {version && <span className="text-slate-600">v{version}</span>}
+          <span>{label}</span>
+          {version ? <code>v{version}</code> : null}
         </div>
       </div>
     </header>

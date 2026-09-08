@@ -102,9 +102,7 @@ class QKDChannelStageSpec:
             px=_optional_number(data.get("px"), "px"),
             py=_optional_number(data.get("py"), "py"),
             pz=_optional_number(data.get("pz"), "pz"),
-            intercept_fraction=_optional_number(
-                data.get("intercept_fraction"), "intercept_fraction"
-            ),
+            intercept_fraction=_optional_number(data.get("intercept_fraction"), "intercept_fraction"),
         )
 
 

@@ -2,12 +2,14 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+from orchestration import SessionProfile, session_capabilities
 from ui.backend.schemas import (
     AdversaryCapability,
     CapabilitiesResponse,
     ChannelCapability,
     FeatureCapability,
     ParameterCapability,
+    ProfileCapability,
     ProtocolCapability,
 )
 
@@ -49,6 +51,7 @@ def get_capabilities() -> CapabilitiesResponse:
 
     return CapabilitiesResponse(
         version=project_version(),
+        profiles=[_profile_capability(definition.profile) for definition in session_capabilities()],
         protocols=[
             ProtocolCapability(
                 id="bb84",
@@ -215,18 +218,48 @@ def get_capabilities() -> CapabilitiesResponse:
             ),
             FeatureCapability(
                 id="pqc_authentication",
-                name="PQC session integration",
-                implemented=False,
+                name="PQC session establishment",
+                implemented=True,
                 description=(
-                    "The standalone PQC handshake exists, but it has no Web API and is not connected "
-                    "to QKD session orchestration."
+                    "Mutually authenticated ML-KEM/HQC profile execution, HKDF-SHA-384, and "
+                    "Finished confirmation are exposed through the common session API."
                 ),
             ),
             FeatureCapability(
                 id="experiments",
-                name="Experiment orchestration",
-                implemented=False,
-                description="Sweeps and Monte Carlo orchestration are planned.",
+                name="Reproducible run records",
+                implemented=True,
+                description=(
+                    "Versioned configurations, environment provenance, ordered traces, categorized "
+                    "metrics, and secret-safe records are current."
+                ),
+            ),
+            FeatureCapability(
+                id="qkd_authentication",
+                name="Executed QKD authentication",
+                implemented=True,
+                description=(
+                    "Assumed, one-time Wegman-Carter-style, and ML-DSA-65 classical-channel "
+                    "authentication policies are explicit and executable."
+                ),
+            ),
+            FeatureCapability(
+                id="hybrid_sessions",
+                name="Hybrid QKD–PQC sessions",
+                implemented=True,
+                description=(
+                    "Independent BB84 and PQC contributions are composed above both domains with "
+                    "canonical ordering, provenance, HKDF, and Finished confirmation."
+                ),
+            ),
+            FeatureCapability(
+                id="data_plane",
+                name="AES-256-GCM data plane",
+                implemented=True,
+                description=(
+                    "Established 256-bit session keys can be consumed by a backend-only protected "
+                    "session with nonce allocation, AAD binding, and tamper rejection."
+                ),
             ),
             FeatureCapability(
                 id="qkdn",
@@ -239,5 +272,59 @@ def get_capabilities() -> CapabilitiesResponse:
             "max_signals": MAX_SIGNALS,
             "max_channels": MAX_CHANNELS,
             "inspector_records": INSPECTOR_LIMIT,
+        },
+    )
+
+
+def _profile_capability(profile: SessionProfile) -> ProfileCapability:
+    definition = next(item for item in session_capabilities() if item.profile is profile)
+    descriptions = {
+        SessionProfile.QKD_ASSUMED: (
+            "BB84 baseline with an authenticated classical channel stated as an external assumption."
+        ),
+        SessionProfile.QKD_CLASSICAL_AUTH: (
+            "BB84 with executed one-time universal-hash authentication from provisioned PSK material."
+        ),
+        SessionProfile.QKD_PQC_AUTH: (
+            "BB84 with executed ML-DSA-65 authentication over the canonical public transcript."
+        ),
+        SessionProfile.PQC_BASE: (
+            "Mutually authenticated ML-KEM-768 session establishment and key confirmation."
+        ),
+        SessionProfile.PQC_DIVERSE: (
+            "PQC session establishment diversified with independent ML-KEM-768 and HQC-3 inputs."
+        ),
+        SessionProfile.HYBRID: (
+            "Upper-layer composition of authenticated BB84 material and ML-KEM-768 material."
+        ),
+        SessionProfile.HYBRID_DIVERSE: (
+            "Upper-layer composition of BB84, ML-KEM-768, and HQC-3 material with explicit provenance."
+        ),
+    }
+    if definition.hybrid:
+        family = "hybrid"
+    elif definition.qkd_profile is not None:
+        family = "qkd"
+    else:
+        family = "pqc"
+    return ProfileCapability(
+        id=profile.value,
+        name=profile.value,
+        family=family,
+        implemented=definition.supported,
+        status=definition.status.value,
+        description=descriptions[profile],
+        establishment=list(definition.establishment_algorithms),
+        authentication=list(definition.authentication_policy),
+        algorithms=list(definition.algorithms),
+        hybrid=definition.hybrid,
+        diversified=definition.diversified,
+        supports_qkd=definition.qkd_profile is not None or definition.hybrid,
+        supports_data_plane=profile
+        in {
+            SessionProfile.PQC_BASE,
+            SessionProfile.PQC_DIVERSE,
+            SessionProfile.HYBRID,
+            SessionProfile.HYBRID_DIVERSE,
         },
     )
