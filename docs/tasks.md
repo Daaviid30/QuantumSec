@@ -129,6 +129,8 @@ Exit condition: D1 demonstrates the establishment/data-plane boundary and all ta
   wrapper, CPU, OS, backend versions, ordered condition, trace, metrics, and outcome.
 - [x] Export versioned JSON and analysis-ready CSV without secrets.
 - [x] Support randomized condition order and discarded warm-up for PQC timing.
+- [x] Preserve batch UUID, shuffle/order seed, warm-up count, execution index, and Git dirty state.
+- [x] Scale fresh Wegman–Carter material conservatively for the configured QKD/Cascade workload.
 - [x] Report median/IQR and justified distribution summaries.
 - [x] Report justified Wilson binomial intervals for QBER/proportions.
 - [x] Preserve available raw/canonical categories and record public JSON artifact size without

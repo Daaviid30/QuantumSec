@@ -30,6 +30,7 @@ class ExperimentEnvironment:
     machine_architecture: str
     cpu_identifier: str | None
     git_commit_sha: str | None
+    git_worktree_dirty: bool | None
 
     @classmethod
     def capture(cls) -> ExperimentEnvironment:
@@ -41,9 +42,10 @@ class ExperimentEnvironment:
             versions = oqs_runtime_versions()
             liboqs_version = versions.liboqs
             liboqs_python_version = versions.liboqs_python
-        except (ImportError, OSError, RuntimeError, PQCError):
+        except ImportError, OSError, RuntimeError, PQCError:
             pass
         cpu = platform.processor().strip() or os.environ.get("PROCESSOR_IDENTIFIER", "").strip()
+        git_commit_sha, git_worktree_dirty = _git_state()
         return cls(
             python_version=platform.python_version(),
             python_implementation=platform.python_implementation(),
@@ -57,7 +59,8 @@ class ExperimentEnvironment:
             os_version=platform.version(),
             machine_architecture=platform.machine(),
             cpu_identifier=cpu or None,
-            git_commit_sha=_git_commit(),
+            git_commit_sha=git_commit_sha,
+            git_worktree_dirty=git_worktree_dirty,
         )
 
     def to_public_dict(self) -> dict[str, object]:
@@ -75,6 +78,7 @@ class ExperimentEnvironment:
             "machine_architecture": self.machine_architecture,
             "cpu_identifier": self.cpu_identifier,
             "git_commit_sha": self.git_commit_sha,
+            "git_worktree_dirty": self.git_worktree_dirty,
         }
 
 
@@ -92,16 +96,16 @@ def _quantumsec_version() -> str | None:
     pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
     try:
         project = tomllib.loads(pyproject.read_text(encoding="utf-8")).get("project", {})
-    except (OSError, tomllib.TOMLDecodeError):
+    except OSError, tomllib.TOMLDecodeError:
         return None
     version = project.get("version") if isinstance(project, dict) else None
     return version if isinstance(version, str) else None
 
 
-def _git_commit() -> str | None:
+def _git_state() -> tuple[str | None, bool | None]:
     repository = Path(__file__).resolve().parents[1]
     try:
-        completed = subprocess.run(
+        commit = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=repository,
             check=False,
@@ -109,7 +113,17 @@ def _git_commit() -> str | None:
             text=True,
             timeout=2,
         )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    sha = completed.stdout.strip()
-    return sha if completed.returncode == 0 and len(sha) == 40 else None
+        status = subprocess.run(
+            ["git", "status", "--porcelain=v1", "--untracked-files=normal"],
+            cwd=repository,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+    except OSError, subprocess.SubprocessError:
+        return None, None
+    sha = commit.stdout.strip()
+    clean_sha = sha if commit.returncode == 0 and len(sha) == 40 else None
+    dirty = bool(status.stdout.strip()) if status.returncode == 0 else None
+    return clean_sha, dirty

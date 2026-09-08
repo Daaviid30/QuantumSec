@@ -25,7 +25,9 @@ ExperimentRecord (copied public result + trace + categorized metrics)
 normalized `SessionConfig`, the applicable simulation `seed`, ordered `qkd_stages`, and at most 16
 short public tags. Unknown fields are rejected. QKD and hybrid profiles require a seed; PQC-only
 profiles reject QKD stages and use `seed: null` because liboqs retains real cryptographic
-randomness. JSON loaders also reject duplicate object keys.
+randomness. JSON loaders also reject duplicate object keys. The engine rejects obvious label/profile
+contradictions: E2-E4 require QKD, E3 additionally requires an `intercept_resend` stage, and
+E1/E5/D1 require a PQC component.
 
 The Pydantic-free `QKDChannelStageSpec` supports, in exact listed order, `identity`,
 `depolarizing(p)`, `bit_flip(p)`, `phase_flip(p)`, `amplitude_damping(gamma)`,
@@ -40,7 +42,9 @@ stage index.
 `SessionExecutionContext`. PQC parties, ML-DSA identities, and peer trust are provisioned lazily and
 reused by a factory. This happens before the session stopwatches. A QKD ML-DSA run reuses those
 identities but gets a fresh anti-replay registry. A Wegman-Carter run receives fresh pre-shared
-authentication material for each run; only `secret_bits_consumed` is recorded.
+authentication material for each run. The factory uses a conservative capacity scaled by signal
+count and Cascade passes, while storing PSK bytes in packed form; the public provisioning metadata
+records only bytes provisioned per direction and `secret_bits_consumed`, never the material.
 
 The generic runner never exports an established key. It copies `SessionResult.to_public_dict()`,
 separates its result, trace, and metrics sections, freezes those copies, and closes the live
@@ -55,17 +59,18 @@ condition/replicate, optional execution-order index, and an environment snapshot
 - Python version and implementation;
 - NumPy, liboqs-python, liboqs, cryptography, and QuantumSec versions when available;
 - OS name/release/version, machine architecture, and CPU identifier when available; and
-- best-effort Git commit SHA (nullable for source archives).
+- best-effort Git commit SHA and worktree-dirty state (nullable for source archives).
 
 `ExperimentRecord.to_public_dict()` has stable top-level fields: `version`, `run_id`,
-`experiment_kind`, `condition_id`, `replicate_index`, `execution_order_index`, `timestamp_utc`,
-`seed`, `profile`, `environment`, `config`, `provisioning`, `result`, `trace`, `metrics`, and
+`experiment_kind`, `condition_id`, `replicate_index`, `batch`, `execution_order_index`,
+`timestamp_utc`, `seed`, `profile`, `environment`, `config`, `provisioning`, `result`, `trace`, `metrics`, and
 `artifact`. `artifact.experiment_record_json_bytes` is the standalone pretty-printed public JSON
 object size, excluding an export file's final newline.
 
 `result` includes only public session ID, profile, status/abort reason, key type/bit count,
 provenance, authentication outcome, and public context. It has no key value. `trace` and `metrics`
-are copied directly from their existing public serializers.
+are copied from their existing public serializers and checked against their stable root schemas.
+Non-finite floats and explicitly secret-bearing field names are rejected as a second export barrier.
 
 ## Metrics and exports
 
@@ -85,8 +90,10 @@ relabeled as primitive timings.
 ## Batch and statistics
 
 `run_batch` is sequential. `shuffle=True` requires a separate non-negative `order_seed`; it never
-changes a config's BB84 seed. Each retained record receives `execution_order_index`. Explicit
-`warmup_runs` execute before measurements and are discarded. No QKD warm-up is automatic.
+changes a config's BB84 seed. Every retained record shares versioned `batch` provenance containing
+a UUID4 `batch_run_id`, `shuffle`, `order_seed`, and `warmup_runs`, and receives its own
+`execution_order_index`. Explicit warm-ups execute before measurements and are discarded. No QKD
+warm-up is automatic.
 
 `median_iqr` returns `n`, median, quartiles, IQR, minimum, and maximum using NumPy's linear
 percentile convention. `wilson_interval` returns a two-sided Wilson score interval (not exact
@@ -110,5 +117,5 @@ Generated `experiments/output/` and `results/` trees are ignored. Selected thesi
 archived later by an explicit decision. The V1 engine is ready to produce E1-E5 establishment
 records and includes the D1 label/config foundation. As specified by the lifecycle boundary, a
 future specialized D1 runner must transfer `K_SESSION` into the existing data plane before close;
-the generic runner deliberately never does so. V1 does not execute campaigns or provide plotting,
+the generic runner rejects D1 explicitly and never exports its key. V1 does not execute campaigns or provide plotting,
 hypothesis testing, dashboards, workers, or a database.

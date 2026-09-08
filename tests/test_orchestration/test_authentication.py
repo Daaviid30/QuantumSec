@@ -1,5 +1,6 @@
 from dataclasses import replace
 
+import numpy as np
 import pytest
 
 from orchestration.authentication import (
@@ -232,6 +233,19 @@ def test_pre_shared_material_fails_closed_when_exhausted() -> None:
 
     with pytest.raises(AuthenticationMaterialExhaustedError, match="Insufficient"):
         authenticator.generate_evidence(_frame())
+
+
+def test_pre_shared_material_consumes_packed_bits_across_byte_boundaries() -> None:
+    secret = bytes((0b10101010, 0b01010101, 0b11110000))
+    material = PreSharedAuthenticationMaterial(secret)
+    expected = np.unpackbits(np.frombuffer(secret, dtype=np.uint8), bitorder="big")
+
+    first = material.consume(5, usage_id=b"first")
+    second = material.consume(11, usage_id=b"second")
+
+    assert np.array_equal(first, expected[:5])
+    assert np.array_equal(second, expected[5:16])
+    assert material.remaining_bits == 8
 
 
 def test_psk_representation_never_contains_secret() -> None:

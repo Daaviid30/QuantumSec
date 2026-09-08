@@ -231,7 +231,8 @@ POST /api/simulations/bb84
 QKD receives an injected `BaseRNG`; repeatable runs use `SeededRNG(seed=...)`. PQC primitives use
 liboqs and operating-system cryptographic randomness and are not forced to be deterministic.
 Experiment records preserve the environment, versions, config, run ID, applicable seed, ordered
-conditions, trace, metrics, and outcome without serializing secrets. Equal QKD config/seed means an
+conditions, versioned batch plan, Git dirty state, trace, metrics, and outcome without serializing
+secrets. Equal QKD config/seed means an
 equal protocol outcome (not run ID, timestamp, or timing); equal PQC config means an equal method,
 profile, algorithms, and metric schema, not equal random artifacts or timings.
 

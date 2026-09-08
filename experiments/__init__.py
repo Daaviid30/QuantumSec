@@ -12,7 +12,12 @@ from experiments.export import (
     load_config_json,
     load_configs_json,
 )
-from experiments.record import EXPERIMENT_RECORD_VERSION, ExperimentRecord
+from experiments.record import (
+    BATCH_PROVENANCE_VERSION,
+    EXPERIMENT_RECORD_VERSION,
+    BatchProvenance,
+    ExperimentRecord,
+)
 from experiments.runner import ExperimentRunner, run_batch
 from experiments.runtime import ExperimentRuntimeFactory, RuntimeProvisioning
 from experiments.statistics import TimingSummary, WilsonInterval, median_iqr, wilson_interval
@@ -20,6 +25,8 @@ from experiments.statistics import TimingSummary, WilsonInterval, median_iqr, wi
 __all__ = [
     "EXPERIMENT_CONFIG_VERSION",
     "EXPERIMENT_RECORD_VERSION",
+    "BATCH_PROVENANCE_VERSION",
+    "BatchProvenance",
     "ExperimentConfig",
     "ExperimentEnvironment",
     "ExperimentKind",

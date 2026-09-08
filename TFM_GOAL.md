@@ -206,6 +206,8 @@ Every experiment follows `CONFIG -> RUN -> RECORD -> EXPORT -> ANALYZE` and reco
 normalized configuration, applicable seed, Python and NumPy versions, liboqs and wrapper versions,
 CPU, OS, profile, backend metadata, ordered condition, trace, metrics, and outcome. Secret values,
 private keys, shared secrets, `K_SESSION`, and `K_CONFIRM` are never exported as metrics.
+Batch records also retain a batch UUID, shuffle policy, independent order seed, discarded warm-up
+count, and execution index. Source provenance records both Git commit and dirty-worktree state.
 
 The V1 implementation of this flow is **CURRENT** in `experiments/`; its concrete schemas, runtime
 provisioning boundary, CLI, and export behavior are documented in

@@ -5,10 +5,22 @@ from pathlib import Path
 
 import pytest
 
+from core.rng import SeededRNG
 from experiments import ExperimentConfig, ExperimentKind
 from experiments.export import config_from_json, load_config_json
 from orchestration import SessionConfig, SessionProfile
-from qkd.channel import QKDChannelStageSpec, QKDChannelStageType
+from qkd.channel import (
+    AmplitudeDampingChannel,
+    BitFlipChannel,
+    DepolarizingChannel,
+    IdentityChannel,
+    InterceptResendAttack,
+    PauliChannel,
+    PhaseFlipChannel,
+    QKDChannelStageSpec,
+    QKDChannelStageType,
+    build_channel_stage,
+)
 
 
 def test_experiment_kind_has_the_six_v1_labels() -> None:
@@ -51,6 +63,50 @@ def test_config_rejects_obvious_ambiguities(qkd_config) -> None:
         QKDChannelStageSpec(QKDChannelStageType.IDENTITY, p=0.1)
     with pytest.raises(ValueError, match="Pauli"):
         QKDChannelStageSpec(QKDChannelStageType.PAULI, px=0.5, py=0.5, pz=0.1)
+
+
+def test_experiment_kind_rejects_obvious_profile_and_stage_mismatches() -> None:
+    with pytest.raises(ValueError, match="E3 experiments require a QKD profile"):
+        ExperimentConfig(
+            ExperimentKind.E3_INTERCEPT_RESEND,
+            "mislabeled-pqc",
+            0,
+            SessionConfig(SessionProfile.PQC_BASE),
+        )
+    with pytest.raises(ValueError, match="intercept_resend"):
+        ExperimentConfig(
+            ExperimentKind.E3_INTERCEPT_RESEND,
+            "missing-eve",
+            0,
+            SessionConfig(SessionProfile.QKD_ASSUMED, qkd_signal_count=64),
+            seed=8,
+        )
+    with pytest.raises(ValueError, match="E1 experiments require a PQC component"):
+        ExperimentConfig(
+            ExperimentKind.E1_PQC_COST,
+            "mislabeled-qkd",
+            0,
+            SessionConfig(SessionProfile.QKD_ASSUMED, qkd_signal_count=64),
+            seed=9,
+        )
+
+
+@pytest.mark.parametrize(
+    ("public", "expected_type"),
+    [
+        ({"type": "identity"}, IdentityChannel),
+        ({"type": "depolarizing", "p": 0.1}, DepolarizingChannel),
+        ({"type": "bit_flip", "p": 0.1}, BitFlipChannel),
+        ({"type": "phase_flip", "p": 0.1}, PhaseFlipChannel),
+        ({"type": "amplitude_damping", "gamma": 0.1}, AmplitudeDampingChannel),
+        ({"type": "pauli", "px": 0.1, "py": 0.2, "pz": 0.3}, PauliChannel),
+        ({"type": "intercept_resend", "intercept_fraction": 0.5}, InterceptResendAttack),
+    ],
+)
+def test_every_public_qkd_stage_builds_the_expected_channel(public, expected_type) -> None:
+    spec = QKDChannelStageSpec.from_public_dict(public)
+    assert spec.to_public_dict() == public
+    assert isinstance(build_channel_stage(spec, rng=SeededRNG(91)), expected_type)
 
 
 def test_json_loader_rejects_duplicate_and_unknown_fields(qkd_config) -> None:

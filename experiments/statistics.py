@@ -81,11 +81,7 @@ def wilson_interval(
     z_squared = z * z
     denominator = 1.0 + z_squared / trials
     center = (estimate + z_squared / (2.0 * trials)) / denominator
-    radius = (
-        z
-        * math.sqrt(estimate * (1.0 - estimate) / trials + z_squared / (4.0 * trials**2))
-        / denominator
-    )
+    radius = z * math.sqrt(estimate * (1.0 - estimate) / trials + z_squared / (4.0 * trials**2)) / denominator
     return WilsonInterval(
         successes=successes,
         trials=trials,

@@ -11,7 +11,7 @@ from typing import Final
 from orchestration.config import SESSION_CONFIG_VERSION, SessionConfig
 from orchestration.profiles import QKDProfile, SessionProfile, session_profile_definition
 from pqc.profiles import PQCProfile
-from qkd.channel import QKDChannelStageSpec
+from qkd.channel import QKDChannelStageSpec, QKDChannelStageType
 from qkd.postprocessing import CascadeConfig
 from qkd.protocols import BB84PostprocessingConfig
 
@@ -48,12 +48,8 @@ class ExperimentConfig:
             raise ValueError(f"version must be {EXPERIMENT_CONFIG_VERSION}.")
         if not isinstance(self.experiment_kind, ExperimentKind):
             raise TypeError("experiment_kind must be an ExperimentKind.")
-        if not isinstance(self.condition_id, str) or not _CONDITION_PATTERN.fullmatch(
-            self.condition_id
-        ):
-            raise ValueError(
-                "condition_id must contain 1-128 ASCII letters, digits, '.', '_', or '-'."
-            )
+        if not isinstance(self.condition_id, str) or not _CONDITION_PATTERN.fullmatch(self.condition_id):
+            raise ValueError("condition_id must contain 1-128 ASCII letters, digits, '.', '_', or '-'.")
         if (
             isinstance(self.replicate_index, bool)
             or not isinstance(self.replicate_index, int)
@@ -83,6 +79,32 @@ class ExperimentConfig:
         if not uses_qkd and stages:
             raise ValueError("PQC-only experiments cannot configure QKD stages.")
         object.__setattr__(self, "qkd_stages", stages)
+
+        uses_pqc = definition.internal_pqc_profile is not None
+        if (
+            self.experiment_kind
+            in {
+                ExperimentKind.E2_BB84_VALIDATION,
+                ExperimentKind.E3_INTERCEPT_RESEND,
+                ExperimentKind.E4_QKD_AUTHENTICATION,
+            }
+            and not uses_qkd
+        ):
+            raise ValueError(f"{self.experiment_kind.value} experiments require a QKD profile.")
+        if self.experiment_kind is ExperimentKind.E3_INTERCEPT_RESEND and not any(
+            stage.type is QKDChannelStageType.INTERCEPT_RESEND for stage in stages
+        ):
+            raise ValueError("E3 experiments require an intercept_resend QKD stage.")
+        if (
+            self.experiment_kind
+            in {
+                ExperimentKind.E1_PQC_COST,
+                ExperimentKind.E5_HYBRID_OVERHEAD,
+                ExperimentKind.D1_PROTECTED_SESSION,
+            }
+            and not uses_pqc
+        ):
+            raise ValueError(f"{self.experiment_kind.value} experiments require a PQC component.")
 
         tags = tuple(self.tags)
         if len(tags) > 16 or len(set(tags)) != len(tags):
@@ -147,9 +169,7 @@ class ExperimentConfig:
             for index, stage in enumerate(raw_stages)
         )
         raw_tags = data.get("tags", ())
-        if not isinstance(raw_tags, (list, tuple)) or not all(
-            isinstance(tag, str) for tag in raw_tags
-        ):
+        if not isinstance(raw_tags, (list, tuple)) or not all(isinstance(tag, str) for tag in raw_tags):
             raise ValueError("tags must be an array of strings.")
         seed_value = data.get("seed")
         seed = None if seed_value is None else _integer(seed_value, "seed")
@@ -227,9 +247,7 @@ def _session_from_public_dict(data: Mapping[str, object]) -> SessionConfig:
         qkd_authentication_profile=(QKDProfile(auth_value) if auth_value is not None else None),
         qkd_signal_count=_optional_integer(data.get("qkd_signal_count"), "qkd_signal_count"),
         qkd_postprocessing=(
-            _postprocessing_from_public_dict(postprocessing_data)
-            if postprocessing_data is not None
-            else None
+            _postprocessing_from_public_dict(postprocessing_data) if postprocessing_data is not None else None
         ),
         internal_pqc_profile=(PQCProfile(internal_value) if internal_value is not None else None),
     )
@@ -272,8 +290,6 @@ def _postprocessing_from_public_dict(data: Mapping[str, object]) -> BB84Postproc
             data.get("phase_error_abort_threshold"), "phase_error_abort_threshold"
         ),
         cascade=cascade,
-        verification_tag_length=_integer(
-            data.get("verification_tag_length"), "verification_tag_length"
-        ),
+        verification_tag_length=_integer(data.get("verification_tag_length"), "verification_tag_length"),
         security_margin_bits=_integer(data.get("security_margin_bits"), "security_margin_bits"),
     )

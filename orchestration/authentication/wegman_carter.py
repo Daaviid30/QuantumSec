@@ -48,23 +48,21 @@ class AuthenticationMaterialReuseError(AuthenticationMaterialError):
 class PreSharedAuthenticationMaterial:
     """Consumable PSK bit stream whose contents are never exposed or serialized."""
 
-    __slots__ = ("_bits", "_consumed_bits", "_lock", "_usage_ids")
+    __slots__ = ("_secret", "_consumed_bits", "_lock", "_usage_ids")
 
     def __init__(self, secret: bytes) -> None:
         if not isinstance(secret, bytes):
             raise TypeError(f"secret must be bytes. Got {type(secret).__name__}.")
         if not secret:
             raise ValueError("Pre-shared authentication material must not be empty.")
-        bits = np.unpackbits(np.frombuffer(bytes(secret), dtype=np.uint8), bitorder="big")
-        bits.flags.writeable = False
-        self._bits: npt.NDArray[np.uint8] = bits
+        self._secret = bytes(secret)
         self._consumed_bits = 0
         self._usage_ids: set[bytes] = set()
         self._lock = Lock()
 
     @property
     def total_bits(self) -> int:
-        return int(self._bits.size)
+        return len(self._secret) * 8
 
     @property
     def consumed_bits(self) -> int:
@@ -95,14 +93,23 @@ class PreSharedAuthenticationMaterial:
                     "Insufficient fresh pre-shared authentication material: "
                     f"required={bit_count}, remaining={self.total_bits - self._consumed_bits} bits."
                 )
-            selected = np.array(self._bits[self._consumed_bits : end], dtype=np.uint8, copy=True)
+            byte_start = self._consumed_bits // 8
+            byte_end = (end + 7) // 8
+            packed = np.frombuffer(self._secret[byte_start:byte_end], dtype=np.uint8)
+            unpacked = np.unpackbits(packed, bitorder="big")
+            bit_offset = self._consumed_bits - byte_start * 8
+            selected = np.array(
+                unpacked[bit_offset : bit_offset + bit_count],
+                dtype=np.uint8,
+                copy=True,
+            )
             selected.flags.writeable = False
             self._consumed_bits = end
             self._usage_ids.add(clean_usage_id)
             return selected
 
     def _same_secret_as(self, other: PreSharedAuthenticationMaterial) -> bool:
-        return compare_digest(self._bits.tobytes(), other._bits.tobytes())
+        return compare_digest(self._secret, other._secret)
 
     def __repr__(self) -> str:
         return (

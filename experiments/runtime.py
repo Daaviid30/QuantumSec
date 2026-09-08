@@ -17,6 +17,8 @@ from pqc import MLDSAIdentity, PQCParty, TrustedIdentityStore
 from qkd.channel import build_channel_pipeline
 from qkd.protocols import BB84Protocol
 
+_WEGMAN_CARTER_BYTES_PER_SIGNAL_PER_PHASE = 128
+
 
 @dataclass(frozen=True, slots=True)
 class RuntimeProvisioning:
@@ -24,12 +26,29 @@ class RuntimeProvisioning:
 
     pqc_identities: str | None
     qkd_authentication_material: str | None
+    qkd_authentication_material_bytes_per_direction: int | None = None
     included_in_session_timings: bool = False
+
+    def __post_init__(self) -> None:
+        for name in ("pqc_identities", "qkd_authentication_material"):
+            value = getattr(self, name)
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                raise ValueError(f"{name} must be a non-empty string or None.")
+        capacity = self.qkd_authentication_material_bytes_per_direction
+        if capacity is not None and (
+            isinstance(capacity, bool) or not isinstance(capacity, int) or capacity <= 0
+        ):
+            raise ValueError("qkd_authentication_material_bytes_per_direction must be positive or None.")
+        if not isinstance(self.included_in_session_timings, bool):
+            raise TypeError("included_in_session_timings must be a bool.")
 
     def to_public_dict(self) -> dict[str, object]:
         return {
             "pqc_identities": self.pqc_identities,
             "qkd_authentication_material": self.qkd_authentication_material,
+            "qkd_authentication_material_bytes_per_direction": (
+                self.qkd_authentication_material_bytes_per_direction
+            ),
             "included_in_session_timings": self.included_in_session_timings,
         }
 
@@ -64,8 +83,7 @@ class ExperimentRuntimeFactory:
         self._minimum_psk_bytes = minimum_psk_bytes
         self._pqc_parties: tuple[PQCParty, PQCParty] | None = None
         self._qkd_mldsa_material: (
-            tuple[MLDSAIdentity, MLDSAIdentity, TrustedIdentityStore, TrustedIdentityStore]
-            | None
+            tuple[MLDSAIdentity, MLDSAIdentity, TrustedIdentityStore, TrustedIdentityStore] | None
         ) = None
 
     def build(self, config: ExperimentConfig) -> ExperimentRuntime:
@@ -76,21 +94,27 @@ class ExperimentRuntimeFactory:
         qkd_protocol = None
         qkd_authentication = None
         qkd_authentication_mode: str | None = None
+        qkd_authentication_material_bytes: int | None = None
         if config.seed is not None:
             pipeline = build_channel_pipeline(config.qkd_stages, root_seed=config.seed)
             qkd_protocol = BB84Protocol(pipeline, SeededRNG(config.seed))
             assert definition.qkd_authentication_profile is not None
-            auth_mode = qkd_profile_definition(
-                definition.qkd_authentication_profile
-            ).classical_authentication
+            auth_mode = qkd_profile_definition(definition.qkd_authentication_profile).classical_authentication
             if auth_mode is ClassicalAuthenticationMode.WEGMAN_CARTER:
                 signal_count = definition.qkd_signal_count or 0
-                material_bytes = max(self._minimum_psk_bytes, signal_count * 32)
+                postprocessing = definition.qkd_postprocessing
+                assert postprocessing is not None
+                phase_count = postprocessing.cascade.passes + 1
+                material_bytes = max(
+                    self._minimum_psk_bytes,
+                    signal_count * _WEGMAN_CARTER_BYTES_PER_SIGNAL_PER_PHASE * phase_count,
+                )
                 qkd_authentication = WegmanCarterAuthenticationContext.from_shared_secrets(
                     alice_to_bob_secret=token_bytes(material_bytes),
                     bob_to_alice_secret=token_bytes(material_bytes),
                 )
                 qkd_authentication_mode = "fresh pre-shared authentication material per run"
+                qkd_authentication_material_bytes = material_bytes
             elif auth_mode is ClassicalAuthenticationMode.ML_DSA_65:
                 qkd_authentication = self._new_qkd_mldsa_context()
                 qkd_authentication_mode = (
@@ -115,6 +139,7 @@ class ExperimentRuntimeFactory:
             provisioning=RuntimeProvisioning(
                 pqc_identities=pqc_identity_mode,
                 qkd_authentication_material=qkd_authentication_mode,
+                qkd_authentication_material_bytes_per_direction=(qkd_authentication_material_bytes),
             ),
         )
 

@@ -1,5 +1,7 @@
 from collections.abc import Mapping
 
+import pytest
+
 from experiments import ExperimentConfig, ExperimentKind, run_batch
 from orchestration import QKDProfile, SessionConfig, SessionProfile
 from qkd.channel import QKDChannelStageSpec, QKDChannelStageType
@@ -19,9 +21,7 @@ def _hybrid_config() -> ExperimentConfig:
     )
 
 
-def test_e3_record_exposes_protocol_estimates_without_secret_inspection(
-    experiment_runner, e3_config
-) -> None:
+def test_e3_record_exposes_protocol_estimates_without_secret_inspection(experiment_runner, e3_config) -> None:
     record = experiment_runner.run(e3_config)
     public = record.to_public_dict()
     qkd = record.metrics["qkd"]
@@ -103,7 +103,61 @@ def test_batch_shuffle_is_reproducible_and_records_execution_order() -> None:
     )
     first = run_batch(configs, shuffle=True, order_seed=77, warmup_runs=1)
     second = run_batch(configs, shuffle=True, order_seed=77)
-    assert tuple(record.condition_id for record in first) == tuple(
-        record.condition_id for record in second
-    )
+    assert tuple(record.condition_id for record in first) == tuple(record.condition_id for record in second)
     assert tuple(record.execution_order_index for record in first) == (0, 1, 2, 3)
+    assert all(record.batch is not None for record in first)
+    first_batch = first[0].batch
+    assert first_batch is not None
+    assert all(record.batch == first_batch for record in first)
+    assert first_batch.shuffle is True
+    assert first_batch.order_seed == 77
+    assert first_batch.warmup_runs == 1
+    assert second[0].batch is not None
+    assert second[0].batch.batch_run_id != first_batch.batch_run_id
+
+
+def test_generic_runner_rejects_d1_until_the_data_plane_runner_exists(
+    experiment_runner,
+) -> None:
+    config = ExperimentConfig(
+        ExperimentKind.D1_PROTECTED_SESSION,
+        "d1-not-yet-connected",
+        0,
+        SessionConfig(SessionProfile.PQC_BASE),
+    )
+    with pytest.raises(ValueError, match="specialized data-plane runner"):
+        experiment_runner.run(config)
+
+
+@pytest.mark.parametrize(
+    ("experiment_kind", "profile"),
+    (
+        (ExperimentKind.E4_QKD_AUTHENTICATION, SessionProfile.QKD_CLASSICAL_AUTH),
+        (ExperimentKind.E5_HYBRID_OVERHEAD, SessionProfile.HYBRID),
+    ),
+)
+def test_runtime_provisions_enough_wegman_carter_material_for_normal_load(
+    experiment_runner,
+    experiment_kind: ExperimentKind,
+    profile: SessionProfile,
+) -> None:
+    config = ExperimentConfig(
+        experiment_kind,
+        f"wc-ideal-4000-{experiment_kind.value.lower()}",
+        0,
+        SessionConfig(
+            profile,
+            qkd_authentication_profile=(
+                QKDProfile.QKD_CLASSICAL_AUTH if profile is SessionProfile.HYBRID else None
+            ),
+            qkd_signal_count=4_000,
+        ),
+        seed=2026,
+    )
+    record = experiment_runner.run(config)
+    assert record.result["status"] == "established"
+    capacity = record.provisioning.qkd_authentication_material_bytes_per_direction
+    authentication = record.metrics["qkd_authentication"]
+    assert capacity is not None
+    assert isinstance(authentication, Mapping)
+    assert authentication["secret_bits_consumed"] <= capacity * 8

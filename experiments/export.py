@@ -60,7 +60,7 @@ def dumps_json(
         if not all(isinstance(record, ExperimentRecord) for record in records):
             raise TypeError("JSON export accepts only ExperimentRecord values.")
         payload = [record.to_public_dict() for record in records]
-    return json.dumps(payload, ensure_ascii=False, indent=2)
+    return json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False)
 
 
 def export_json(
@@ -91,15 +91,9 @@ def dumps_csv(records: Iterable[ExperimentRecord]) -> str:
         row["config_json"] = _canonical_cell(public["config"])
         config = cast(Mapping[str, object], public["config"])
         row["qkd_stages_json"] = _canonical_cell(config["qkd_stages"])
-        row["result.provenance_json"] = _canonical_cell(
-            _lookup(public, "result.provenance")
-        )
-        row["result.authentication_json"] = _canonical_cell(
-            _lookup(public, "result.authentication")
-        )
-        row["result.public_context_json"] = _canonical_cell(
-            _lookup(public, "result.public_context")
-        )
+        row["result.provenance_json"] = _canonical_cell(_lookup(public, "result.provenance"))
+        row["result.authentication_json"] = _canonical_cell(_lookup(public, "result.authentication"))
+        row["result.public_context_json"] = _canonical_cell(_lookup(public, "result.public_context"))
         row["trace_json"] = _canonical_cell(public["trace"])
         writer.writerow(row)
     return buffer.getvalue()
@@ -153,7 +147,13 @@ def _csv_value(value: object) -> object:
 
 
 def _canonical_cell(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
 
 
 _BASE_COLUMNS = (
@@ -162,15 +162,18 @@ _BASE_COLUMNS = (
     "experiment_kind",
     "condition_id",
     "replicate_index",
+    "batch.version",
+    "batch.batch_run_id",
+    "batch.shuffle",
+    "batch.order_seed",
+    "batch.warmup_runs",
     "execution_order_index",
     "timestamp_utc",
     "seed",
     "profile",
     "artifact.experiment_record_json_bytes",
 )
-_ENVIRONMENT_COLUMNS = tuple(
-    f"environment.{field.name}" for field in fields(ExperimentEnvironment)
-)
+_ENVIRONMENT_COLUMNS = tuple(f"environment.{field.name}" for field in fields(ExperimentEnvironment))
 _CONFIG_COLUMNS = (
     "config.version",
     "config.experiment_kind",
@@ -190,6 +193,7 @@ _CONFIG_COLUMNS = (
 _PROVISIONING_COLUMNS = (
     "provisioning.pqc_identities",
     "provisioning.qkd_authentication_material",
+    "provisioning.qkd_authentication_material_bytes_per_direction",
     "provisioning.included_in_session_timings",
 )
 _RESULT_COLUMNS = (

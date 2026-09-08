@@ -416,7 +416,8 @@ requirements are centralized in
 [`../TFM_GOAL.md §12`](../TFM_GOAL.md#12-experimental-methodology).
 
 The V1 experiment layer is **CURRENT**. It records environment, versions, profile, normalized
-round-trippable config, applicable seed, randomized condition order, trace, public byte sizes,
+round-trippable config, applicable seed, versioned batch provenance, randomized condition order,
+Git dirty-worktree state, trace, public byte sizes,
 applicable timings, QKD protocol estimates/diagnostics, and outcome. It never serializes secret
 values and closes each generic `SessionResult` after copying public evidence. Its exact contracts,
 CLI, seed policy, batch behavior, and export schemas are documented in

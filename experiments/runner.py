@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import random
 from collections.abc import Iterable
+from uuid import uuid4
 
-from experiments.config import ExperimentConfig
+from experiments.config import ExperimentConfig, ExperimentKind
 from experiments.environment import ExperimentEnvironment
-from experiments.record import ExperimentRecord
+from experiments.record import BatchProvenance, ExperimentRecord
 from experiments.runtime import ExperimentRuntimeFactory
 from orchestration.runner import run_session
 
@@ -26,10 +27,16 @@ class ExperimentRunner:
         self,
         config: ExperimentConfig,
         *,
+        batch: BatchProvenance | None = None,
         execution_order_index: int | None = None,
     ) -> ExperimentRecord:
         if not isinstance(config, ExperimentConfig):
             raise TypeError("config must be an ExperimentConfig.")
+        if config.experiment_kind is ExperimentKind.D1_PROTECTED_SESSION:
+            raise ValueError(
+                "D1_PROTECTED_SESSION requires the specialized data-plane runner to transfer "
+                "K_SESSION before session closure."
+            )
         environment = ExperimentEnvironment.capture()
         runtime = self.runtime_factory.build(config)
         session_result = run_session(config.session_config, runtime.context)
@@ -39,6 +46,7 @@ class ExperimentRunner:
                 environment=environment,
                 provisioning=runtime.provisioning,
                 session_result=session_result,
+                batch=batch,
                 execution_order_index=execution_order_index,
             )
         finally:
@@ -80,7 +88,13 @@ def run_batch(
         random.Random(order_seed).shuffle(ordered)
     for index in range(warmup_runs):
         active_runner.run(ordered[index % len(ordered)])
+    batch = BatchProvenance(
+        batch_run_id=str(uuid4()),
+        shuffle=shuffle,
+        order_seed=order_seed,
+        warmup_runs=warmup_runs,
+    )
     return tuple(
-        active_runner.run(config, execution_order_index=index)
+        active_runner.run(config, batch=batch, execution_order_index=index)
         for index, config in enumerate(ordered)
     )

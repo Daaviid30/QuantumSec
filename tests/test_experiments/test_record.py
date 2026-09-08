@@ -1,5 +1,6 @@
 import json
 from collections.abc import Mapping
+from dataclasses import replace
 from datetime import datetime
 from uuid import UUID
 
@@ -28,3 +29,19 @@ def test_record_recursively_freezes_copied_session_structures(experiment_runner,
     assert isinstance(record.metrics, Mapping)
     with pytest.raises(TypeError):
         record.metrics["qkd"] = None  # type: ignore[index]
+
+
+def test_record_rejects_secret_fields_and_non_finite_public_values(
+    experiment_runner,
+    qkd_config,
+) -> None:
+    record = experiment_runner.run(qkd_config)
+    result = dict(record.result)
+    result["public_context"] = {"k_session": "forbidden"}
+    with pytest.raises(ValueError, match="Forbidden secret-bearing"):
+        replace(record, result=result)
+
+    metrics = dict(record.metrics)
+    metrics["orchestration_software_wall_time_ns"] = float("nan")
+    with pytest.raises(ValueError, match="non-finite"):
+        replace(record, metrics=metrics)
