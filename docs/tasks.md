@@ -161,17 +161,17 @@ The measurement-category and statistics rules are centralized in
 
 ### 10. Web Laboratory V1
 
-- [ ] **Builder:** supported profile selector; signal count, seed, channel/parameters, Eve fraction;
+- [X] **Builder:** supported profile selector; signal count, seed, channel/parameters, Eve fraction;
   profile-derived PQC components; contextual cards.
-- [ ] **Run:** real Alice/Bob/Eve trace, explicit authentication state, compatible metrics,
+- [X] **Run:** real Alice/Bob/Eve trace, explicit authentication state, compatible metrics,
   outcome, and protected-message strip.
-- [ ] Show `CLASSICAL AUTHENTICATION — ASSUMED / NOT EXECUTED` for `QKD-ASSUMED`.
+- [X] Show `CLASSICAL AUTHENTICATION — ASSUMED / NOT EXECUTED` for `QKD-ASSUMED`.
 - [ ] **Compare:** exactly two saved runs with configuration diff, components, assumptions,
   compatible metrics, bytes, outcome, and security notes.
-- [ ] Prevent direct temporal comparison between numerical BB84 and real PQC operations.
-- [ ] Add small, static/versioned, sourced component cards with a status-as-of date.
-- [ ] Remove the separate Quantum-Safe Explorer concept; do not build N-run web analytics.
-- [ ] Add backend, frontend, accessibility, loading/error, and unsupported-capability tests.
+- [X] Prevent direct temporal comparison between numerical BB84 and real PQC operations.
+- [X] Add small, static/versioned, sourced component cards with a status-as-of date.
+- [X] Remove the separate Quantum-Safe Explorer concept; do not build N-run web analytics.
+- [X] Add backend, frontend, accessibility, loading/error, and unsupported-capability tests.
 
 Exit condition: Builder, Run, and Compare render actual backend records without invented behavior.
 

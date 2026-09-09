@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { compareRuns } from '../api/client'
 import { useRuns } from '../hooks/useRuns'
+import { formatIdentifier } from '../lib/labels'
 import { formatBytes, formatDurationNs, formatPercent } from '../lib/profiles'
 import type { CompareResponse, SessionRunResponse } from '../types/api'
 
@@ -117,13 +118,13 @@ export function ComparePage({ refreshKey, initialIds }: ComparePageProps) {
         <div className="comparison-workspace">
           <section className="surface comparison-summary">
             <div className="comparison-head"><span>Field</span><strong>{left.profile}<small>{left.run_id.slice(0, 8)}</small></strong><i /><strong>{right.profile}<small>{right.run_id.slice(0, 8)}</small></strong></div>
-            <ComparisonRow label="Terminal outcome" left={left.result.status} right={right.result.status} />
+            <ComparisonRow label="Terminal outcome" left={formatIdentifier(left.result.status)} right={formatIdentifier(right.result.status)} />
             <ComparisonRow label="Establishment" left={left.result.provenance.map((item) => item.algorithm).join(' + ') || 'No accepted material'} right={right.result.provenance.map((item) => item.algorithm).join(' + ') || 'No accepted material'} />
             <ComparisonRow label="Authentication" left={authLabel(comparison.left)} right={authLabel(comparison.right)} />
             <ComparisonRow label="QKD signals" left={left.config.session.qkd_signal_count?.toLocaleString() ?? 'Not applicable'} right={right.config.session.qkd_signal_count?.toLocaleString() ?? 'Not applicable'} />
             <ComparisonRow label="Seed" left={left.seed?.toString() ?? 'OS / liboqs randomness'} right={right.seed?.toString() ?? 'OS / liboqs randomness'} />
-            <ComparisonRow label="Ordered QKD stages" left={left.config.qkd_stages.map((stage) => stage.type).join(' → ') || 'Ideal / not applicable'} right={right.config.qkd_stages.map((stage) => stage.type).join(' → ') || 'Ideal / not applicable'} />
-            <ComparisonRow label="Accepted key type" left={left.result.established_key.type ?? 'None'} right={right.result.established_key.type ?? 'None'} />
+            <ComparisonRow label="Ordered QKD stages" left={left.config.qkd_stages.map((stage) => formatIdentifier(stage.type)).join(' → ') || 'Ideal / not applicable'} right={right.config.qkd_stages.map((stage) => formatIdentifier(stage.type)).join(' → ') || 'Ideal / not applicable'} />
+            <ComparisonRow label="Accepted key type" left={left.result.established_key.type ? formatIdentifier(left.result.established_key.type) : 'None'} right={right.result.established_key.type ? formatIdentifier(right.result.established_key.type) : 'None'} />
           </section>
 
           <section className="surface compatibility-panel">

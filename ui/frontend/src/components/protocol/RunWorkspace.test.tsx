@@ -35,6 +35,7 @@ test('renders real Eve evidence, per-basis QBER, trace, and explicit assumed aut
   expect(screen.getByText('Estimated e_Z')).toBeInTheDocument()
   expect(screen.getAllByText('10.00%').length).toBeGreaterThan(0)
   expect(screen.getAllByText(/Authentication is externally assumed/i).length).toBeGreaterThan(0)
+  expect(screen.getByRole('cell', { name: 'QKD' })).toBeInTheDocument()
   expect(screen.queryByText(/[01]{40,}/)).not.toBeInTheDocument()
 })
 

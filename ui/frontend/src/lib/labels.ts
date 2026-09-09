@@ -37,6 +37,15 @@ const CANONICAL_TOKENS: Record<string, string> = {
   z: 'Z',
 }
 
+/** Full identifiers whose canonical spelling includes punctuation or a domain-specific name. */
+const CANONICAL_IDENTIFIERS: Record<string, string> = {
+  ml_dsa_65: 'ML-DSA-65',
+  ml_kem_768: 'ML-KEM-768',
+  hqc_3: 'HQC-3',
+  wegman_carter: 'Wegman–Carter',
+  intercept_resend: 'Intercept-resend',
+}
+
 function formatToken(token: string): string {
   if (!token) return token
   const canonical = CANONICAL_TOKENS[token.toLowerCase()]
@@ -52,6 +61,8 @@ function formatToken(token: string): string {
  * `finished_b`               -> `Finished B`
  */
 export function formatIdentifier(value: string): string {
+  const canonicalIdentifier = CANONICAL_IDENTIFIERS[value.trim().toLowerCase()]
+  if (canonicalIdentifier) return canonicalIdentifier
   const tokens = value.split(/[\s_]+/).filter(Boolean)
   if (tokens.length === 0) return value
   return tokens
@@ -69,4 +80,19 @@ export function formatIdentifier(value: string): string {
  */
 export function formatSource(value: string): string {
   return formatIdentifier(value)
+}
+
+/**
+ * Preserve ordinary backend prose while replacing embedded technical identifiers with their
+ * canonical public spelling. Capability descriptions can contain identifiers such as
+ * `ml_dsa_65`; title-casing the whole sentence would damage otherwise correct copy.
+ */
+export function formatTechnicalText(value: string): string {
+  return value.replace(
+    /\b(?:ml_dsa_65|ml_kem_768|hqc_3|wegman_carter|intercept_resend|bb84|qkd|pqc|qber|hkdf|hmac|aes|gcm)\b/gi,
+    (identifier) =>
+      CANONICAL_IDENTIFIERS[identifier.toLowerCase()]
+      ?? CANONICAL_TOKENS[identifier.toLowerCase()]
+      ?? identifier,
+  )
 }

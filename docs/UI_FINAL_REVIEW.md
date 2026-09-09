@@ -524,3 +524,34 @@ returns Swagger UI rather than the app shell.
    `orchestration/hybrid/runner.py` genuinely reports zero for the phases the hybrid layer owns.
    Left as the backend fact; re-labelling it would be the UI inventing an interpretation. Worth a
    sentence in the defense if a reviewer asks.
+
+---
+
+## 8. Follow-up verification
+
+Status: completed 2026-09-08 against the current worktree after the final-review implementation.
+
+The four product surfaces were rechecked with the Vite development server connected to the real
+FastAPI backend. Headless Chrome captures covered Overview, Laboratory and Runs at 1440, 1024 and
+640 px, including a real `QKD-PQC-AUTH` execution and the automatic transition to its terminal
+outcome. This closes the main visual-verification risk recorded above for those representative
+states; projector-specific gamma and physical-room viewing distance still require a human check on
+the target display.
+
+All P0, P1 and P2 findings remain present in the implementation. The browser pass exposed two small
+presentation gaps beyond the original checklist:
+
+- Capability, evidence and comparison panels could still print backend identifiers such as
+  `ml_dsa_65`, `intercept_resend`, `qkd`, `pqc` and `qkd_bitstring` outside the protocol trace. The
+  shared formatter now covers composition, authentication mechanisms, provenance sources and
+  comparison values, including canonical
+  `ML-DSA-65`, `Wegman–Carter`, `Intercept-resend`, `QKD` and `PQC` spellings.
+- Programmatic focus after a completed run used the browser's rectangular heading outline. It now
+  retains a visible focus cue as a restrained accent underline, with the danger colour used for
+  aborted and failed outcomes.
+
+The optional P3 observations remain deliberately unchanged: none produces a user-visible defect or
+justifies the additional dependency, semantic or abstraction churn in this final calibration pass.
+
+Follow-up quality gates: `806 passed` in Python, `13 passed` in the frontend, Ruff clean, Pyright
+clean, TypeScript clean, and the Vite production build completed successfully.

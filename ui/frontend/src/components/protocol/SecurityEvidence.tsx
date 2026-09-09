@@ -1,5 +1,6 @@
 import { Fingerprint, ShieldCheck } from 'lucide-react'
 
+import { formatIdentifier, formatSource } from '../../lib/labels'
 import type { AuthenticationOutcome, SecretProvenance } from '../../types/api'
 
 interface SecurityEvidenceProps {
@@ -17,7 +18,7 @@ function AuthenticationCard({ outcome }: { outcome: AuthenticationOutcome }) {
         <strong>{!outcome.executed ? 'ASSUMED — NOT EXECUTED' : outcome.verified ? 'EXECUTED — VERIFIED' : 'EXECUTED — FAILED'}</strong>
       </div>
       <dl>
-        <div><dt>Mechanism</dt><dd>{outcome.mechanism}</dd></div>
+        <div><dt>Mechanism</dt><dd>{formatIdentifier(outcome.mechanism)}</dd></div>
         <div><dt>Algorithm</dt><dd>{outcome.algorithm}</dd></div>
         <div><dt>Trust boundary</dt><dd>{outcome.trust_assumption}</dd></div>
       </dl>
@@ -46,7 +47,7 @@ export function SecurityEvidence({ qkd, pqc, provenance }: SecurityEvidenceProps
             {provenance.map((item) => (
               <tr key={`${item.position}-${item.source}`}>
                 <td><code>{String(item.position).padStart(2, '0')}</code></td>
-                <td>{item.source}</td>
+                <td>{formatSource(item.source)}</td>
                 <td>{item.protocol}</td>
                 <td>{item.algorithm}</td>
                 <td>{item.encoding}</td>

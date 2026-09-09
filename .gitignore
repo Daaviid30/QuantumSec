@@ -46,3 +46,9 @@ prompt.md
 # Generated experimental artifacts (selected TFM datasets may be archived explicitly)
 experiments/output/
 results/
+
+#docs
+docs/reviews/
+docs/UI_FINAL_REVIEW.md
+docs/UI_REDESIGN.md
+docs/THESIS_CAMPAIGN.md
