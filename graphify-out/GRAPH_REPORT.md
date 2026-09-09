@@ -1,7 +1,7 @@
-# Graph Report - QuantumSec  (2026-09-08)
+# Graph Report - QuantumSec  (2026-09-09)
 
 ## Corpus Check
-- 310 files · ~142,500 words
+- 310 files · ~142,499 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `81dac26f`
+- Built from commit: `cf5db7ff`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -724,7 +724,7 @@ Cohesion: 0.50
 Nodes (3): ArrayLike, ComplexArray, Apply amplitude damping to a single-qubit density matrix.
 
 ## Knowledge Gaps
-- **378 isolated node(s):** `quantumsec`, `name`, `private`, `version`, `type` (+373 more)
+- **378 isolated node(s):** `1. Thesis in One Sentence`, `2. Problem Statement`, `3. Research Question`, `4. Research Subquestions`, `5. Hypotheses` (+373 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1339 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -732,7 +732,7 @@ Nodes (3): ArrayLike, ComplexArray, Apply amplitude damping to a single-qubit de
 
 **Preferred sources** — corroborated by past sessions; start here.
 - `QuantumChannel` (4× useful, score=2.893288868) _(code changed — re-verify)_
-- `Basis` (4× useful, score=2.893288868) _(code changed — re-verify)_
+- `Basis` (4× useful, score=2.893288868)
 - `BaseRNG` (3× useful, score=2.16957619)
 - `BB84Protocol` (2× useful, score=1.447957891) _(code changed — re-verify)_
 - `SeededRNG` (2× useful, score=1.447745854)
@@ -740,12 +740,12 @@ Nodes (3): ArrayLike, ComplexArray, Apply amplitude damping to a single-qubit de
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SeededRNG` connect `SeededRNG` to `dm_from_ket`, `test_api.py`, `runtime.py`, `BaseRNG`, `SessionConfig`, `test_measures.py`, `QuantumChannel`, `reconcile_cascade`, `amplify_privacy`, `verify_reconciled_keys`, `adapters.py`, `BB84Protocol`, `estimate_qber_from_sample`, `test_data_plane.py`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
 - **Why does `PQCParty` connect `PQCParty` to `PQCProfile`, `PublicIdentity`, `TrustedIdentityStore`, `runtime.py`, `test_client_exchange.py`, `SessionConfig`, `test_party.py`, `.generate`, `orchestration/__init__.py`, `pqc/__init__.py`, `exchange.py`, `MLDSAIdentity`, `identity.py`, `test_key_schedule.py`, `test_key_confirmation.py`, `test_data_plane.py`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Why does `QuantumSec TFM Goal` connect `QuantumSec TFM Goal` to `10. Security Model`, `EXPERIMENTS.md`, `13. Experiments`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `Basis` connect `bb84.py` to `PQCProfile`, `dm_from_ket`, `BB84Result`, `BaseRNG`, `sift_keys`, `adapters.py`, `BB84Protocol`, `qkd/transcript.py`, `estimate_qber_from_sample`, `qber_by_basis`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
+- **Why does `SeededRNG` connect `SeededRNG` to `dm_from_ket`, `test_api.py`, `runtime.py`, `BaseRNG`, `SessionConfig`, `test_measures.py`, `QuantumChannel`, `reconcile_cascade`, `amplify_privacy`, `verify_reconciled_keys`, `adapters.py`, `BB84Protocol`, `estimate_qber_from_sample`, `test_data_plane.py`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
 - **Are the 18 inferred relationships involving `SeededRNG` (e.g. with `ExperimentRuntimeFactory` and `build_channel_pipeline()`) actually correct?**
   _`SeededRNG` has 18 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `PQCParty` (e.g. with `ClientKeyExchangeFactory` and `ClientKeyExchangeProcessor`) actually correct?**
