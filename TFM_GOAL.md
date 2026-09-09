@@ -56,8 +56,8 @@ Original Spanish formulation:
    operations dominate it on the documented reference platform?
 2. Does the BB84 simulator reproduce the analytical per-basis error predictions of each supported
    channel, and where is the current security estimator's domain of validity?
-3. Once the planned ideal intercept-resend model is implemented, how do interception fraction,
-   channel noise, and sampling affect QBER, final material, and abort probability?
+3. How do interception fraction, channel noise, and sampling affect QBER, final material, and
+   abort probability under the implemented ideal intercept-resend model?
 4. What overhead and security assumptions distinguish assumed, classical/ITS, and PQC
    authentication of the QKD classical channel?
 5. What marginal orchestration, byte, derivation, and confirmation overhead is introduced by the
@@ -168,7 +168,8 @@ Intercept-resend Eve is **CURRENT** as a seeded `ChannelPipeline` stage. Eve int
 without receiving Alice's or Bob's private choices. Under the ideal assumptions used by the
 experiment, the expected induced QBER is approximately `0.25 f`. This is one concrete experimental
 model for validating a central BB84 property, not a complete QKD adversary model. The E3 campaign
-runner and statistical result set remain planned.
+runner and its statistical result set are **CURRENT and EXECUTED** as part of campaign
+`thesis-v1.0.1`.
 
 ### PQC and hybrid boundary
 
