@@ -1,0 +1,17 @@
+[
+  {
+    "scenario": "ciphertext_bit_flip",
+    "rejected": true,
+    "exception": "InvalidTag"
+  },
+  {
+    "scenario": "tag_bit_flip",
+    "rejected": true,
+    "exception": "InvalidTag"
+  },
+  {
+    "scenario": "aad_change",
+    "rejected": true,
+    "exception": "InvalidTag"
+  }
+]

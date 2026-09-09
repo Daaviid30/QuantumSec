@@ -1,0 +1,2 @@
+version,timestamp_utc,profile,algorithm,key_bits,plaintext_bytes,ciphertext_bytes,nonce_bytes,tag_bytes,application_aad_bytes,round_trip_verified,tamper_matrix_json
+1,2026-09-08T08:18:58.142126+00:00,HYBRID-DIVERSE,AES-256-GCM,256,42,42,12,16,16,True,"[{""exception"": ""InvalidTag"", ""rejected"": true, ""scenario"": ""ciphertext_bit_flip""}, {""exception"": ""InvalidTag"", ""rejected"": true, ""scenario"": ""tag_bit_flip""}, {""exception"": ""InvalidTag"", ""rejected"": true, ""scenario"": ""aad_change""}]"

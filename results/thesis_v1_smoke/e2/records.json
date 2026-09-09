@@ -1,0 +1,5127 @@
+[
+  {
+    "version": 1,
+    "run_id": "90bfaa24-e09b-4237-bbed-edd50414d83c",
+    "experiment_kind": "E2",
+    "condition_id": "identity",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 0,
+    "timestamp_utc": "2026-09-08T07:42:03.864719+00:00",
+    "seed": 3603565485437329315,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "identity",
+      "replicate_index": 0,
+      "seed": 3603565485437329315,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "identity"
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "0f1d4ccb756ee6be174a86cd6f6ba504",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 158
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 158,
+          "byte_length": 20
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "c3d2078da9ada0f48eebc84e00eea0985d0945091a866271850ce9a776e6584bc5e4f01a7573048b037f4905f04dec46"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 97257600,
+        "n_raw": 512,
+        "n_sifted": 244,
+        "n_disclosed": 50,
+        "n_candidate": 194,
+        "n_reconciled": 194,
+        "n_final": 158,
+        "sifting_efficiency": 0.4765625,
+        "final_secret_fraction": 0.30859375,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.0,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.0,
+        "transcript_bytes": 27136
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 97257600
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6162
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "0135afcc-154d-4a32-a84f-8a45fbf425b4",
+    "experiment_kind": "E2",
+    "condition_id": "depolarizing-0.02",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 1,
+    "timestamp_utc": "2026-09-08T07:42:04.015454+00:00",
+    "seed": 11486884877779899456,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "depolarizing-0.02",
+      "replicate_index": 0,
+      "seed": 11486884877779899456,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "depolarizing",
+          "p": 0.02
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "7c8bf47b6e70d1c0450906a13a5b6081",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Universal-hash key confirmation failed after reconciliation.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "44a303eaa6142ac59eeff0dae66b1845f428e4eca6de97e72709051ad1f62203a304301a2f6bde30dc82b6ad45c35686"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Universal-hash key confirmation failed after reconciliation."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Universal-hash key confirmation failed after reconciliation."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 89062300,
+        "n_raw": 512,
+        "n_sifted": 254,
+        "n_disclosed": 52,
+        "n_candidate": 202,
+        "n_reconciled": 202,
+        "n_final": 0,
+        "sifting_efficiency": 0.49609375,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 23,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 29,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 52,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.007874015748031496,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.013986013986013986,
+        "diagnostic_qber_aggregated": 0.007874015748031496,
+        "transcript_bytes": 27817
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 89062300
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6127
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "be89d4e5-87ef-4994-9faa-5299f0b4794f",
+    "experiment_kind": "E2",
+    "condition_id": "depolarizing-0.05",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 2,
+    "timestamp_utc": "2026-09-08T07:42:04.164059+00:00",
+    "seed": 9425662700139738470,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "depolarizing-0.05",
+      "replicate_index": 0,
+      "seed": 9425662700139738470,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "depolarizing",
+          "p": 0.05
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "f85920d985525f22c697875accd98d0e",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 100
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 100,
+          "byte_length": 13
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "ad453448620e479a79ba1e8c954e62a1e3d14be5bd156166ce9e1ebb1bde32083aa78ee7d41e40fcef6e29f30fb93f75"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 89692200,
+        "n_raw": 512,
+        "n_sifted": 246,
+        "n_disclosed": 50,
+        "n_candidate": 196,
+        "n_reconciled": 196,
+        "n_final": 100,
+        "sifting_efficiency": 0.48046875,
+        "final_secret_fraction": 0.1953125,
+        "estimated_qber_z": 0.038461538461538464,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.02,
+        "estimated_z_errors": 1,
+        "estimated_z_trials": 26,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 24,
+        "estimated_aggregate_errors": 1,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.038461538461538464,
+        "diagnostic_full_sifted_qber": 0.008130081300813009,
+        "diagnostic_qber_z": 0.015873015873015872,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.008130081300813009,
+        "transcript_bytes": 34219
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 89692200
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6289
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "40670cc4-9d60-4a9d-8b55-1aca91927383",
+    "experiment_kind": "E2",
+    "condition_id": "depolarizing-0.10",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 3,
+    "timestamp_utc": "2026-09-08T07:42:04.322676+00:00",
+    "seed": 8479324920329332946,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "depolarizing-0.10",
+      "replicate_index": 0,
+      "seed": 8479324920329332946,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "depolarizing",
+          "p": 0.1
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "314007d118f9f5905fc4515a73de77cf",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 67
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 67,
+          "byte_length": 9
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "48b7b8cc33a9c8c51fa8026663c85adbf2c3c4539cd8997d566c68ad1cb7d6a3fb1b89754dd6cf1785620524cecb9f37"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 98776600,
+        "n_raw": 512,
+        "n_sifted": 265,
+        "n_disclosed": 53,
+        "n_candidate": 212,
+        "n_reconciled": 212,
+        "n_final": 67,
+        "sifting_efficiency": 0.517578125,
+        "final_secret_fraction": 0.130859375,
+        "estimated_qber_z": 0.03571428571428571,
+        "estimated_qber_x": 0.04,
+        "estimated_qber_aggregated": 0.03773584905660377,
+        "estimated_z_errors": 1,
+        "estimated_z_trials": 28,
+        "estimated_x_errors": 1,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 2,
+        "estimated_aggregate_trials": 53,
+        "phase_error_bound": 0.04,
+        "diagnostic_full_sifted_qber": 0.033962264150943396,
+        "diagnostic_qber_z": 0.03571428571428571,
+        "diagnostic_qber_x": 0.032,
+        "diagnostic_qber_aggregated": 0.033962264150943396,
+        "transcript_bytes": 62245
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 98776600
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6287
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "7301a82b-6874-4fc2-b452-2528a1e9346b",
+    "experiment_kind": "E2",
+    "condition_id": "depolarizing-0.15",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 4,
+    "timestamp_utc": "2026-09-08T07:42:04.477210+00:00",
+    "seed": 12357989560377222326,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "depolarizing-0.15",
+      "replicate_index": 0,
+      "seed": 12357989560377222326,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "depolarizing",
+          "p": 0.15
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "e524f9587c40b1e5d2f0aac1f21ad312",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 1
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 1,
+          "byte_length": 1
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "12a19efbe331ff714e97d235777fdbc86f950f92261d7df719e56fe5bedf31c40525dade9fc0f04959c70bf5a0df5aab"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 95149700,
+        "n_raw": 512,
+        "n_sifted": 246,
+        "n_disclosed": 50,
+        "n_candidate": 196,
+        "n_reconciled": 196,
+        "n_final": 1,
+        "sifting_efficiency": 0.48046875,
+        "final_secret_fraction": 0.001953125,
+        "estimated_qber_z": 0.04,
+        "estimated_qber_x": 0.04,
+        "estimated_qber_aggregated": 0.04,
+        "estimated_z_errors": 1,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 1,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 2,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.04,
+        "diagnostic_full_sifted_qber": 0.09349593495934959,
+        "diagnostic_qber_z": 0.07317073170731707,
+        "diagnostic_qber_x": 0.11382113821138211,
+        "diagnostic_qber_aggregated": 0.09349593495934959,
+        "transcript_bytes": 89051
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 95149700
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6268
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "d0bae8d5-24a8-4483-a6ba-c5643fef14a2",
+    "experiment_kind": "E2",
+    "condition_id": "depolarizing-0.20",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 5,
+    "timestamp_utc": "2026-09-08T07:42:04.623761+00:00",
+    "seed": 3297620819727423325,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "depolarizing-0.20",
+      "replicate_index": 0,
+      "seed": 3297620819727423325,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "depolarizing",
+          "p": 0.2
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "df25c594d344d511cf1f6f0fd4755cec",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.000000, X=0.160000 give phase-error bound 0.160000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.075472 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "1b894a638008f427ffeb61403b3e2c0e611beccba4bdb667c581a6249d404d5ae01d01363bd5a6351524bca066acff2d"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.000000, X=0.160000 give phase-error bound 0.160000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.075472 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.000000, X=0.160000 give phase-error bound 0.160000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.075472 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 88257200,
+        "n_raw": 512,
+        "n_sifted": 262,
+        "n_disclosed": 53,
+        "n_candidate": 209,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.51171875,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.16,
+        "estimated_qber_aggregated": 0.07547169811320754,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 28,
+        "estimated_x_errors": 4,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 4,
+        "estimated_aggregate_trials": 53,
+        "phase_error_bound": 0.16,
+        "diagnostic_full_sifted_qber": 0.10305343511450382,
+        "diagnostic_qber_z": 0.08029197080291971,
+        "diagnostic_qber_x": 0.128,
+        "diagnostic_qber_aggregated": 0.10305343511450382,
+        "transcript_bytes": 5090
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 88257200
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6492
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "49df0944-d3fa-4dd8-a718-c078b1e3ee6e",
+    "experiment_kind": "E2",
+    "condition_id": "depolarizing-0.25",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 6,
+    "timestamp_utc": "2026-09-08T07:42:04.771903+00:00",
+    "seed": 13114328003722948084,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "depolarizing-0.25",
+      "replicate_index": 0,
+      "seed": 13114328003722948084,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "depolarizing",
+          "p": 0.25
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "ae1e01b10f0c4403f5eb8dd369b549e3",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.037037, X=0.120000 give phase-error bound 0.120000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.076923 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "2ffed105b9c0bbb91faabfbce580f30616a9576c42df17fa1c821f0095bd59f77bba1e6b86948dc914ccf6816b7ae4a1"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.037037, X=0.120000 give phase-error bound 0.120000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.076923 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.037037, X=0.120000 give phase-error bound 0.120000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.076923 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 89634600,
+        "n_raw": 512,
+        "n_sifted": 256,
+        "n_disclosed": 52,
+        "n_candidate": 204,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.5,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.037037037037037035,
+        "estimated_qber_x": 0.12,
+        "estimated_qber_aggregated": 0.07692307692307693,
+        "estimated_z_errors": 1,
+        "estimated_z_trials": 27,
+        "estimated_x_errors": 3,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 4,
+        "estimated_aggregate_trials": 52,
+        "phase_error_bound": 0.12,
+        "diagnostic_full_sifted_qber": 0.109375,
+        "diagnostic_qber_z": 0.09923664122137404,
+        "diagnostic_qber_x": 0.12,
+        "diagnostic_qber_aggregated": 0.109375,
+        "transcript_bytes": 5024
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 89634600
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6482
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "6abb6305-df29-4f84-b765-939254257553",
+    "experiment_kind": "E2",
+    "condition_id": "bit-flip-0.02",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 7,
+    "timestamp_utc": "2026-09-08T07:42:04.923229+00:00",
+    "seed": 8267765020702042356,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "bit-flip-0.02",
+      "replicate_index": 0,
+      "seed": 8267765020702042356,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "bit_flip",
+          "p": 0.02
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "5b4af3884a5d0a7e2fac56151ac19747",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Universal-hash key confirmation failed after reconciliation.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "5ead145db4aa1acdb52afe617b32dbf30a93eb28e410ee8e2b1514e4d7299d6e9a528ade10dcf3cd73f5ffa7d6da71ce"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Universal-hash key confirmation failed after reconciliation."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Universal-hash key confirmation failed after reconciliation."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 93099000,
+        "n_raw": 512,
+        "n_sifted": 248,
+        "n_disclosed": 50,
+        "n_candidate": 198,
+        "n_reconciled": 198,
+        "n_final": 0,
+        "sifting_efficiency": 0.484375,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 24,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 26,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.008064516129032258,
+        "diagnostic_qber_z": 0.01694915254237288,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.008064516129032258,
+        "transcript_bytes": 27348
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 93099000
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6110
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "55f345bd-ebfe-48c1-add8-f7d90492c96a",
+    "experiment_kind": "E2",
+    "condition_id": "bit-flip-0.05",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 8,
+    "timestamp_utc": "2026-09-08T07:42:05.077035+00:00",
+    "seed": 9319738407568109853,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "bit-flip-0.05",
+      "replicate_index": 0,
+      "seed": 9319738407568109853,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "bit_flip",
+          "p": 0.05
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "ded4f90939faa3ea0feb1bcf9c96b060",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 30
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 30,
+          "byte_length": 4
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "af452178692d234a087897e67d7a9547dfb5eee0851742672dcf2875209dfb03de4bdb5da85b517bd1c8e4cc74197afd"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 92305400,
+        "n_raw": 512,
+        "n_sifted": 246,
+        "n_disclosed": 50,
+        "n_candidate": 196,
+        "n_reconciled": 196,
+        "n_final": 30,
+        "sifting_efficiency": 0.48046875,
+        "final_secret_fraction": 0.05859375,
+        "estimated_qber_z": 0.08,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.04,
+        "estimated_z_errors": 2,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 2,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.08,
+        "diagnostic_full_sifted_qber": 0.036585365853658534,
+        "diagnostic_qber_z": 0.07377049180327869,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.036585365853658534,
+        "transcript_bytes": 55447
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 92305400
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6241
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "c7a5720c-fd99-443e-9f9a-0cdbccda1b50",
+    "experiment_kind": "E2",
+    "condition_id": "bit-flip-0.10",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 9,
+    "timestamp_utc": "2026-09-08T07:42:05.222367+00:00",
+    "seed": 13316767510703652155,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "bit-flip-0.10",
+      "replicate_index": 0,
+      "seed": 13316767510703652155,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "bit_flip",
+          "p": 0.1
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "edc69136377cd1ced4281cb2f18eccdc",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.115385, X=0.000000 give phase-error bound 0.115385, above the configured asymptotic threshold 0.110000; aggregate QBER 0.058824 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "5a7138ac6ff577fcaf2f2d9f5a3628d94580b2d720e04c175eacde647f625c850606e84ca50fb2825cc347e249ea2a81"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.115385, X=0.000000 give phase-error bound 0.115385, above the configured asymptotic threshold 0.110000; aggregate QBER 0.058824 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.115385, X=0.000000 give phase-error bound 0.115385, above the configured asymptotic threshold 0.110000; aggregate QBER 0.058824 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 86923800,
+        "n_raw": 512,
+        "n_sifted": 251,
+        "n_disclosed": 51,
+        "n_candidate": 200,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.490234375,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.11538461538461539,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.058823529411764705,
+        "estimated_z_errors": 3,
+        "estimated_z_trials": 26,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 3,
+        "estimated_aggregate_trials": 51,
+        "phase_error_bound": 0.11538461538461539,
+        "diagnostic_full_sifted_qber": 0.055776892430278883,
+        "diagnostic_qber_z": 0.10852713178294573,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.055776892430278883,
+        "transcript_bytes": 4966
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 86923800
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6514
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "6ffbb450-ea35-4b7d-ae5f-2b651d4fd412",
+    "experiment_kind": "E2",
+    "condition_id": "bit-flip-0.16",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 10,
+    "timestamp_utc": "2026-09-08T07:42:05.369418+00:00",
+    "seed": 2822176690448351109,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "bit-flip-0.16",
+      "replicate_index": 0,
+      "seed": 2822176690448351109,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "bit_flip",
+          "p": 0.16
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "bad8ab88d44041a828296cc15c4650ac",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.185185, X=0.000000 give phase-error bound 0.185185, above the configured asymptotic threshold 0.110000; aggregate QBER 0.096154 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "8e3065eb57a0b23e08fbd7970d60e17284e081ee96676c594a5d43165281408500660f0fcd31cced1c8b09ff12907a25"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.185185, X=0.000000 give phase-error bound 0.185185, above the configured asymptotic threshold 0.110000; aggregate QBER 0.096154 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.185185, X=0.000000 give phase-error bound 0.185185, above the configured asymptotic threshold 0.110000; aggregate QBER 0.096154 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 88526000,
+        "n_raw": 512,
+        "n_sifted": 253,
+        "n_disclosed": 52,
+        "n_candidate": 201,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.494140625,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.18518518518518517,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.09615384615384616,
+        "estimated_z_errors": 5,
+        "estimated_z_trials": 27,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 5,
+        "estimated_aggregate_trials": 52,
+        "phase_error_bound": 0.18518518518518517,
+        "diagnostic_full_sifted_qber": 0.08300395256916997,
+        "diagnostic_qber_z": 0.16030534351145037,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.08300395256916997,
+        "transcript_bytes": 5000
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 88526000
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6511
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "8b60ca0e-9a44-4183-8c2c-5c8929d54e8c",
+    "experiment_kind": "E2",
+    "condition_id": "bit-flip-0.20",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 11,
+    "timestamp_utc": "2026-09-08T07:42:05.517621+00:00",
+    "seed": 12229315937803878081,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "bit-flip-0.20",
+      "replicate_index": 0,
+      "seed": 12229315937803878081,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "bit_flip",
+          "p": 0.2
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "f5839d339342cddcd2fa8b8116cba86f",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.333333, X=0.000000 give phase-error bound 0.333333, above the configured asymptotic threshold 0.110000; aggregate QBER 0.160714 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "3f3be6bf89d72ef5811c50e7a6ac8cc69e05e653ef4b316c0f9e40800506585fef36c8000bb7c85ed64c9a6b2269fe9c"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.333333, X=0.000000 give phase-error bound 0.333333, above the configured asymptotic threshold 0.110000; aggregate QBER 0.160714 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.333333, X=0.000000 give phase-error bound 0.333333, above the configured asymptotic threshold 0.110000; aggregate QBER 0.160714 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 89651200,
+        "n_raw": 512,
+        "n_sifted": 278,
+        "n_disclosed": 56,
+        "n_candidate": 222,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.54296875,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.3333333333333333,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.16071428571428573,
+        "estimated_z_errors": 9,
+        "estimated_z_trials": 27,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 29,
+        "estimated_aggregate_errors": 9,
+        "estimated_aggregate_trials": 56,
+        "phase_error_bound": 0.3333333333333333,
+        "diagnostic_full_sifted_qber": 0.10431654676258993,
+        "diagnostic_qber_z": 0.21804511278195488,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.10431654676258993,
+        "transcript_bytes": 5272
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 89651200
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6509
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "6e9d1558-a50c-4ad8-bb0c-375e46823195",
+    "experiment_kind": "E2",
+    "condition_id": "phase-flip-0.02",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 12,
+    "timestamp_utc": "2026-09-08T07:42:05.667410+00:00",
+    "seed": 8799260884135390668,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "phase-flip-0.02",
+      "replicate_index": 0,
+      "seed": 8799260884135390668,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "phase_flip",
+          "p": 0.02
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "7836282229f466e132aaabb730d5f474",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 38
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 38,
+          "byte_length": 5
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "76fdda6e9fdad8c61ba19c9a30792569a25b709e2fad1bb7ee5583e2f047cce43d666fe6477185c39cd9503923ad9a3f"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 90702100,
+        "n_raw": 512,
+        "n_sifted": 273,
+        "n_disclosed": 55,
+        "n_candidate": 218,
+        "n_reconciled": 218,
+        "n_final": 38,
+        "sifting_efficiency": 0.533203125,
+        "final_secret_fraction": 0.07421875,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.1,
+        "estimated_qber_aggregated": 0.05454545454545454,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 3,
+        "estimated_x_trials": 30,
+        "estimated_aggregate_errors": 3,
+        "estimated_aggregate_trials": 55,
+        "phase_error_bound": 0.1,
+        "diagnostic_full_sifted_qber": 0.02197802197802198,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.04,
+        "diagnostic_qber_aggregated": 0.02197802197802198,
+        "transcript_bytes": 50251
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 90702100
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6245
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "08cf9b7a-ca53-416a-b476-a0a849dbd462",
+    "experiment_kind": "E2",
+    "condition_id": "phase-flip-0.05",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 13,
+    "timestamp_utc": "2026-09-08T07:42:05.830980+00:00",
+    "seed": 10056385074654670159,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "phase-flip-0.05",
+      "replicate_index": 0,
+      "seed": 10056385074654670159,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "phase_flip",
+          "p": 0.05
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "18ec7e793103243d0a47f8aa79a42c49",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 94
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 94,
+          "byte_length": 12
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "3149b84a37928175c10d7359e1c16889829cdea791bb4ada92e4ee6874800d57ac42e4fc650073a9d2acd9073b4f725c"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 101814800,
+        "n_raw": 512,
+        "n_sifted": 280,
+        "n_disclosed": 57,
+        "n_candidate": 223,
+        "n_reconciled": 223,
+        "n_final": 94,
+        "sifting_efficiency": 0.546875,
+        "final_secret_fraction": 0.18359375,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.03225806451612903,
+        "estimated_qber_aggregated": 0.017543859649122806,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 26,
+        "estimated_x_errors": 1,
+        "estimated_x_trials": 31,
+        "estimated_aggregate_errors": 1,
+        "estimated_aggregate_trials": 57,
+        "phase_error_bound": 0.03225806451612903,
+        "diagnostic_full_sifted_qber": 0.02857142857142857,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.052980132450331126,
+        "diagnostic_qber_aggregated": 0.02857142857142857,
+        "transcript_bytes": 58629
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 101814800
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6296
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "43aa7201-b509-434f-bc2b-d8889d374e69",
+    "experiment_kind": "E2",
+    "condition_id": "phase-flip-0.10",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 14,
+    "timestamp_utc": "2026-09-08T07:42:05.978465+00:00",
+    "seed": 8729666234731551633,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "phase-flip-0.10",
+      "replicate_index": 0,
+      "seed": 8729666234731551633,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "phase_flip",
+          "p": 0.1
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "b58110016e0b6e694c4d79b68f8bb398",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.000000, X=0.160000 give phase-error bound 0.160000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.078431 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "eacb6830ce34172d077fa4891a08c1117d6d8ffe1cf501315623beca16f999cd4a06a09b27030ea6e5f68607ad3d84b9"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.000000, X=0.160000 give phase-error bound 0.160000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.078431 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.000000, X=0.160000 give phase-error bound 0.160000, above the configured asymptotic threshold 0.110000; aggregate QBER 0.078431 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 87830400,
+        "n_raw": 512,
+        "n_sifted": 253,
+        "n_disclosed": 51,
+        "n_candidate": 202,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.494140625,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.16,
+        "estimated_qber_aggregated": 0.0784313725490196,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 26,
+        "estimated_x_errors": 4,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 4,
+        "estimated_aggregate_trials": 51,
+        "phase_error_bound": 0.16,
+        "diagnostic_full_sifted_qber": 0.05928853754940711,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.12,
+        "diagnostic_qber_aggregated": 0.05928853754940711,
+        "transcript_bytes": 4982
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 87830400
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6470
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "79f98e26-8cdd-4da8-9eed-4adc94eda2d4",
+    "experiment_kind": "E2",
+    "condition_id": "phase-flip-0.16",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 15,
+    "timestamp_utc": "2026-09-08T07:42:06.125189+00:00",
+    "seed": 8112065706560728576,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "phase-flip-0.16",
+      "replicate_index": 0,
+      "seed": 8112065706560728576,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "phase_flip",
+          "p": 0.16
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "93b4ec09414d5b1d21e54cf4030d5c33",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.000000, X=0.166667 give phase-error bound 0.166667, above the configured asymptotic threshold 0.110000; aggregate QBER 0.081633 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "b518c99bc166f6173116ed0528457cc9027237ad302c5994905afb4acc459cc7d0098f2a0c20bc30d6346a486bbc8066"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.000000, X=0.166667 give phase-error bound 0.166667, above the configured asymptotic threshold 0.110000; aggregate QBER 0.081633 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.000000, X=0.166667 give phase-error bound 0.166667, above the configured asymptotic threshold 0.110000; aggregate QBER 0.081633 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 88264800,
+        "n_raw": 512,
+        "n_sifted": 240,
+        "n_disclosed": 49,
+        "n_candidate": 191,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.46875,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.16666666666666666,
+        "estimated_qber_aggregated": 0.08163265306122448,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 4,
+        "estimated_x_trials": 24,
+        "estimated_aggregate_errors": 4,
+        "estimated_aggregate_trials": 49,
+        "phase_error_bound": 0.16666666666666666,
+        "diagnostic_full_sifted_qber": 0.1,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.20512820512820512,
+        "diagnostic_qber_aggregated": 0.1,
+        "transcript_bytes": 4842
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 88264800
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6481
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "9d2a885d-8f4e-49ac-b246-d2365eae57d1",
+    "experiment_kind": "E2",
+    "condition_id": "phase-flip-0.20",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 16,
+    "timestamp_utc": "2026-09-08T07:42:06.280481+00:00",
+    "seed": 5431698975353568511,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "phase-flip-0.20",
+      "replicate_index": 0,
+      "seed": 5431698975353568511,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "phase_flip",
+          "p": 0.2
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "8002fc76fe0f808fc547d5512f7339c9",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: The asymptotic security estimator produced no extractable secret bits.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "f895652b1b7c9f61e702d3a7177d2d327430251ca6d23a3f809b2b98549ed250479222792dbb5caed68f1bca4fb6ff0d"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "The asymptotic security estimator produced no extractable secret bits."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: The asymptotic security estimator produced no extractable secret bits."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 96567000,
+        "n_raw": 512,
+        "n_sifted": 248,
+        "n_disclosed": 51,
+        "n_candidate": 197,
+        "n_reconciled": 197,
+        "n_final": 0,
+        "sifting_efficiency": 0.484375,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.041666666666666664,
+        "estimated_qber_aggregated": 0.0196078431372549,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 27,
+        "estimated_x_errors": 1,
+        "estimated_x_trials": 24,
+        "estimated_aggregate_errors": 1,
+        "estimated_aggregate_trials": 51,
+        "phase_error_bound": 0.041666666666666664,
+        "diagnostic_full_sifted_qber": 0.0846774193548387,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.1810344827586207,
+        "diagnostic_qber_aggregated": 0.0846774193548387,
+        "transcript_bytes": 104916
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 96567000
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6191
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "9e0f8eaf-a78e-4178-941d-1edd01aae5c8",
+    "experiment_kind": "E2",
+    "condition_id": "amplitude-damping-0.02",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 17,
+    "timestamp_utc": "2026-09-08T07:42:06.424786+00:00",
+    "seed": 6683285961949860643,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "amplitude-damping-0.02",
+      "replicate_index": 0,
+      "seed": 6683285961949860643,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "amplitude_damping",
+          "gamma": 0.02
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "bffd98a104b01d7c03a932518dbafe53",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 149
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 149,
+          "byte_length": 19
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "1dbb90ced0c423e23e0c06ab41e38ca12f90025df837156731ebd3091263229dcc7017f707653a1c1067660ecc5a29b6"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 85131500,
+        "n_raw": 512,
+        "n_sifted": 242,
+        "n_disclosed": 50,
+        "n_candidate": 192,
+        "n_reconciled": 192,
+        "n_final": 149,
+        "sifting_efficiency": 0.47265625,
+        "final_secret_fraction": 0.291015625,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 27,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 23,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.004132231404958678,
+        "diagnostic_qber_z": 0.007633587786259542,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.004132231404958678,
+        "transcript_bytes": 33396
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 85131500
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6276
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "aea3fbc1-e8c2-4249-ae4c-f20c3a46a52f",
+    "experiment_kind": "E2",
+    "condition_id": "amplitude-damping-0.05",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 18,
+    "timestamp_utc": "2026-09-08T07:42:06.567598+00:00",
+    "seed": 1566061281333991778,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "amplitude-damping-0.05",
+      "replicate_index": 0,
+      "seed": 1566061281333991778,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "amplitude_damping",
+          "gamma": 0.05
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "260b4e793561374195a7468b9d284fff",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Universal-hash key confirmation failed after reconciliation.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "d61112fe8d03a6fb7f3b7368050051843303ab306444b66256f598dc8d4b3604818047009fea11200690abc593c72c39"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Universal-hash key confirmation failed after reconciliation."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Universal-hash key confirmation failed after reconciliation."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 84662700,
+        "n_raw": 512,
+        "n_sifted": 244,
+        "n_disclosed": 49,
+        "n_candidate": 195,
+        "n_reconciled": 195,
+        "n_final": 0,
+        "sifting_efficiency": 0.4765625,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 24,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 25,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 49,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.020491803278688523,
+        "diagnostic_qber_z": 0.025210084033613446,
+        "diagnostic_qber_x": 0.016,
+        "diagnostic_qber_aggregated": 0.020491803278688523,
+        "transcript_bytes": 33496
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 84662700
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6146
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "43ef2d4c-305e-4bf1-979a-2c83030b4ca6",
+    "experiment_kind": "E2",
+    "condition_id": "amplitude-damping-0.10",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 19,
+    "timestamp_utc": "2026-09-08T07:42:06.715990+00:00",
+    "seed": 15164161443992317750,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "amplitude-damping-0.10",
+      "replicate_index": 0,
+      "seed": 15164161443992317750,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "amplitude_damping",
+          "gamma": 0.1
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "377b952002e5f19964e23fe7f66403c3",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 55
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 55,
+          "byte_length": 7
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "a322be3debfa43ffdf3c17a4f4d530a89f825ec244c5c3f7303a94feba9c7e9bd0da5c6c21f34ef60dfeabf0af0db6de"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 88662800,
+        "n_raw": 512,
+        "n_sifted": 244,
+        "n_disclosed": 50,
+        "n_candidate": 194,
+        "n_reconciled": 194,
+        "n_final": 55,
+        "sifting_efficiency": 0.4765625,
+        "final_secret_fraction": 0.107421875,
+        "estimated_qber_z": 0.038461538461538464,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.02,
+        "estimated_z_errors": 1,
+        "estimated_z_trials": 26,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 24,
+        "estimated_aggregate_errors": 1,
+        "estimated_aggregate_trials": 50,
+        "phase_error_bound": 0.038461538461538464,
+        "diagnostic_full_sifted_qber": 0.040983606557377046,
+        "diagnostic_qber_z": 0.046875,
+        "diagnostic_qber_x": 0.034482758620689655,
+        "diagnostic_qber_aggregated": 0.040983606557377046,
+        "transcript_bytes": 62893
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 88662800
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6312
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "c90fb2a8-74fd-41fb-8610-40dd7c991fc7",
+    "experiment_kind": "E2",
+    "condition_id": "amplitude-damping-0.20",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 20,
+    "timestamp_utc": "2026-09-08T07:42:06.866136+00:00",
+    "seed": 14155948565480662456,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "amplitude-damping-0.20",
+      "replicate_index": 0,
+      "seed": 14155948565480662456,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "amplitude_damping",
+          "gamma": 0.2
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "40ba262b35273a889dcd1cadb4ce3591",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 20
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 20,
+          "byte_length": 3
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "9c5876c9ae7ecb9f90dc3cb0604b297c56c741ace9ab990d6a6306196f1b9abf229d637e79b7d145801768ea974ca1c0"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 90456800,
+        "n_raw": 512,
+        "n_sifted": 254,
+        "n_disclosed": 51,
+        "n_candidate": 203,
+        "n_reconciled": 203,
+        "n_final": 20,
+        "sifting_efficiency": 0.49609375,
+        "final_secret_fraction": 0.0390625,
+        "estimated_qber_z": 0.08,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0392156862745098,
+        "estimated_z_errors": 2,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 26,
+        "estimated_aggregate_errors": 2,
+        "estimated_aggregate_trials": 51,
+        "phase_error_bound": 0.08,
+        "diagnostic_full_sifted_qber": 0.047244094488188976,
+        "diagnostic_qber_z": 0.064,
+        "diagnostic_qber_x": 0.031007751937984496,
+        "diagnostic_qber_aggregated": 0.047244094488188976,
+        "transcript_bytes": 65685
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 90456800
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6290
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "495a9405-629b-44b4-a40e-d8d95a99afc9",
+    "experiment_kind": "E2",
+    "condition_id": "amplitude-damping-0.30",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 21,
+    "timestamp_utc": "2026-09-08T07:42:07.010840+00:00",
+    "seed": 13236983898205357458,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "amplitude-damping-0.30",
+      "replicate_index": 0,
+      "seed": 13236983898205357458,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "amplitude_damping",
+          "gamma": 0.3
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "6d88d6e44cf536c435fc41bf5985e345",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.230769, X=0.035714 give phase-error bound 0.230769, above the configured asymptotic threshold 0.110000; aggregate QBER 0.129630 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "e3b58b6beb5ecb4af2d38bcadeca114453591b3d91f6742355ae9231550a5d9a5e34a97004d83785edc626fab8f40f5d"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.230769, X=0.035714 give phase-error bound 0.230769, above the configured asymptotic threshold 0.110000; aggregate QBER 0.129630 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.230769, X=0.035714 give phase-error bound 0.230769, above the configured asymptotic threshold 0.110000; aggregate QBER 0.129630 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 85965100,
+        "n_raw": 512,
+        "n_sifted": 266,
+        "n_disclosed": 54,
+        "n_candidate": 212,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.51953125,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.23076923076923078,
+        "estimated_qber_x": 0.03571428571428571,
+        "estimated_qber_aggregated": 0.12962962962962962,
+        "estimated_z_errors": 6,
+        "estimated_z_trials": 26,
+        "estimated_x_errors": 1,
+        "estimated_x_trials": 28,
+        "estimated_aggregate_errors": 7,
+        "estimated_aggregate_trials": 54,
+        "phase_error_bound": 0.23076923076923078,
+        "diagnostic_full_sifted_qber": 0.12030075187969924,
+        "diagnostic_qber_z": 0.15079365079365079,
+        "diagnostic_qber_x": 0.09285714285714286,
+        "diagnostic_qber_aggregated": 0.12030075187969924,
+        "transcript_bytes": 5140
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 85965100
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6574
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "125ee2f9-872b-4b8e-b3bf-736e1445055c",
+    "experiment_kind": "E2",
+    "condition_id": "pauli-symmetric",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 22,
+    "timestamp_utc": "2026-09-08T07:42:07.161552+00:00",
+    "seed": 9016889033940770469,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "pauli-symmetric",
+      "replicate_index": 0,
+      "seed": 9016889033940770469,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "pauli",
+          "px": 0.02,
+          "py": 0.02,
+          "pz": 0.02
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "2af4b3b1b16913419c5423f086895fb4",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 35
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 35,
+          "byte_length": 5
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "5bad2cd49fc5e5bdfe2b2bd8d9053c1a4e54252c708295bf93ff53ddc51014e0cf14ac2fe3a6a8c03eb2b44b9fe35f81"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 91231700,
+        "n_raw": 512,
+        "n_sifted": 254,
+        "n_disclosed": 51,
+        "n_candidate": 203,
+        "n_reconciled": 203,
+        "n_final": 35,
+        "sifting_efficiency": 0.49609375,
+        "final_secret_fraction": 0.068359375,
+        "estimated_qber_z": 0.04,
+        "estimated_qber_x": 0.07692307692307693,
+        "estimated_qber_aggregated": 0.058823529411764705,
+        "estimated_z_errors": 1,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 2,
+        "estimated_x_trials": 26,
+        "estimated_aggregate_errors": 3,
+        "estimated_aggregate_trials": 51,
+        "phase_error_bound": 0.07692307692307693,
+        "diagnostic_full_sifted_qber": 0.03543307086614173,
+        "diagnostic_qber_z": 0.048,
+        "diagnostic_qber_x": 0.023255813953488372,
+        "diagnostic_qber_aggregated": 0.03543307086614173,
+        "transcript_bytes": 54613
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 91231700
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6333
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "11a9a20f-b9c4-46f4-acf5-e6078756fb9d",
+    "experiment_kind": "E2",
+    "condition_id": "pauli-x-dominant",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 23,
+    "timestamp_utc": "2026-09-08T07:42:07.313371+00:00",
+    "seed": 4683891970439938648,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "pauli-x-dominant",
+      "replicate_index": 0,
+      "seed": 4683891970439938648,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "pauli",
+          "px": 0.08,
+          "py": 0.01,
+          "pz": 0.02
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "6c19d12628a1b8a204e922d5f2cd4d59",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 21
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 21,
+          "byte_length": 3
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "968cd9125bc401a6d503f3402f02f9c5b9fabfd374bfb576229402e7584cf8b5ad3822387ec1eae6e184d0ee5900ec67"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 92995000,
+        "n_raw": 512,
+        "n_sifted": 252,
+        "n_disclosed": 51,
+        "n_candidate": 201,
+        "n_reconciled": 201,
+        "n_final": 21,
+        "sifting_efficiency": 0.4921875,
+        "final_secret_fraction": 0.041015625,
+        "estimated_qber_z": 0.08695652173913043,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0392156862745098,
+        "estimated_z_errors": 2,
+        "estimated_z_trials": 23,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 28,
+        "estimated_aggregate_errors": 2,
+        "estimated_aggregate_trials": 51,
+        "phase_error_bound": 0.08695652173913043,
+        "diagnostic_full_sifted_qber": 0.03968253968253968,
+        "diagnostic_qber_z": 0.06140350877192982,
+        "diagnostic_qber_x": 0.021739130434782608,
+        "diagnostic_qber_aggregated": 0.03968253968253968,
+        "transcript_bytes": 60702
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 92995000
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6345
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "8d31f25d-fa29-463d-9a99-e389432da8c1",
+    "experiment_kind": "E2",
+    "condition_id": "pauli-z-dominant",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f09124c6-2120-4bfa-8fec-9f0b18a096b5",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 24,
+    "timestamp_utc": "2026-09-08T07:42:07.459205+00:00",
+    "seed": 13544541728321013074,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E2",
+      "condition_id": "pauli-z-dominant",
+      "replicate_index": 0,
+      "seed": 13544541728321013074,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 512,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "pauli",
+          "px": 0.02,
+          "py": 0.01,
+          "pz": 0.08
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "f6ee50ebcfe4245e3bf0aac998e9d6bd",
+      "profile": "QKD-ASSUMED",
+      "status": "aborted",
+      "abort_reason": "BB84 security abort: Per-basis errors Z=0.000000, X=0.178571 give phase-error bound 0.178571, above the configured asymptotic threshold 0.110000; aggregate QBER 0.094340 is not the phase-error bound.",
+      "established_key": {
+        "type": null,
+        "bit_length": 0
+      },
+      "provenance": [],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "8d9955f8e0bcd88ccab48970b3c536ec5afba6bb5aac0e0205ccd328b58350b8b2602d2c76e25d5cc7b6d4c9c04e65b6"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "aborted",
+          "detail": "Per-basis errors Z=0.000000, X=0.178571 give phase-error bound 0.178571, above the configured asymptotic threshold 0.110000; aggregate QBER 0.094340 is not the phase-error bound."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "withheld",
+          "detail": "No final key material is exposed by the orchestration result."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "aborted",
+          "detail": "BB84 security abort: Per-basis errors Z=0.000000, X=0.178571 give phase-error bound 0.178571, above the configured asymptotic threshold 0.110000; aggregate QBER 0.094340 is not the phase-error bound."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 86862900,
+        "n_raw": 512,
+        "n_sifted": 261,
+        "n_disclosed": 53,
+        "n_candidate": 208,
+        "n_reconciled": 0,
+        "n_final": 0,
+        "sifting_efficiency": 0.509765625,
+        "final_secret_fraction": 0.0,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.17857142857142858,
+        "estimated_qber_aggregated": 0.09433962264150944,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 25,
+        "estimated_x_errors": 5,
+        "estimated_x_trials": 28,
+        "estimated_aggregate_errors": 5,
+        "estimated_aggregate_trials": 53,
+        "phase_error_bound": 0.17857142857142858,
+        "diagnostic_full_sifted_qber": 0.08045977011494253,
+        "diagnostic_qber_z": 0.04032258064516129,
+        "diagnostic_qber_x": 0.11678832116788321,
+        "diagnostic_qber_aggregated": 0.08045977011494253,
+        "transcript_bytes": 5082
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 86862900
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6573
+    }
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "python_version": "3.14.7",
+  "python_implementation": "CPython",
+  "numpy_version": "2.5.0",
+  "liboqs_python_version": "0.16.0",
+  "liboqs_version": "0.16.0",
+  "cryptography_version": "50.0.1",
+  "quantumsec_version": "0.1.0",
+  "os": "Windows",
+  "os_release": "11",
+  "os_version": "10.0.26200",
+  "machine_architecture": "AMD64",
+  "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+  "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+  "git_worktree_dirty": true
+}

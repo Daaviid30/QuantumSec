@@ -1,0 +1,448 @@
+[
+  {
+    "version": 1,
+    "run_id": "a9217e6d-4d36-43f6-881f-6782746e94ab",
+    "experiment_kind": "E1",
+    "condition_id": "pqc-diverse",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f4b81aff-2dab-4541-862d-ef909b5e1f39",
+      "shuffle": true,
+      "order_seed": 701001,
+      "warmup_runs": 2
+    },
+    "execution_order_index": 0,
+    "timestamp_utc": "2026-09-08T07:42:03.624362+00:00",
+    "seed": null,
+    "profile": "PQC-DIVERSE",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E1",
+      "condition_id": "pqc-diverse",
+      "replicate_index": 0,
+      "seed": null,
+      "session": {
+        "version": 1,
+        "profile": "PQC-DIVERSE",
+        "qkd_authentication_profile": null,
+        "qkd_signal_count": null,
+        "qkd_postprocessing": null,
+        "internal_pqc_profile": "high"
+      },
+      "qkd_stages": [],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+      "qkd_authentication_material": null,
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": 858400,
+      "pqc_bob_identity_generation_time_ns": 668600,
+      "pqc_total_identity_generation_time_ns": 1527000,
+      "pqc_public_identity_bytes": 3904,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "6e78991ea7170f45420fd6cb10db50ea",
+      "profile": "PQC-DIVERSE",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "session_key",
+        "bit_length": 256
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "ML-KEM-768",
+          "encoding": "raw KEM secret via canonical PQC KDF input",
+          "bit_length": 256,
+          "byte_length": 32
+        },
+        {
+          "position": 2,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "HQC-3",
+          "encoding": "raw KEM secret via canonical PQC KDF input",
+          "bit_length": 256,
+          "byte_length": 32
+        }
+      ],
+      "authentication": {
+        "qkd_classical": null,
+        "pqc_exchange": {
+          "purpose": "PQC handshake authentication",
+          "mechanism": "mutual digital signatures",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+        }
+      },
+      "public_context": {
+        "pqc_protocol_version": 1,
+        "pqc_transcript_hash_sha384": "6e00b7cd815a753addbc6c4522ae7faa19b3172ae131483b1c5c4d2902dc0cc0690bb8e11ce267ecc3640ecd3b92b94d"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "PQC-DIVERSE"
+        },
+        {
+          "sequence": 1,
+          "source": "pqc",
+          "stage": "server_offer",
+          "state": "created",
+          "detail": "Responder KEM offer signed."
+        },
+        {
+          "sequence": 2,
+          "source": "pqc",
+          "stage": "server_offer_authentication",
+          "state": "verified",
+          "detail": "Responder identity verified."
+        },
+        {
+          "sequence": 3,
+          "source": "pqc",
+          "stage": "client_exchange",
+          "state": "created",
+          "detail": "Initiator encapsulations signed."
+        },
+        {
+          "sequence": 4,
+          "source": "pqc",
+          "stage": "client_exchange_authentication",
+          "state": "verified",
+          "detail": "Initiator identity verified."
+        },
+        {
+          "sequence": 5,
+          "source": "pqc",
+          "stage": "key_schedule",
+          "state": "derived",
+          "detail": "Role-local session and confirmation schedules started."
+        },
+        {
+          "sequence": 6,
+          "source": "pqc",
+          "stage": "finished",
+          "state": "verified",
+          "detail": "Both role-separated Finished messages verified."
+        },
+        {
+          "sequence": 7,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Confirmed PQC session key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": null,
+      "pqc": {
+        "internal_profile": "high",
+        "algorithms": [
+          "ML-KEM-768",
+          "HQC-3",
+          "ML-DSA-65",
+          "HKDF-SHA-384",
+          "HMAC-SHA-384"
+        ],
+        "server_offer_time_ns": 15618300,
+        "server_processing_time_ns": 27361200,
+        "client_exchange_time_ns": 1413400,
+        "client_processing_time_ns": 41515600,
+        "key_schedule_time_ns": 200200,
+        "confirmation_time_ns": 352300,
+        "crypto_software_time_ns": 86461000,
+        "ml_kem_keygen_time_ns": 407900,
+        "hqc_keygen_time_ns": 12940100,
+        "server_offer_sign_time_ns": 2225800,
+        "server_offer_verify_time_ns": 894100,
+        "ml_kem_encapsulate_time_ns": 338300,
+        "hqc_encapsulate_time_ns": 26090900,
+        "client_exchange_sign_time_ns": 1348600,
+        "client_exchange_verify_time_ns": 883800,
+        "ml_kem_decapsulate_time_ns": 346500,
+        "hqc_decapsulate_time_ns": 40224400,
+        "transcript_construction_hash_time_ns": 360400,
+        "kem_combiner_encoding_time_ns": 21300,
+        "hkdf_session_time_ns": 54000,
+        "hkdf_confirmation_time_ns": 29000,
+        "finished_generation_time_ns": 41100,
+        "finished_verification_time_ns": 27000,
+        "kem_public_key_bytes": 5698,
+        "kem_ciphertext_bytes": 10066,
+        "canonical_protocol_bytes": 16105,
+        "transcript_bytes": 22852,
+        "signature_bytes": 6618,
+        "finished_bytes": 96,
+        "public_key_provisioning_bytes": 3904,
+        "serialized_transport_bytes": null
+      },
+      "qkd_authentication": null,
+      "pqc_authentication": {
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "signatures_generated": 2,
+        "signatures_verified": 2,
+        "signature_bytes": 6618,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      },
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 86653400
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6817
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "8ab315be-fbc6-4397-8c70-7ca8e5498403",
+    "experiment_kind": "E1",
+    "condition_id": "pqc-base",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "f4b81aff-2dab-4541-862d-ef909b5e1f39",
+      "shuffle": true,
+      "order_seed": 701001,
+      "warmup_runs": 2
+    },
+    "execution_order_index": 1,
+    "timestamp_utc": "2026-09-08T07:42:03.698298+00:00",
+    "seed": null,
+    "profile": "PQC-BASE",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E1",
+      "condition_id": "pqc-base",
+      "replicate_index": 0,
+      "seed": null,
+      "session": {
+        "version": 1,
+        "profile": "PQC-BASE",
+        "qkd_authentication_profile": null,
+        "qkd_signal_count": null,
+        "qkd_postprocessing": null,
+        "internal_pqc_profile": "low"
+      },
+      "qkd_stages": [],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+      "qkd_authentication_material": null,
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": 858400,
+      "pqc_bob_identity_generation_time_ns": 668600,
+      "pqc_total_identity_generation_time_ns": 1527000,
+      "pqc_public_identity_bytes": 3904,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "5f796fdac89de7eeeef56b0f865ad41a",
+      "profile": "PQC-BASE",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "session_key",
+        "bit_length": 256
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "ML-KEM-768",
+          "encoding": "raw KEM secret via canonical PQC KDF input",
+          "bit_length": 256,
+          "byte_length": 32
+        }
+      ],
+      "authentication": {
+        "qkd_classical": null,
+        "pqc_exchange": {
+          "purpose": "PQC handshake authentication",
+          "mechanism": "mutual digital signatures",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+        }
+      },
+      "public_context": {
+        "pqc_protocol_version": 1,
+        "pqc_transcript_hash_sha384": "5361f3d22be688f049510c666c02bed7e018ce870169319a753b227009c88de3d4455b1e1bde8b1dde5a5a0bce52c84c"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "PQC-BASE"
+        },
+        {
+          "sequence": 1,
+          "source": "pqc",
+          "stage": "server_offer",
+          "state": "created",
+          "detail": "Responder KEM offer signed."
+        },
+        {
+          "sequence": 2,
+          "source": "pqc",
+          "stage": "server_offer_authentication",
+          "state": "verified",
+          "detail": "Responder identity verified."
+        },
+        {
+          "sequence": 3,
+          "source": "pqc",
+          "stage": "client_exchange",
+          "state": "created",
+          "detail": "Initiator encapsulations signed."
+        },
+        {
+          "sequence": 4,
+          "source": "pqc",
+          "stage": "client_exchange_authentication",
+          "state": "verified",
+          "detail": "Initiator identity verified."
+        },
+        {
+          "sequence": 5,
+          "source": "pqc",
+          "stage": "key_schedule",
+          "state": "derived",
+          "detail": "Role-local session and confirmation schedules started."
+        },
+        {
+          "sequence": 6,
+          "source": "pqc",
+          "stage": "finished",
+          "state": "verified",
+          "detail": "Both role-separated Finished messages verified."
+        },
+        {
+          "sequence": 7,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Confirmed PQC session key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": null,
+      "pqc": {
+        "internal_profile": "low",
+        "algorithms": [
+          "ML-KEM-768",
+          "ML-DSA-65",
+          "HKDF-SHA-384",
+          "HMAC-SHA-384"
+        ],
+        "server_offer_time_ns": 6971900,
+        "server_processing_time_ns": 1139900,
+        "client_exchange_time_ns": 3113400,
+        "client_processing_time_ns": 1148400,
+        "key_schedule_time_ns": 138800,
+        "confirmation_time_ns": 252700,
+        "crypto_software_time_ns": 12765100,
+        "ml_kem_keygen_time_ns": 308500,
+        "hqc_keygen_time_ns": null,
+        "server_offer_sign_time_ns": 6613000,
+        "server_offer_verify_time_ns": 791300,
+        "ml_kem_encapsulate_time_ns": 312700,
+        "hqc_encapsulate_time_ns": null,
+        "client_exchange_sign_time_ns": 3066500,
+        "client_exchange_verify_time_ns": 766000,
+        "ml_kem_decapsulate_time_ns": 347900,
+        "hqc_decapsulate_time_ns": null,
+        "transcript_construction_hash_time_ns": 189600,
+        "kem_combiner_encoding_time_ns": 15400,
+        "hkdf_session_time_ns": 52500,
+        "hkdf_confirmation_time_ns": 27400,
+        "finished_generation_time_ns": 39100,
+        "finished_verification_time_ns": 24900,
+        "kem_public_key_bytes": 1184,
+        "kem_ciphertext_bytes": 1088,
+        "canonical_protocol_bytes": 2585,
+        "transcript_bytes": 9332,
+        "signature_bytes": 6618,
+        "finished_bytes": 96,
+        "public_key_provisioning_bytes": 3904,
+        "serialized_transport_bytes": null
+      },
+      "qkd_authentication": null,
+      "pqc_authentication": {
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "signatures_generated": 2,
+        "signatures_verified": 2,
+        "signature_bytes": 6618,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      },
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 12890800
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6497
+    }
+  }
+]

@@ -1,0 +1,5 @@
+profile,n,pqc_crypto_median_ns,pqc_crypto_iqr_ns,hybrid_composition_median_ns,hybrid_composition_iqr_ns,overhead_ratio_median,overhead_ratio_iqr,extra_transmitted_bytes_median,extra_transmitted_bytes_iqr,canonical_combiner_input_bytes_median,canonical_combiner_input_bytes_iqr,encoding_overhead_bytes_median,encoding_overhead_bytes_iqr,public_context_bytes_median,public_context_bytes_iqr
+HYBRID-DIVERSE,1,89863400.0,0.0,278600.0,0.0,0.0031002610629021383,0.0,482.0,0.0,458.0,0.0,345.0,0.0,289.0,0.0
+PQC-BASE,1,9910900.0,0.0,,,,,,,,,,,,
+PQC-DIVERSE,1,89581100.0,0.0,,,,,,,,,,,,
+HYBRID,1,11619900.0,0.0,331200.0,0.0,0.02850282704670436,0.0,466.0,0.0,335.0,0.0,256.0,0.0,267.0,0.0

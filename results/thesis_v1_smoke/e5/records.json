@@ -1,0 +1,1153 @@
+[
+  {
+    "version": 1,
+    "run_id": "64b8b4f8-b3fe-401d-8662-a9514d3c27f2",
+    "experiment_kind": "E5",
+    "condition_id": "hybrid-diverse",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "c12458b2-9944-4418-8cab-7e7e705c5a15",
+      "shuffle": true,
+      "order_seed": 705001,
+      "warmup_runs": 4
+    },
+    "execution_order_index": 0,
+    "timestamp_utc": "2026-09-08T07:42:11.289663+00:00",
+    "seed": 202750332253653075,
+    "profile": "HYBRID-DIVERSE",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E5",
+      "condition_id": "hybrid-diverse",
+      "replicate_index": 0,
+      "seed": 202750332253653075,
+      "session": {
+        "version": 1,
+        "profile": "HYBRID-DIVERSE",
+        "qkd_authentication_profile": "QKD-PQC-AUTH",
+        "qkd_signal_count": 1024,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": "high"
+      },
+      "qkd_stages": [
+        {
+          "type": "identity"
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+      "qkd_authentication_material": "persistent pre-provisioned ML-DSA identities; fresh anti-replay registry per run",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": 858400,
+      "pqc_bob_identity_generation_time_ns": 668600,
+      "pqc_total_identity_generation_time_ns": 1527000,
+      "pqc_public_identity_bytes": 3904,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "6862cc1dcad2f01ccc3ff6ada97f6e51",
+      "profile": "HYBRID-DIVERSE",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "session_key",
+        "bit_length": 256
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "BB84-final-key",
+          "encoding": "packed-bits-big-endian",
+          "bit_length": 388,
+          "byte_length": 49
+        },
+        {
+          "position": 2,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "ML-KEM-768",
+          "encoding": "raw-bytes",
+          "bit_length": 256,
+          "byte_length": 32
+        },
+        {
+          "position": 3,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "HQC-3",
+          "encoding": "raw-bytes",
+          "bit_length": 256,
+          "byte_length": 32
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "ml_dsa_65",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+        },
+        "pqc_exchange": {
+          "purpose": "PQC contribution authentication",
+          "mechanism": "mutual digital signatures",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+        }
+      },
+      "public_context": {
+        "hybrid_context_hash_sha384": "2f0a58417c4f3792adde9a11c349f444f7fb549eb33be3cd8b035a1090e018c639164307da75b50f26090e39b8e5f9a2",
+        "qkd_transcript_hash_sha384": "50d8e6383735a5f3e059f5d8b4e6a59d72e625ff4372803b4b77dff789c47307657f9cc435fef4276472f1390bfaad38",
+        "pqc_transcript_hash_sha384": "391e00f37aa3d0ea75c0bcdfd78a8081a0b1146c72b914f48f5fa7fe47624a43cfe0e2348c0fa716d6dd95c61c13bf13",
+        "hybrid_encoding_version": 1,
+        "hybrid_context_version": 1
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "HYBRID-DIVERSE"
+        },
+        {
+          "sequence": 1,
+          "source": "pqc",
+          "stage": "server_offer",
+          "state": "created",
+          "detail": "Responder KEM offer signed."
+        },
+        {
+          "sequence": 2,
+          "source": "pqc",
+          "stage": "server_offer_authentication",
+          "state": "verified",
+          "detail": "Responder identity verified."
+        },
+        {
+          "sequence": 3,
+          "source": "pqc",
+          "stage": "client_exchange",
+          "state": "created",
+          "detail": "Initiator encapsulations signed."
+        },
+        {
+          "sequence": 4,
+          "source": "pqc",
+          "stage": "client_exchange_authentication",
+          "state": "verified",
+          "detail": "Initiator identity verified."
+        },
+        {
+          "sequence": 5,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 6,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "executed_verified",
+          "detail": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+        },
+        {
+          "sequence": 7,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 8,
+          "source": "hybrid",
+          "stage": "combiner_input",
+          "state": "encoded",
+          "detail": "Canonical ordered contributions encoded."
+        },
+        {
+          "sequence": 9,
+          "source": "hybrid",
+          "stage": "finished_b",
+          "state": "verified",
+          "detail": "Alice verified Bob's hybrid Finished."
+        },
+        {
+          "sequence": 10,
+          "source": "hybrid",
+          "stage": "finished_a",
+          "state": "verified",
+          "detail": "Bob verified Alice's chained hybrid Finished."
+        },
+        {
+          "sequence": 11,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Mutually confirmed hybrid session key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 154791500,
+        "n_raw": 1024,
+        "n_sifted": 531,
+        "n_disclosed": 107,
+        "n_candidate": 424,
+        "n_reconciled": 424,
+        "n_final": 388,
+        "sifting_efficiency": 0.5185546875,
+        "final_secret_fraction": 0.37890625,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 54,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 53,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 107,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.0,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.0,
+        "transcript_bytes": 53662
+      },
+      "pqc": {
+        "internal_profile": "high",
+        "algorithms": [
+          "ML-KEM-768",
+          "HQC-3",
+          "ML-DSA-65",
+          "HKDF-SHA-384",
+          "HMAC-SHA-384"
+        ],
+        "server_offer_time_ns": 15713500,
+        "server_processing_time_ns": 27607000,
+        "client_exchange_time_ns": 4553500,
+        "client_processing_time_ns": 41989400,
+        "key_schedule_time_ns": 0,
+        "confirmation_time_ns": 0,
+        "crypto_software_time_ns": 89863400,
+        "ml_kem_keygen_time_ns": 296700,
+        "hqc_keygen_time_ns": 13256100,
+        "server_offer_sign_time_ns": 2108500,
+        "server_offer_verify_time_ns": 837700,
+        "ml_kem_encapsulate_time_ns": 308500,
+        "hqc_encapsulate_time_ns": 26419200,
+        "client_exchange_sign_time_ns": 4481100,
+        "client_exchange_verify_time_ns": 904400,
+        "ml_kem_decapsulate_time_ns": 357100,
+        "hqc_decapsulate_time_ns": 40666500,
+        "transcript_construction_hash_time_ns": 136400,
+        "kem_combiner_encoding_time_ns": 0,
+        "hkdf_session_time_ns": 0,
+        "hkdf_confirmation_time_ns": 0,
+        "finished_generation_time_ns": 0,
+        "finished_verification_time_ns": 0,
+        "kem_public_key_bytes": 5698,
+        "kem_ciphertext_bytes": 10066,
+        "canonical_protocol_bytes": 16105,
+        "transcript_bytes": 22852,
+        "signature_bytes": 6618,
+        "finished_bytes": 0,
+        "public_key_provisioning_bytes": 3904,
+        "serialized_transport_bytes": null
+      },
+      "qkd_authentication": {
+        "mechanism": "ml_dsa_65",
+        "algorithm": "ML-DSA-65",
+        "family": "post-quantum digital signature",
+        "authenticated_bytes": 107622,
+        "evidence_bytes": 6618,
+        "checkpoints": 2,
+        "generation_operations": 2,
+        "verification_operations": 2,
+        "generation_time_ns": 13524800,
+        "verification_time_ns": 3084200,
+        "total_time_ns": 16609000,
+        "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": 3904,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+          "liboqs": "0.16.0",
+          "liboqs-python": "0.16.0"
+        }
+      },
+      "pqc_authentication": {
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "signatures_generated": 2,
+        "signatures_verified": 2,
+        "signature_bytes": 6618,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      },
+      "hybrid": {
+        "component_count": 3,
+        "component_metadata_bytes": [
+          102,
+          89,
+          81
+        ],
+        "qkd_contribution_bits": 388,
+        "ml_kem_contribution_bytes": 32,
+        "hqc_contribution_bytes": 32,
+        "canonical_combiner_input_bytes": 458,
+        "encoding_overhead_bytes": 345,
+        "public_context_bytes": 289,
+        "encoding_time_ns": 35300,
+        "hkdf_session_time_ns": 81400,
+        "hkdf_confirmation_time_ns": 49700,
+        "finished_generation_time_ns": 62100,
+        "finished_verification_time_ns": 50100,
+        "finished_responder_bytes": 241,
+        "finished_initiator_bytes": 241,
+        "derived_session_key_bits": 256
+      },
+      "orchestration_software_wall_time_ns": 262224200
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 11274
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "5c99f9f8-ffd5-497c-9026-f1d0119c793a",
+    "experiment_kind": "E5",
+    "condition_id": "pqc-base",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "c12458b2-9944-4418-8cab-7e7e705c5a15",
+      "shuffle": true,
+      "order_seed": 705001,
+      "warmup_runs": 4
+    },
+    "execution_order_index": 1,
+    "timestamp_utc": "2026-09-08T07:42:11.360187+00:00",
+    "seed": null,
+    "profile": "PQC-BASE",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E5",
+      "condition_id": "pqc-base",
+      "replicate_index": 0,
+      "seed": null,
+      "session": {
+        "version": 1,
+        "profile": "PQC-BASE",
+        "qkd_authentication_profile": null,
+        "qkd_signal_count": null,
+        "qkd_postprocessing": null,
+        "internal_pqc_profile": "low"
+      },
+      "qkd_stages": [],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+      "qkd_authentication_material": null,
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": 858400,
+      "pqc_bob_identity_generation_time_ns": 668600,
+      "pqc_total_identity_generation_time_ns": 1527000,
+      "pqc_public_identity_bytes": 3904,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "a2371d621f8427bf87143c6120319d36",
+      "profile": "PQC-BASE",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "session_key",
+        "bit_length": 256
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "ML-KEM-768",
+          "encoding": "raw KEM secret via canonical PQC KDF input",
+          "bit_length": 256,
+          "byte_length": 32
+        }
+      ],
+      "authentication": {
+        "qkd_classical": null,
+        "pqc_exchange": {
+          "purpose": "PQC handshake authentication",
+          "mechanism": "mutual digital signatures",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+        }
+      },
+      "public_context": {
+        "pqc_protocol_version": 1,
+        "pqc_transcript_hash_sha384": "10ef0604e4f5c8caf7dd188870c848e0837998875301a576e26d79ac6a30d81346a4f51e8b36152f3c6a89fcd6cba5bd"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "PQC-BASE"
+        },
+        {
+          "sequence": 1,
+          "source": "pqc",
+          "stage": "server_offer",
+          "state": "created",
+          "detail": "Responder KEM offer signed."
+        },
+        {
+          "sequence": 2,
+          "source": "pqc",
+          "stage": "server_offer_authentication",
+          "state": "verified",
+          "detail": "Responder identity verified."
+        },
+        {
+          "sequence": 3,
+          "source": "pqc",
+          "stage": "client_exchange",
+          "state": "created",
+          "detail": "Initiator encapsulations signed."
+        },
+        {
+          "sequence": 4,
+          "source": "pqc",
+          "stage": "client_exchange_authentication",
+          "state": "verified",
+          "detail": "Initiator identity verified."
+        },
+        {
+          "sequence": 5,
+          "source": "pqc",
+          "stage": "key_schedule",
+          "state": "derived",
+          "detail": "Role-local session and confirmation schedules started."
+        },
+        {
+          "sequence": 6,
+          "source": "pqc",
+          "stage": "finished",
+          "state": "verified",
+          "detail": "Both role-separated Finished messages verified."
+        },
+        {
+          "sequence": 7,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Confirmed PQC session key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": null,
+      "pqc": {
+        "internal_profile": "low",
+        "algorithms": [
+          "ML-KEM-768",
+          "ML-DSA-65",
+          "HKDF-SHA-384",
+          "HMAC-SHA-384"
+        ],
+        "server_offer_time_ns": 4892600,
+        "server_processing_time_ns": 1121700,
+        "client_exchange_time_ns": 2400400,
+        "client_processing_time_ns": 1119600,
+        "key_schedule_time_ns": 133400,
+        "confirmation_time_ns": 243200,
+        "crypto_software_time_ns": 9910900,
+        "ml_kem_keygen_time_ns": 288400,
+        "hqc_keygen_time_ns": null,
+        "server_offer_sign_time_ns": 4562400,
+        "server_offer_verify_time_ns": 778500,
+        "ml_kem_encapsulate_time_ns": 308600,
+        "hqc_encapsulate_time_ns": null,
+        "client_exchange_sign_time_ns": 2354600,
+        "client_exchange_verify_time_ns": 748700,
+        "ml_kem_decapsulate_time_ns": 338600,
+        "hqc_decapsulate_time_ns": null,
+        "transcript_construction_hash_time_ns": 181800,
+        "kem_combiner_encoding_time_ns": 15700,
+        "hkdf_session_time_ns": 48900,
+        "hkdf_confirmation_time_ns": 24800,
+        "finished_generation_time_ns": 37800,
+        "finished_verification_time_ns": 22100,
+        "kem_public_key_bytes": 1184,
+        "kem_ciphertext_bytes": 1088,
+        "canonical_protocol_bytes": 2585,
+        "transcript_bytes": 9332,
+        "signature_bytes": 6618,
+        "finished_bytes": 96,
+        "public_key_provisioning_bytes": 3904,
+        "serialized_transport_bytes": null
+      },
+      "qkd_authentication": null,
+      "pqc_authentication": {
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "signatures_generated": 2,
+        "signatures_verified": 2,
+        "signature_bytes": 6618,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      },
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 10036600
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6496
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "f93513ca-48c0-424a-9b06-1f73bafde767",
+    "experiment_kind": "E5",
+    "condition_id": "pqc-diverse",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "c12458b2-9944-4418-8cab-7e7e705c5a15",
+      "shuffle": true,
+      "order_seed": 705001,
+      "warmup_runs": 4
+    },
+    "execution_order_index": 2,
+    "timestamp_utc": "2026-09-08T07:42:11.509779+00:00",
+    "seed": null,
+    "profile": "PQC-DIVERSE",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E5",
+      "condition_id": "pqc-diverse",
+      "replicate_index": 0,
+      "seed": null,
+      "session": {
+        "version": 1,
+        "profile": "PQC-DIVERSE",
+        "qkd_authentication_profile": null,
+        "qkd_signal_count": null,
+        "qkd_postprocessing": null,
+        "internal_pqc_profile": "high"
+      },
+      "qkd_stages": [],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+      "qkd_authentication_material": null,
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": 858400,
+      "pqc_bob_identity_generation_time_ns": 668600,
+      "pqc_total_identity_generation_time_ns": 1527000,
+      "pqc_public_identity_bytes": 3904,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "958f5e627b7ce55e3161346bb4feff3f",
+      "profile": "PQC-DIVERSE",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "session_key",
+        "bit_length": 256
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "ML-KEM-768",
+          "encoding": "raw KEM secret via canonical PQC KDF input",
+          "bit_length": 256,
+          "byte_length": 32
+        },
+        {
+          "position": 2,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "HQC-3",
+          "encoding": "raw KEM secret via canonical PQC KDF input",
+          "bit_length": 256,
+          "byte_length": 32
+        }
+      ],
+      "authentication": {
+        "qkd_classical": null,
+        "pqc_exchange": {
+          "purpose": "PQC handshake authentication",
+          "mechanism": "mutual digital signatures",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+        }
+      },
+      "public_context": {
+        "pqc_protocol_version": 1,
+        "pqc_transcript_hash_sha384": "6da08c5b9e013191d7bb41698a26235e0ab80f2358e91cd897dce6ff0f038d2929f5773d00b0d6de5c974d94e0499c85"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "PQC-DIVERSE"
+        },
+        {
+          "sequence": 1,
+          "source": "pqc",
+          "stage": "server_offer",
+          "state": "created",
+          "detail": "Responder KEM offer signed."
+        },
+        {
+          "sequence": 2,
+          "source": "pqc",
+          "stage": "server_offer_authentication",
+          "state": "verified",
+          "detail": "Responder identity verified."
+        },
+        {
+          "sequence": 3,
+          "source": "pqc",
+          "stage": "client_exchange",
+          "state": "created",
+          "detail": "Initiator encapsulations signed."
+        },
+        {
+          "sequence": 4,
+          "source": "pqc",
+          "stage": "client_exchange_authentication",
+          "state": "verified",
+          "detail": "Initiator identity verified."
+        },
+        {
+          "sequence": 5,
+          "source": "pqc",
+          "stage": "key_schedule",
+          "state": "derived",
+          "detail": "Role-local session and confirmation schedules started."
+        },
+        {
+          "sequence": 6,
+          "source": "pqc",
+          "stage": "finished",
+          "state": "verified",
+          "detail": "Both role-separated Finished messages verified."
+        },
+        {
+          "sequence": 7,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Confirmed PQC session key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": null,
+      "pqc": {
+        "internal_profile": "high",
+        "algorithms": [
+          "ML-KEM-768",
+          "HQC-3",
+          "ML-DSA-65",
+          "HKDF-SHA-384",
+          "HMAC-SHA-384"
+        ],
+        "server_offer_time_ns": 17247000,
+        "server_processing_time_ns": 27648700,
+        "client_exchange_time_ns": 1450300,
+        "client_processing_time_ns": 42703000,
+        "key_schedule_time_ns": 194700,
+        "confirmation_time_ns": 337400,
+        "crypto_software_time_ns": 89581100,
+        "ml_kem_keygen_time_ns": 303200,
+        "hqc_keygen_time_ns": 13236400,
+        "server_offer_sign_time_ns": 3660700,
+        "server_offer_verify_time_ns": 846400,
+        "ml_kem_encapsulate_time_ns": 309000,
+        "hqc_encapsulate_time_ns": 26452600,
+        "client_exchange_sign_time_ns": 1383400,
+        "client_exchange_verify_time_ns": 902400,
+        "ml_kem_decapsulate_time_ns": 354300,
+        "hqc_decapsulate_time_ns": 41386300,
+        "transcript_construction_hash_time_ns": 354600,
+        "kem_combiner_encoding_time_ns": 20400,
+        "hkdf_session_time_ns": 51200,
+        "hkdf_confirmation_time_ns": 25900,
+        "finished_generation_time_ns": 37900,
+        "finished_verification_time_ns": 23400,
+        "kem_public_key_bytes": 5698,
+        "kem_ciphertext_bytes": 10066,
+        "canonical_protocol_bytes": 16105,
+        "transcript_bytes": 22852,
+        "signature_bytes": 6618,
+        "finished_bytes": 96,
+        "public_key_provisioning_bytes": 3904,
+        "serialized_transport_bytes": null
+      },
+      "qkd_authentication": null,
+      "pqc_authentication": {
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "signatures_generated": 2,
+        "signatures_verified": 2,
+        "signature_bytes": 6618,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      },
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 89772900
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6817
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "4773e64b-2d73-44c1-8de8-66dfd4e652b9",
+    "experiment_kind": "E5",
+    "condition_id": "hybrid",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "c12458b2-9944-4418-8cab-7e7e705c5a15",
+      "shuffle": true,
+      "order_seed": 705001,
+      "warmup_runs": 4
+    },
+    "execution_order_index": 3,
+    "timestamp_utc": "2026-09-08T07:42:11.747337+00:00",
+    "seed": 11592527119588117428,
+    "profile": "HYBRID",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E5",
+      "condition_id": "hybrid",
+      "replicate_index": 0,
+      "seed": 11592527119588117428,
+      "session": {
+        "version": 1,
+        "profile": "HYBRID",
+        "qkd_authentication_profile": "QKD-PQC-AUTH",
+        "qkd_signal_count": 1024,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": "low"
+      },
+      "qkd_stages": [
+        {
+          "type": "identity"
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+      "qkd_authentication_material": "persistent pre-provisioned ML-DSA identities; fresh anti-replay registry per run",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": 858400,
+      "pqc_bob_identity_generation_time_ns": 668600,
+      "pqc_total_identity_generation_time_ns": 1527000,
+      "pqc_public_identity_bytes": 3904,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "d4fc0a00c04ab95413bc97e1874d572e",
+      "profile": "HYBRID",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "session_key",
+        "bit_length": 256
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "BB84-final-key",
+          "encoding": "packed-bits-big-endian",
+          "bit_length": 373,
+          "byte_length": 47
+        },
+        {
+          "position": 2,
+          "source": "pqc",
+          "protocol": "authenticated KEM handshake",
+          "algorithm": "ML-KEM-768",
+          "encoding": "raw-bytes",
+          "bit_length": 256,
+          "byte_length": 32
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "ml_dsa_65",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+        },
+        "pqc_exchange": {
+          "purpose": "PQC contribution authentication",
+          "mechanism": "mutual digital signatures",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+        }
+      },
+      "public_context": {
+        "hybrid_context_hash_sha384": "5f8100fb6d78a08e827e0bdcfe524c0595af20a2e6edbe68cb7a4d46c889c01f3668f4977dd49a4bcf0538f1e4c6bcdf",
+        "qkd_transcript_hash_sha384": "cd9ae4bc63b5707ee748ee1ac4dfd4bdec6d290c958c146e12594b63f3dc0c07db1f954abd34a2d499d31f3e5aee6cce",
+        "pqc_transcript_hash_sha384": "bad1dc733be92a9c0dec29baeba6c77db959be25d1c3e0e8147b222ced88c0a6d901b6eea7b6b19bc8b71e87ae81846e",
+        "hybrid_encoding_version": 1,
+        "hybrid_context_version": 1
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "HYBRID"
+        },
+        {
+          "sequence": 1,
+          "source": "pqc",
+          "stage": "server_offer",
+          "state": "created",
+          "detail": "Responder KEM offer signed."
+        },
+        {
+          "sequence": 2,
+          "source": "pqc",
+          "stage": "server_offer_authentication",
+          "state": "verified",
+          "detail": "Responder identity verified."
+        },
+        {
+          "sequence": 3,
+          "source": "pqc",
+          "stage": "client_exchange",
+          "state": "created",
+          "detail": "Initiator encapsulations signed."
+        },
+        {
+          "sequence": 4,
+          "source": "pqc",
+          "stage": "client_exchange_authentication",
+          "state": "verified",
+          "detail": "Initiator identity verified."
+        },
+        {
+          "sequence": 5,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 6,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "executed_verified",
+          "detail": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+        },
+        {
+          "sequence": 7,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 8,
+          "source": "hybrid",
+          "stage": "combiner_input",
+          "state": "encoded",
+          "detail": "Canonical ordered contributions encoded."
+        },
+        {
+          "sequence": 9,
+          "source": "hybrid",
+          "stage": "finished_b",
+          "state": "verified",
+          "detail": "Alice verified Bob's hybrid Finished."
+        },
+        {
+          "sequence": 10,
+          "source": "hybrid",
+          "stage": "finished_a",
+          "state": "verified",
+          "detail": "Bob verified Alice's chained hybrid Finished."
+        },
+        {
+          "sequence": 11,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Mutually confirmed hybrid session key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 154978800,
+        "n_raw": 1024,
+        "n_sifted": 513,
+        "n_disclosed": 104,
+        "n_candidate": 409,
+        "n_reconciled": 409,
+        "n_final": 373,
+        "sifting_efficiency": 0.5009765625,
+        "final_secret_fraction": 0.3642578125,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 51,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 53,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 104,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.0,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.0,
+        "transcript_bytes": 52016
+      },
+      "pqc": {
+        "internal_profile": "low",
+        "algorithms": [
+          "ML-KEM-768",
+          "ML-DSA-65",
+          "HKDF-SHA-384",
+          "HMAC-SHA-384"
+        ],
+        "server_offer_time_ns": 1903300,
+        "server_processing_time_ns": 1136100,
+        "client_exchange_time_ns": 7434300,
+        "client_processing_time_ns": 1146200,
+        "key_schedule_time_ns": 0,
+        "confirmation_time_ns": 0,
+        "crypto_software_time_ns": 11619900,
+        "ml_kem_keygen_time_ns": 297900,
+        "hqc_keygen_time_ns": null,
+        "server_offer_sign_time_ns": 1569900,
+        "server_offer_verify_time_ns": 785200,
+        "ml_kem_encapsulate_time_ns": 318500,
+        "hqc_encapsulate_time_ns": null,
+        "client_exchange_sign_time_ns": 7388700,
+        "client_exchange_verify_time_ns": 765100,
+        "ml_kem_decapsulate_time_ns": 347600,
+        "hqc_decapsulate_time_ns": null,
+        "transcript_construction_hash_time_ns": 67600,
+        "kem_combiner_encoding_time_ns": 0,
+        "hkdf_session_time_ns": 0,
+        "hkdf_confirmation_time_ns": 0,
+        "finished_generation_time_ns": 0,
+        "finished_verification_time_ns": 0,
+        "kem_public_key_bytes": 1184,
+        "kem_ciphertext_bytes": 1088,
+        "canonical_protocol_bytes": 2585,
+        "transcript_bytes": 9332,
+        "signature_bytes": 6618,
+        "finished_bytes": 0,
+        "public_key_provisioning_bytes": 3904,
+        "serialized_transport_bytes": null
+      },
+      "qkd_authentication": {
+        "mechanism": "ml_dsa_65",
+        "algorithm": "ML-DSA-65",
+        "family": "post-quantum digital signature",
+        "authenticated_bytes": 104330,
+        "evidence_bytes": 6618,
+        "checkpoints": 2,
+        "generation_operations": 2,
+        "verification_operations": 2,
+        "generation_time_ns": 7477000,
+        "verification_time_ns": 3612700,
+        "total_time_ns": 11089700,
+        "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": 3904,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+          "liboqs": "0.16.0",
+          "liboqs-python": "0.16.0"
+        }
+      },
+      "pqc_authentication": {
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "signatures_generated": 2,
+        "signatures_verified": 2,
+        "signature_bytes": 6618,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      },
+      "hybrid": {
+        "component_count": 2,
+        "component_metadata_bytes": [
+          102,
+          89
+        ],
+        "qkd_contribution_bits": 373,
+        "ml_kem_contribution_bytes": 32,
+        "hqc_contribution_bytes": null,
+        "canonical_combiner_input_bytes": 335,
+        "encoding_overhead_bytes": 256,
+        "public_context_bytes": 267,
+        "encoding_time_ns": 51200,
+        "hkdf_session_time_ns": 83900,
+        "hkdf_confirmation_time_ns": 48100,
+        "finished_generation_time_ns": 75500,
+        "finished_verification_time_ns": 72500,
+        "finished_responder_bytes": 233,
+        "finished_initiator_bytes": 233,
+        "derived_session_key_bits": 256
+      },
+      "orchestration_software_wall_time_ns": 178716700
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 10951
+    }
+  }
+]

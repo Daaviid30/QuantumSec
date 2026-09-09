@@ -43,9 +43,6 @@ graphify-out/[0-9][0-9][0-9][0-9]-*/
 # extra files generated
 prompt.md
 
-# Generated experimental artifacts (selected TFM datasets may be archived explicitly)
-experiments/output/
-results/
 
 #docs
 docs/reviews/

@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "timestamp_utc": "2026-09-08T08:18:58.142126+00:00",
+  "environment": {
+    "python_version": "3.14.7",
+    "python_implementation": "CPython",
+    "numpy_version": "2.5.0",
+    "liboqs_python_version": "0.16.0",
+    "liboqs_version": "0.16.0",
+    "cryptography_version": "50.0.1",
+    "quantumsec_version": "0.1.0",
+    "os": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26200",
+    "machine_architecture": "AMD64",
+    "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+    "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+    "git_worktree_dirty": true
+  },
+  "config": {
+    "version": 1,
+    "experiment_kind": "D1",
+    "condition_id": "hybrid-diverse-aes-gcm",
+    "replicate_index": 0,
+    "seed": 9857894321211126253,
+    "session": {
+      "version": 1,
+      "profile": "HYBRID-DIVERSE",
+      "qkd_authentication_profile": "QKD-PQC-AUTH",
+      "qkd_signal_count": 4096,
+      "qkd_postprocessing": {
+        "sample_fraction": 0.2,
+        "phase_error_abort_threshold": 0.11,
+        "cascade_passes": 4,
+        "cascade_initial_block_factor": 0.73,
+        "cascade_maximum_initial_block_size": null,
+        "cascade_maximum_lookback_steps": null,
+        "verification_tag_length": 32,
+        "security_margin_bits": 0
+      },
+      "internal_pqc_profile": "high"
+    },
+    "qkd_stages": [
+      {
+        "type": "identity"
+      }
+    ],
+    "tags": []
+  },
+  "provisioning": {
+    "pqc_identities": "persistent pre-provisioned ML-DSA identities and peer trust",
+    "qkd_authentication_material": "persistent pre-provisioned ML-DSA identities; fresh anti-replay registry per run",
+    "qkd_authentication_material_bytes_per_direction": null,
+    "pqc_alice_identity_generation_time_ns": 858800,
+    "pqc_bob_identity_generation_time_ns": 667500,
+    "pqc_total_identity_generation_time_ns": 1526300,
+    "pqc_public_identity_bytes": 3904,
+    "included_in_session_timings": false
+  },
+  "session": {
+    "version": 1,
+    "session_id": "74e549fc8c76bcbb8e735a656d6d07f9",
+    "profile": "HYBRID-DIVERSE",
+    "status": "established",
+    "abort_reason": null,
+    "established_key": {
+      "type": "session_key",
+      "bit_length": 256
+    },
+    "provenance": [
+      {
+        "position": 1,
+        "source": "qkd",
+        "protocol": "BB84",
+        "algorithm": "BB84-final-key",
+        "encoding": "packed-bits-big-endian",
+        "bit_length": 1625,
+        "byte_length": 204
+      },
+      {
+        "position": 2,
+        "source": "pqc",
+        "protocol": "authenticated KEM handshake",
+        "algorithm": "ML-KEM-768",
+        "encoding": "raw-bytes",
+        "bit_length": 256,
+        "byte_length": 32
+      },
+      {
+        "position": 3,
+        "source": "pqc",
+        "protocol": "authenticated KEM handshake",
+        "algorithm": "HQC-3",
+        "encoding": "raw-bytes",
+        "bit_length": 256,
+        "byte_length": 32
+      }
+    ],
+    "authentication": {
+      "qkd_classical": {
+        "purpose": "QKD classical transcript authentication",
+        "mechanism": "ml_dsa_65",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+      },
+      "pqc_exchange": {
+        "purpose": "PQC contribution authentication",
+        "mechanism": "mutual digital signatures",
+        "algorithm": "ML-DSA-65",
+        "executed": true,
+        "verified": true,
+        "trust_assumption": "Peer ML-DSA public identities were pre-provisioned out of band."
+      }
+    },
+    "public_context": {
+      "hybrid_context_hash_sha384": "d0ee2345b4d0d99bd0196aec54b35a004fa661d3c31f1272631832ace05e58c4a4b749569a9403ba0fef73107e3de557",
+      "qkd_transcript_hash_sha384": "1abd815bca1dc081097603d1e6388923dba1e4e3a48cb149f602876bcdb20baa05982fa36ff5c89cd3f70efe5f13943f",
+      "pqc_transcript_hash_sha384": "7d4b758fbdb3a4b92a1d9debd870f7fa9127b0920fc63072aaa8685e46186e8b301d136698f4414348db76f6374e8ae3",
+      "hybrid_encoding_version": 1,
+      "hybrid_context_version": 1
+    }
+  },
+  "algorithm": "AES-256-GCM",
+  "key_bits": 256,
+  "sizes": {
+    "plaintext_bytes": 42,
+    "ciphertext_bytes": 42,
+    "nonce_bytes": 12,
+    "tag_bytes": 16,
+    "application_aad_bytes": 16
+  },
+  "round_trip_verified": true,
+  "tamper_matrix": [
+    {
+      "scenario": "ciphertext_bit_flip",
+      "rejected": true,
+      "exception": "InvalidTag"
+    },
+    {
+      "scenario": "tag_bit_flip",
+      "rejected": true,
+      "exception": "InvalidTag"
+    },
+    {
+      "scenario": "aad_change",
+      "rejected": true,
+      "exception": "InvalidTag"
+    }
+  ]
+}

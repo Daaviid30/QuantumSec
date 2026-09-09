@@ -1,0 +1,631 @@
+[
+  {
+    "version": 1,
+    "run_id": "f4d00996-f80a-442a-83fa-ab7d7a6e56e2",
+    "experiment_kind": "E4",
+    "condition_id": "qkd-assumed",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "70eb2eac-58d8-4ac2-88b1-d5b3b4a7dc88",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 0,
+    "timestamp_utc": "2026-09-08T07:42:09.435247+00:00",
+    "seed": 14327934917155077723,
+    "profile": "QKD-ASSUMED",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E4",
+      "condition_id": "qkd-assumed",
+      "replicate_index": 0,
+      "seed": 14327934917155077723,
+      "session": {
+        "version": 1,
+        "profile": "QKD-ASSUMED",
+        "qkd_authentication_profile": "QKD-ASSUMED",
+        "qkd_signal_count": 1024,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "identity"
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "authentication explicitly assumed; no runtime material",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "e3ff03d1705b4417ffdd1dd70bb2f661",
+      "profile": "QKD-ASSUMED",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 393
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 393,
+          "byte_length": 50
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "assumed",
+          "algorithm": "none",
+          "executed": false,
+          "verified": null,
+          "trust_assumption": "The classical BB84 channel is assumed authenticated externally."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "f5f71868f1b70575b2d6e35be993c8c75cb7849d8e7225a4a93273dbad9d81a6a5aaf432e87123dbb7e1c03ea6568cb1"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-ASSUMED"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "assumed_not_executed",
+          "detail": "The classical BB84 channel is assumed authenticated externally."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 152846700,
+        "n_raw": 1024,
+        "n_sifted": 537,
+        "n_disclosed": 108,
+        "n_candidate": 429,
+        "n_reconciled": 429,
+        "n_final": 393,
+        "sifting_efficiency": 0.5244140625,
+        "final_secret_fraction": 0.3837890625,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 57,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 51,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 108,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.0,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.0,
+        "transcript_bytes": 54210
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "assumed",
+        "algorithm": "none",
+        "family": "none",
+        "authenticated_bytes": 0,
+        "evidence_bytes": 0,
+        "checkpoints": 0,
+        "generation_operations": 0,
+        "verification_operations": 0,
+        "generation_time_ns": 0,
+        "verification_time_ns": 0,
+        "total_time_ns": 0,
+        "trust_assumption": "The classical BB84 channel is assumed authenticated externally.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 152846700
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6181
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "ba0e0966-958b-4371-8dbc-60710e448efc",
+    "experiment_kind": "E4",
+    "condition_id": "qkd-classical-auth",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "70eb2eac-58d8-4ac2-88b1-d5b3b4a7dc88",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 1,
+    "timestamp_utc": "2026-09-08T07:42:09.940907+00:00",
+    "seed": 14327934917155077723,
+    "profile": "QKD-CLASSICAL-AUTH",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E4",
+      "condition_id": "qkd-classical-auth",
+      "replicate_index": 0,
+      "seed": 14327934917155077723,
+      "session": {
+        "version": 1,
+        "profile": "QKD-CLASSICAL-AUTH",
+        "qkd_authentication_profile": "QKD-CLASSICAL-AUTH",
+        "qkd_signal_count": 1024,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "identity"
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "fresh pre-shared authentication material per run",
+      "qkd_authentication_material_bytes_per_direction": 655360,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "e3ff03d1705b4417ffdd1dd70bb2f661",
+      "profile": "QKD-CLASSICAL-AUTH",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 393
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 393,
+          "byte_length": 50
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "wegman_carter",
+          "algorithm": "Toeplitz-U2+one-time-mask-128",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Alice and Bob hold identical, uniformly random, pre-shared authentication material; every Toeplitz selector and one-time tag mask is fresh and never reused."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "f5f71868f1b70575b2d6e35be993c8c75cb7849d8e7225a4a93273dbad9d81a6a5aaf432e87123dbb7e1c03ea6568cb1"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-CLASSICAL-AUTH"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "executed_verified",
+          "detail": "Alice and Bob hold identical, uniformly random, pre-shared authentication material; every Toeplitz selector and one-time tag mask is fresh and never reused."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 158883200,
+        "n_raw": 1024,
+        "n_sifted": 537,
+        "n_disclosed": 108,
+        "n_candidate": 429,
+        "n_reconciled": 429,
+        "n_final": 393,
+        "sifting_efficiency": 0.5244140625,
+        "final_secret_fraction": 0.3837890625,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 57,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 51,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 108,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.0,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.0,
+        "transcript_bytes": 54210
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "wegman_carter",
+        "algorithm": "Toeplitz-U2+one-time-mask-128",
+        "family": "information-theoretic universal-hash authentication",
+        "authenticated_bytes": 108718,
+        "evidence_bytes": 32,
+        "checkpoints": 2,
+        "generation_operations": 2,
+        "verification_operations": 2,
+        "generation_time_ns": 142570000,
+        "verification_time_ns": 140791400,
+        "total_time_ns": 283361400,
+        "trust_assumption": "Alice and Bob hold identical, uniformly random, pre-shared authentication material; every Toeplitz selector and one-time tag mask is fresh and never reused.",
+        "secret_bits_consumed": 870254,
+        "public_key_provisioning_bytes": null,
+        "forgery_bound": "<= 2^-128 per fresh-key checkpoint",
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 442244600
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6674
+    }
+  },
+  {
+    "version": 1,
+    "run_id": "08ce3945-0cab-4e4d-a3ef-6f3307742b8d",
+    "experiment_kind": "E4",
+    "condition_id": "qkd-pqc-auth",
+    "replicate_index": 0,
+    "batch": {
+      "version": 1,
+      "batch_run_id": "70eb2eac-58d8-4ac2-88b1-d5b3b4a7dc88",
+      "shuffle": false,
+      "order_seed": null,
+      "warmup_runs": 0
+    },
+    "execution_order_index": 2,
+    "timestamp_utc": "2026-09-08T07:42:10.197429+00:00",
+    "seed": 14327934917155077723,
+    "profile": "QKD-PQC-AUTH",
+    "environment": {
+      "python_version": "3.14.7",
+      "python_implementation": "CPython",
+      "numpy_version": "2.5.0",
+      "liboqs_python_version": "0.16.0",
+      "liboqs_version": "0.16.0",
+      "cryptography_version": "50.0.1",
+      "quantumsec_version": "0.1.0",
+      "os": "Windows",
+      "os_release": "11",
+      "os_version": "10.0.26200",
+      "machine_architecture": "AMD64",
+      "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+      "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+      "git_worktree_dirty": true
+    },
+    "config": {
+      "version": 1,
+      "experiment_kind": "E4",
+      "condition_id": "qkd-pqc-auth",
+      "replicate_index": 0,
+      "seed": 14327934917155077723,
+      "session": {
+        "version": 1,
+        "profile": "QKD-PQC-AUTH",
+        "qkd_authentication_profile": "QKD-PQC-AUTH",
+        "qkd_signal_count": 1024,
+        "qkd_postprocessing": {
+          "sample_fraction": 0.2,
+          "phase_error_abort_threshold": 0.11,
+          "cascade_passes": 4,
+          "cascade_initial_block_factor": 0.73,
+          "cascade_maximum_initial_block_size": null,
+          "cascade_maximum_lookback_steps": null,
+          "verification_tag_length": 32,
+          "security_margin_bits": 0
+        },
+        "internal_pqc_profile": null
+      },
+      "qkd_stages": [
+        {
+          "type": "identity"
+        }
+      ],
+      "tags": []
+    },
+    "provisioning": {
+      "pqc_identities": null,
+      "qkd_authentication_material": "persistent pre-provisioned ML-DSA identities; fresh anti-replay registry per run",
+      "qkd_authentication_material_bytes_per_direction": null,
+      "pqc_alice_identity_generation_time_ns": null,
+      "pqc_bob_identity_generation_time_ns": null,
+      "pqc_total_identity_generation_time_ns": null,
+      "pqc_public_identity_bytes": null,
+      "included_in_session_timings": false
+    },
+    "result": {
+      "version": 1,
+      "session_id": "e3ff03d1705b4417ffdd1dd70bb2f661",
+      "profile": "QKD-PQC-AUTH",
+      "status": "established",
+      "abort_reason": null,
+      "established_key": {
+        "type": "qkd_bitstring",
+        "bit_length": 393
+      },
+      "provenance": [
+        {
+          "position": 1,
+          "source": "qkd",
+          "protocol": "BB84",
+          "algorithm": "privacy-amplified-bitstring",
+          "encoding": "big-endian packed bits with explicit bit length",
+          "bit_length": 393,
+          "byte_length": 50
+        }
+      ],
+      "authentication": {
+        "qkd_classical": {
+          "purpose": "QKD classical transcript authentication",
+          "mechanism": "ml_dsa_65",
+          "algorithm": "ML-DSA-65",
+          "executed": true,
+          "verified": true,
+          "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+        },
+        "pqc_exchange": null
+      },
+      "public_context": {
+        "qkd_transcript_version": 1,
+        "qkd_transcript_hash_sha384": "f5f71868f1b70575b2d6e35be993c8c75cb7849d8e7225a4a93273dbad9d81a6a5aaf432e87123dbb7e1c03ea6568cb1"
+      }
+    },
+    "trace": {
+      "version": 1,
+      "events": [
+        {
+          "sequence": 0,
+          "source": "session",
+          "stage": "session",
+          "state": "started",
+          "detail": "QKD-PQC-AUTH"
+        },
+        {
+          "sequence": 1,
+          "source": "qkd",
+          "stage": "bb84",
+          "state": "completed",
+          "detail": "BB84 post-processing completed."
+        },
+        {
+          "sequence": 2,
+          "source": "qkd",
+          "stage": "classical_authentication",
+          "state": "executed_verified",
+          "detail": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session."
+        },
+        {
+          "sequence": 3,
+          "source": "qkd",
+          "stage": "key_release",
+          "state": "released",
+          "detail": "Final key released after all profile checks."
+        },
+        {
+          "sequence": 4,
+          "source": "session",
+          "stage": "session",
+          "state": "established",
+          "detail": "Authenticated QKD key released."
+        }
+      ]
+    },
+    "metrics": {
+      "qkd": {
+        "simulation_time_ns": 181554300,
+        "n_raw": 1024,
+        "n_sifted": 537,
+        "n_disclosed": 108,
+        "n_candidate": 429,
+        "n_reconciled": 429,
+        "n_final": 393,
+        "sifting_efficiency": 0.5244140625,
+        "final_secret_fraction": 0.3837890625,
+        "estimated_qber_z": 0.0,
+        "estimated_qber_x": 0.0,
+        "estimated_qber_aggregated": 0.0,
+        "estimated_z_errors": 0,
+        "estimated_z_trials": 57,
+        "estimated_x_errors": 0,
+        "estimated_x_trials": 51,
+        "estimated_aggregate_errors": 0,
+        "estimated_aggregate_trials": 108,
+        "phase_error_bound": 0.0,
+        "diagnostic_full_sifted_qber": 0.0,
+        "diagnostic_qber_z": 0.0,
+        "diagnostic_qber_x": 0.0,
+        "diagnostic_qber_aggregated": 0.0,
+        "transcript_bytes": 54210
+      },
+      "pqc": null,
+      "qkd_authentication": {
+        "mechanism": "ml_dsa_65",
+        "algorithm": "ML-DSA-65",
+        "family": "post-quantum digital signature",
+        "authenticated_bytes": 108718,
+        "evidence_bytes": 6618,
+        "checkpoints": 2,
+        "generation_operations": 2,
+        "verification_operations": 2,
+        "generation_time_ns": 7562700,
+        "verification_time_ns": 3140700,
+        "total_time_ns": 10703400,
+        "trust_assumption": "Peer ML-DSA-65 public identities are authenticated and pre-provisioned before the QKD session.",
+        "secret_bits_consumed": null,
+        "public_key_provisioning_bytes": 3904,
+        "forgery_bound": null,
+        "runtime_environment": {
+          "python": "3.14.7",
+          "implementation": "cpython",
+          "platform": "Windows-11-10.0.26200-SP0",
+          "processor": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+          "liboqs": "0.16.0",
+          "liboqs-python": "0.16.0"
+        }
+      },
+      "pqc_authentication": null,
+      "hybrid": null,
+      "orchestration_software_wall_time_ns": 192257700
+    },
+    "artifact": {
+      "experiment_record_json_bytes": 6433
+    }
+  }
+]

@@ -1,0 +1,655 @@
+{
+  "campaign_version": "thesis-v1.0.1",
+  "preset": "smoke",
+  "manifest_created_utc": "2026-09-08T07:42:03.247386+00:00",
+  "config_schema_version": 1,
+  "record_schema_version": 1,
+  "environment": {
+    "python_version": "3.14.7",
+    "python_implementation": "CPython",
+    "numpy_version": "2.5.0",
+    "liboqs_python_version": "0.16.0",
+    "liboqs_version": "0.16.0",
+    "cryptography_version": "50.0.1",
+    "quantumsec_version": "0.1.0",
+    "os": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26200",
+    "machine_architecture": "AMD64",
+    "cpu_identifier": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+    "git_commit_sha": "ac46477bb374bde1c0ace1ef0bcfbc26b199dcfa",
+    "git_worktree_dirty": true
+  },
+  "pqc_identity_provisioning": {
+    "alice_identity_generation_time_ns": 858400,
+    "bob_identity_generation_time_ns": 668600,
+    "total_identity_generation_time_ns": 1527000,
+    "public_identity_bytes": 3904
+  },
+  "expected_record_counts": {
+    "e1": 2,
+    "e2": 25,
+    "e3": 11,
+    "e4": 3,
+    "e5": 4,
+    "d1": 1
+  },
+  "experiments": {
+    "e1": {
+      "recorded_runs": 2,
+      "replicates_by_condition": {
+        "pqc-base": 1,
+        "pqc-diverse": 1
+      },
+      "conditions": {
+        "pqc-base": {
+          "profile": "PQC-BASE",
+          "signal_count": null,
+          "qkd_authentication_profile": null,
+          "qkd_stages": []
+        },
+        "pqc-diverse": {
+          "profile": "PQC-DIVERSE",
+          "signal_count": null,
+          "qkd_authentication_profile": null,
+          "qkd_stages": []
+        }
+      }
+    },
+    "e2": {
+      "recorded_runs": 25,
+      "replicates_by_condition": {
+        "identity": 1,
+        "depolarizing-0.02": 1,
+        "depolarizing-0.05": 1,
+        "depolarizing-0.10": 1,
+        "depolarizing-0.15": 1,
+        "depolarizing-0.20": 1,
+        "depolarizing-0.25": 1,
+        "bit-flip-0.02": 1,
+        "bit-flip-0.05": 1,
+        "bit-flip-0.10": 1,
+        "bit-flip-0.16": 1,
+        "bit-flip-0.20": 1,
+        "phase-flip-0.02": 1,
+        "phase-flip-0.05": 1,
+        "phase-flip-0.10": 1,
+        "phase-flip-0.16": 1,
+        "phase-flip-0.20": 1,
+        "amplitude-damping-0.02": 1,
+        "amplitude-damping-0.05": 1,
+        "amplitude-damping-0.10": 1,
+        "amplitude-damping-0.20": 1,
+        "amplitude-damping-0.30": 1,
+        "pauli-symmetric": 1,
+        "pauli-x-dominant": 1,
+        "pauli-z-dominant": 1
+      },
+      "conditions": {
+        "identity": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        },
+        "depolarizing-0.02": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "depolarizing",
+              "p": 0.02
+            }
+          ]
+        },
+        "depolarizing-0.05": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "depolarizing",
+              "p": 0.05
+            }
+          ]
+        },
+        "depolarizing-0.10": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "depolarizing",
+              "p": 0.1
+            }
+          ]
+        },
+        "depolarizing-0.15": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "depolarizing",
+              "p": 0.15
+            }
+          ]
+        },
+        "depolarizing-0.20": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "depolarizing",
+              "p": 0.2
+            }
+          ]
+        },
+        "depolarizing-0.25": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "depolarizing",
+              "p": 0.25
+            }
+          ]
+        },
+        "bit-flip-0.02": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "bit_flip",
+              "p": 0.02
+            }
+          ]
+        },
+        "bit-flip-0.05": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "bit_flip",
+              "p": 0.05
+            }
+          ]
+        },
+        "bit-flip-0.10": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "bit_flip",
+              "p": 0.1
+            }
+          ]
+        },
+        "bit-flip-0.16": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "bit_flip",
+              "p": 0.16
+            }
+          ]
+        },
+        "bit-flip-0.20": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "bit_flip",
+              "p": 0.2
+            }
+          ]
+        },
+        "phase-flip-0.02": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "phase_flip",
+              "p": 0.02
+            }
+          ]
+        },
+        "phase-flip-0.05": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "phase_flip",
+              "p": 0.05
+            }
+          ]
+        },
+        "phase-flip-0.10": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "phase_flip",
+              "p": 0.1
+            }
+          ]
+        },
+        "phase-flip-0.16": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "phase_flip",
+              "p": 0.16
+            }
+          ]
+        },
+        "phase-flip-0.20": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "phase_flip",
+              "p": 0.2
+            }
+          ]
+        },
+        "amplitude-damping-0.02": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "amplitude_damping",
+              "gamma": 0.02
+            }
+          ]
+        },
+        "amplitude-damping-0.05": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "amplitude_damping",
+              "gamma": 0.05
+            }
+          ]
+        },
+        "amplitude-damping-0.10": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "amplitude_damping",
+              "gamma": 0.1
+            }
+          ]
+        },
+        "amplitude-damping-0.20": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "amplitude_damping",
+              "gamma": 0.2
+            }
+          ]
+        },
+        "amplitude-damping-0.30": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "amplitude_damping",
+              "gamma": 0.3
+            }
+          ]
+        },
+        "pauli-symmetric": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "pauli",
+              "px": 0.02,
+              "py": 0.02,
+              "pz": 0.02
+            }
+          ]
+        },
+        "pauli-x-dominant": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "pauli",
+              "px": 0.08,
+              "py": 0.01,
+              "pz": 0.02
+            }
+          ]
+        },
+        "pauli-z-dominant": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "pauli",
+              "px": 0.02,
+              "py": 0.01,
+              "pz": 0.08
+            }
+          ]
+        }
+      }
+    },
+    "e3": {
+      "recorded_runs": 11,
+      "replicates_by_condition": {
+        "intercept-0.0": 1,
+        "intercept-0.1": 1,
+        "intercept-0.2": 1,
+        "intercept-0.3": 1,
+        "intercept-0.4": 1,
+        "intercept-0.5": 1,
+        "intercept-0.6": 1,
+        "intercept-0.7": 1,
+        "intercept-0.8": 1,
+        "intercept-0.9": 1,
+        "intercept-1.0": 1
+      },
+      "conditions": {
+        "intercept-0.0": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.0
+            }
+          ]
+        },
+        "intercept-0.1": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.1
+            }
+          ]
+        },
+        "intercept-0.2": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.2
+            }
+          ]
+        },
+        "intercept-0.3": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.3
+            }
+          ]
+        },
+        "intercept-0.4": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.4
+            }
+          ]
+        },
+        "intercept-0.5": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.5
+            }
+          ]
+        },
+        "intercept-0.6": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.6
+            }
+          ]
+        },
+        "intercept-0.7": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.7
+            }
+          ]
+        },
+        "intercept-0.8": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.8
+            }
+          ]
+        },
+        "intercept-0.9": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 0.9
+            }
+          ]
+        },
+        "intercept-1.0": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 512,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "intercept_resend",
+              "intercept_fraction": 1.0
+            }
+          ]
+        }
+      }
+    },
+    "e4": {
+      "recorded_runs": 3,
+      "replicates_by_condition": {
+        "qkd-assumed": 1,
+        "qkd-classical-auth": 1,
+        "qkd-pqc-auth": 1
+      },
+      "conditions": {
+        "qkd-assumed": {
+          "profile": "QKD-ASSUMED",
+          "signal_count": 1024,
+          "qkd_authentication_profile": "QKD-ASSUMED",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        },
+        "qkd-classical-auth": {
+          "profile": "QKD-CLASSICAL-AUTH",
+          "signal_count": 1024,
+          "qkd_authentication_profile": "QKD-CLASSICAL-AUTH",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        },
+        "qkd-pqc-auth": {
+          "profile": "QKD-PQC-AUTH",
+          "signal_count": 1024,
+          "qkd_authentication_profile": "QKD-PQC-AUTH",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        }
+      }
+    },
+    "e5": {
+      "recorded_runs": 4,
+      "replicates_by_condition": {
+        "pqc-base": 1,
+        "pqc-diverse": 1,
+        "hybrid": 1,
+        "hybrid-diverse": 1
+      },
+      "conditions": {
+        "pqc-base": {
+          "profile": "PQC-BASE",
+          "signal_count": null,
+          "qkd_authentication_profile": null,
+          "qkd_stages": []
+        },
+        "pqc-diverse": {
+          "profile": "PQC-DIVERSE",
+          "signal_count": null,
+          "qkd_authentication_profile": null,
+          "qkd_stages": []
+        },
+        "hybrid": {
+          "profile": "HYBRID",
+          "signal_count": 1024,
+          "qkd_authentication_profile": "QKD-PQC-AUTH",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        },
+        "hybrid-diverse": {
+          "profile": "HYBRID-DIVERSE",
+          "signal_count": 1024,
+          "qkd_authentication_profile": "QKD-PQC-AUTH",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        }
+      }
+    },
+    "d1": {
+      "recorded_runs": 1,
+      "replicates_by_condition": {
+        "hybrid-diverse-aes-gcm": 1
+      },
+      "conditions": {
+        "hybrid-diverse-aes-gcm": {
+          "profile": "HYBRID-DIVERSE",
+          "signal_count": 1024,
+          "qkd_authentication_profile": "QKD-PQC-AUTH",
+          "qkd_stages": [
+            {
+              "type": "identity"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "warmups": {
+    "e1": 2,
+    "e5": 4,
+    "discarded": true
+  },
+  "order_seeds": {
+    "E1": 701001,
+    "E5": 705001
+  },
+  "seed_generation_policy": "uint64(first_8_bytes(SHA256('QuantumSec/thesis-v1.0.1/' + experiment + '/' + condition_index + '/' + replicate_index)), big-endian); E4 fixes condition_index=0 to pair BB84 streams across profiles",
+  "confidence_level": 0.95,
+  "confidence_interval": "two-sided Wilson score interval over pooled exact counts",
+  "statistical_summaries": "median, q1, q3, IQR; no unweighted QBER pooling",
+  "hypothesis_small_overhead_threshold": 0.1,
+  "methodology_locked_before_execution": true,
+  "raw_sha256": {
+    "e1": {
+      "records.json": "eda39cb0206fbffb46b0ba0a1ac615df42ca8abc08038facf5534abedb89e8b5",
+      "records.csv": "2b019e7d73e319be707d228739f71acd45c3c83cefcaa2f5ec3fde8d3a92021d"
+    },
+    "e2": {
+      "records.json": "835ff95caae02e75ccb2f2cacec4bce74a067e5b73ac0b7cb38c4b7831095888",
+      "records.csv": "461a52edc62a5252f1b74b7a7d80af5ec63b8039aabfd7053545733af82b325e"
+    },
+    "e3": {
+      "records.json": "19fd5e69c9d273150eaee20c4c24bd1833ab2900c0c5726455dd9c4848c9297a",
+      "records.csv": "d15161d0e52f660cd410a8bdf8d117f426ca49dff2735f859cc9697dfcfaf647"
+    },
+    "e4": {
+      "records.json": "fcc9896fc18830683c68f00683b39137d81b5ec862cdda2d8ab918d3a356c9b9",
+      "records.csv": "17bd104ca5701fa8a3bd43d514304e5d8343d3af9aeec30c2e5b382aa1edc465"
+    },
+    "e5": {
+      "records.json": "ab59244ac3bdf31523fe91e3b0a5d79646c96ce4b70bdf6dda438bdca4bbd4c6",
+      "records.csv": "f44a9a932744f68f07be70dd7c5b2f7bd79459e7db95c4bc4eff8bb7b5cf8787"
+    },
+    "d1": {
+      "records.json": "e5b235ad788a2272f5a9febf15dde85c5231a99245759242e952eb1b530183eb",
+      "records.csv": "a8d67728f797f1010e0d390077d85532cf1578e9a0dfd28deb313143b65dc2c6"
+    }
+  },
+  "status": "raw-records-complete",
+  "execution_completed_utc": "2026-09-08T07:42:12.363805+00:00"
+}

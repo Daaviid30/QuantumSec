@@ -1,0 +1,4 @@
+scenario,rejected,exception
+ciphertext_bit_flip,True,InvalidTag
+tag_bit_flip,True,InvalidTag
+aad_change,True,InvalidTag
